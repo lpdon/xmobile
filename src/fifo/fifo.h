@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <LPC17xx.H>                          /* LPC17xx definitions         */
 
 #define FIFO_BUFFER_SIZE 32
 
