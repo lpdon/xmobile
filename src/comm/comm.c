@@ -30,47 +30,68 @@ SOFTWARE.*/
 
 #include <string.h>
 
-tCommMessage msgControl =
+#if defined(WIN32)
+	#include "../uart_windows/rs232.h"
+	#define UART_PORT 15
+	#define UART_BAUD 9600
+	#define UART_MODE "8N1"
+#endif
+
+static void comm_initTransmissionMessages(void);
+static void comm_cyclicTransmission(void);
+static void comm_readMessageFromBuffer(tCommCyclicMessage * const arg_message);
+static void comm_writeMessageToBuffer(const tCommCyclicMessage * const arg_message);
+static void comm_transmitCyclicMessage(tCommCyclicMessage * const arg_message);
+
+tCommCyclicMessage msgControl =
 {
-	E_COMM_MSG_CONTROL_ID,
-	{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
-	0xFFU,
+	{
+			E_COMM_MSG_CONTROL_ID,
+			{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
+			0xFFU
+	},
 	E_COMM_INIT,
 	COMM_TIMEOUT,
 	E_COMM_MSG_INACTIVE
 };
 
-tCommMessage msgCurrent =
+tCommCyclicMessage msgCurrent =
 {
-	E_COMM_MSG_CURRENT_ID,
-	{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
-	0xFFU,
+	{
+		E_COMM_MSG_CURRENT_ID,
+		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
+		0xFFU
+	},
 	E_COMM_INIT,
 	COMM_TIMEOUT,
 	E_COMM_MSG_INACTIVE
 };
 
-tCommMessage msgSuspension =
+tCommCyclicMessage msgSuspension =
 {
-	E_COMM_MSG_SUSP_ID,
-	{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
-	0xFFU,
+	{
+		E_COMM_MSG_SUSP_ID,
+		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
+		0xFFU
+	},
 	E_COMM_INIT,
 	COMM_TIMEOUT,
 	E_COMM_MSG_INACTIVE
 };
 
-tCommMessage msgDirection =
+tCommCyclicMessage msgDirection =
 {
-	E_COMM_MSG_DIR_ID,
-	{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
-	0xFFU,
+	{
+		E_COMM_MSG_DIR_ID,
+		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
+		0xFFU
+	},
 	E_COMM_INIT,
 	COMM_TIMEOUT,
 	E_COMM_MSG_INACTIVE
 };
 
-static tCommMessage * transmitMessages[] =
+static tCommCyclicMessage * transmitMessages[] =
 {
 	&msgCurrent,
 	&msgSuspension,
@@ -81,11 +102,21 @@ static tCommMessage * transmitMessages[] =
 void comm_init(void)
 {
 	comm_initTransmissionMessages();
+#if defined(WIN32)
+	RS232_OpenComport(UART_PORT, UART_BAUD, UART_MODE);
+#endif
+}
+
+void comm_end(void)
+{
+#if defined(WIN32)
+	RS232_CloseComport(UART_PORT);
+#endif
 }
 
 void comm_initTransmissionMessages(void)
 {
-	tCommMessage ** pMessage = transmitMessages;
+	tCommCyclicMessage ** pMessage = transmitMessages;
 
 	while (*pMessage != NULL)
 	{
@@ -101,49 +132,56 @@ void comm_cyclic(void)
 
 void comm_cyclicTransmission(void)
 {
-	tCommMessage ** pMessage = transmitMessages;
+	tCommCyclicMessage ** pMessage = transmitMessages;
 
 	while (*pMessage != NULL)
 	{
-		comm_transmitMessage(*pMessage);
+		comm_transmitCyclicMessage(*pMessage);
 		pMessage++;
 	}
 }
 
-void comm_readMessageFromBuffer(tCommMessage * const arg_message)
+void comm_readMessageFromBuffer(tCommCyclicMessage * const arg_message)
 {
 	uint8_t i;
-	uint8_t loc_buffer[sizeof(tCommMessage)];
+	uint8_t loc_buffer[sizeof(tCommMessageBody)];
 
-	for (i = 0U; i < sizeof(tCommMessage); i++)
-	{
-//		loc_buffer[i] = fifo_in();
-	}
+#if defined(WIN32)
+		RS232_PollComport(UART_PORT, loc_buffer, sizeof(tCommMessageBody));
+#else
+	for (i = 0U; i < sizeof(tCommMessageBody); i++)
+		{
+	//		loc_buffer[i] = fifo_in();
+		}
+#endif
 
-	memcpy(arg_message, loc_buffer, sizeof(tCommMessage));
+	memcpy(arg_message, loc_buffer, sizeof(tCommMessageBody));
 }
 
-void comm_writeMessageToBuffer(tCommMessage * const arg_message)
+void comm_writeMessageToBuffer(const tCommCyclicMessage * const arg_message)
 {
 	uint8_t i;
-	uint8_t loc_buffer[sizeof(tCommMessage)];
+	uint8_t loc_buffer[sizeof(tCommMessageBody)];
 
-	memcpy(loc_buffer, arg_message->data, sizeof(tCommMessage));
+	memcpy(loc_buffer, arg_message, sizeof(tCommMessageBody));
 
-	for (i = 0U; i < sizeof(tCommMessage); i++)
+	for (i = 0U; i < sizeof(tCommMessageBody); i++)
 	{
 //		fifo_out(loc_buffer)
+#if defined(WIN32)
+		RS232_SendByte(UART_PORT, loc_buffer[i]);
+#endif
 	}
 }
 
-void comm_transmitMessage(tCommMessage * const arg_message)
+void comm_transmitCyclicMessage(tCommCyclicMessage * const arg_message)
 {
-	const uint8_t loc_messageId = arg_message->messageId;
+	const uint8_t loc_messageId = arg_message->body.messageId;
 	const eCommMessageStatus loc_messageStatus = arg_message->status;
 	uint8_t loc_timeout = arg_message->timeout;
-	uint8_t loc_state = arg_message->state;
+	eCommMessageState loc_state = arg_message->state;
 
-	tCommMessage loc_message;
+	tCommCyclicMessage loc_message;
 	uint8_t loc_crc;
 
 	switch (loc_state)
@@ -164,7 +202,9 @@ void comm_transmitMessage(tCommMessage * const arg_message)
 //			{
 //				loc_state = E_COMM_TRANSMIT;
 //			}
-
+#if defined(WIN32)
+			loc_state = E_COMM_TRANSMIT;
+#endif
 			break;
 		}
 		case E_COMM_TRANSMIT:
@@ -173,11 +213,11 @@ void comm_transmitMessage(tCommMessage * const arg_message)
 			loc_timeout = COMM_TIMEOUT;
 
 			/*Calculate crc*/
-			loc_crc = crc8(arg_message->data, sizeof(arg_message->data));
+			loc_crc = crc8(arg_message->body.data, sizeof(arg_message->body.data));
 
-			loc_message.messageId = loc_messageId;
-			memcpy(loc_message.data, arg_message->data, sizeof(arg_message->data));
-			loc_message.crc = loc_crc;
+			loc_message.body.messageId = loc_messageId;
+			memcpy(loc_message.body.data, arg_message->body.data, sizeof(arg_message->body.data));
+			loc_message.body.crc = loc_crc;
 
 			/*Write message to UART buffer*/
 			comm_writeMessageToBuffer(&loc_message);
@@ -192,11 +232,11 @@ void comm_transmitMessage(tCommMessage * const arg_message)
 				loc_timeout = loc_timeout - 1;
 
 				/*Verify if ACK was received*/
-				tCommMessage loc_ackMessage;
+				tCommCyclicMessage loc_ackMessage;
 				comm_readMessageFromBuffer(&loc_ackMessage);
-				const uint8_t loc_ackMessageId = loc_ackMessage.messageId;
+				const uint8_t loc_ackMessageId = loc_ackMessage.body.messageId;
 
-				if ((loc_ackMessageId && 0xF0U) == loc_messageId)
+				if ((loc_ackMessageId && COMM_IDMASK) == loc_messageId)
 				{
 					if (loc_ackMessageId & COMM_ACK)
 					{

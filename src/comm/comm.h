@@ -27,6 +27,7 @@ SOFTWARE.*/
 
 #define COMM_ACK                   0x01U
 #define COMM_NACK                  0x02U
+#define COMM_IDMASK                0xF0U
 
 /*Timeout in ms*/
 #define COMM_TIMEOUT                 10U
@@ -65,20 +66,22 @@ typedef struct
 	uint8_t messageId;
 	uint8_t data[8];
 	uint8_t crc;
+} tCommMessageBody;
+
+typedef struct
+{
+	tCommMessageBody body;
 	eCommMessageState state;
 	uint8_t timeout;
 	eCommMessageStatus status;
-} tCommMessage;
+} tCommCyclicMessage;
+
+extern tCommCyclicMessage msgCurrent;
+extern tCommCyclicMessage msgSuspension;
+extern tCommCyclicMessage msgDirection;
 
 void comm_init(void);
-void comm_initTransmissionMessages(void);
-
+void comm_end(void);
 void comm_cyclic(void);
-void comm_cyclicTransmission(void);
-
-void comm_readMessageFromBuffer(tCommMessage * const arg_message);
-void comm_writeMessageToBuffer(tCommMessage * const arg_message);
-
-void comm_transmitMessage(tCommMessage * const arg_message);
 
 #endif
