@@ -7,7 +7,7 @@
 **     Version   : Component 02.001, Driver 02.06, CPU db: 2.87.410
 **     Datasheet : MC9S12C128 Rev 01.23 05/2007
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 13.05.2015, 15:21
+**     Date/Time : 14.06.2015, 01:49
 **     Abstract  :
 **         This component "MC9S12C32_80" implements properties, methods,
 **         and events of the CPU.
@@ -32,6 +32,12 @@
 #include "Inhr1.h"
 #include "Inhr2.h"
 #include "CAN1.h"
+#include "AD1.h"
+#include "AS1.h"
+#include "PWM8.h"
+#include "PWM9.h"
+#include "PWM10.h"
+#include "PWM11.h"
 #include "Events.h"
 #include "Cpu.h"
 
@@ -258,14 +264,34 @@ void _EntryPoint(void)
 void PE_low_level_init(void)
 {
   /* Common initialization of the CPU registers */
-  /* PTT: PTT1=1,PTT0=1 */
-  setReg8Bits(PTT, 0x03U);              
+  /* PTT: PTT4=0,PTT3=0,PTT2=0,PTT1=1,PTT0=1 */
+  clrSetReg8Bits(PTT, 0x1CU, 0x03U);    
   /* PPST: PPST1=0,PPST0=0 */
   clrReg8Bits(PPST, 0x03U);             
   /* PERT: PERT1=1,PERT0=1 */
   setReg8Bits(PERT, 0x03U);             
-  /* DDRT: DDRT1=1,DDRT0=0 */
-  clrSetReg8Bits(DDRT, 0x01U, 0x02U);   
+  /* DDRT: DDRT4=1,DDRT3=1,DDRT2=1,DDRT1=1,DDRT0=0 */
+  clrSetReg8Bits(DDRT, 0x01U, 0x1EU);   
+  /* ATDDIEN: IEN3=0,IEN2=0,IEN1=0,IEN0=0 */
+  clrReg8Bits(ATDDIEN, 0x0FU);          
+  /* PTS: PTS1=1 */
+  setReg8Bits(PTS, 0x02U);              
+  /* DDRS: DDRS1=1,DDRS0=0 */
+  clrSetReg8Bits(DDRS, 0x01U, 0x02U);   
+  /* PWME: ??=0,??=0,PWME5=0,PWME4=0,PWME3=0,PWME2=0,PWME1=0,PWME0=0 */
+  setReg8(PWME, 0x00U);                 
+  /* MODRR: MODRR4=1,MODRR3=1,MODRR2=1 */
+  setReg8Bits(MODRR, 0x1CU);            
+  /* PWMCTL: CON45=0,CON23=0,PSWAI=0,PFRZ=0 */
+  clrReg8Bits(PWMCTL, 0x6CU);           
+  /* PWMCAE: CAE5=0,CAE4=0,CAE3=0,CAE2=0 */
+  clrReg8Bits(PWMCAE, 0x3CU);           
+  /* PWMPOL: PPOL5=0,PPOL4=0,PPOL3=0,PPOL2=0 */
+  clrReg8Bits(PWMPOL, 0x3CU);           
+  /* PTP: PTP5=0 */
+  clrReg8Bits(PTP, 0x20U);              
+  /* DDRP: DDRP5=1 */
+  setReg8Bits(DDRP, 0x20U);             
   /* CRGINT: LOCKIE=0,SCMIE=0 */
   clrReg8Bits(CRGINT, 0x12U);           
   /* VREGCTRL: LVIE=0 */
@@ -295,6 +321,18 @@ void PE_low_level_init(void)
   EI2C1_Init();
   /* ###  "CAN1" init code ... */
   CAN1_Init();
+  /* ###  "AD1" init code ... */
+  AD1_Init();
+  /* ### Asynchro serial "AS1" init code ... */
+  AS1_Init();
+  /* ### Programable pulse generation "PWM8" init code ... */
+  PWM8_Init();
+  /* ### Programable pulse generation "PWM9" init code ... */
+  PWM9_Init();
+  /* ### Programable pulse generation "PWM10" init code ... */
+  PWM10_Init();
+  /* ### Programable pulse generation "PWM11" init code ... */
+  PWM11_Init();
   __EI();                              /* Enable interrupts */
 }
 

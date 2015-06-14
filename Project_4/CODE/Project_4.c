@@ -22,6 +22,12 @@
 #include "Inhr1.h"
 #include "Inhr2.h"
 #include "CAN1.h"
+#include "AD1.h"
+#include "AS1.h"
+#include "PWM8.h"
+#include "PWM9.h"
+#include "PWM10.h"
+#include "PWM11.h"
 /* Include shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"
@@ -29,6 +35,7 @@
 #include "IO_Map.h"
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
+#define CURRENT_CONVERSION 2
 
 void main(void)
 {
@@ -41,6 +48,7 @@ void main(void)
   unsigned char can_data[8];
   unsigned int length;
   static char error_code = 0x00;
+  char ler_rec;
 
   /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
   PE_low_level_init();
@@ -68,11 +76,14 @@ void main(void)
       can_data[1] = joystickY & 0xff;
       can_data[2] = buttonC & 0x01;
       can_data[3] = buttonZ & 0x01; 
+      error_code = AS1_SendChar(can_data[0]);
       
       error_code = CAN1_SendFrameExt(0x01,DATA_FRAME,0x04,can_data);
       
-      if (error_code != 0 && error_code != 11) for(;;){}
+      if (error_code != 0 && error_code != 11) for(;;){} 
       
+      error_code = AS1_RecvChar(&ler_rec);
+      if(!error_code) for(;;){}
       Cpu_Delay100US(100);  
   }
   /*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/

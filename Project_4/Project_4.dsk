@@ -2,38 +2,53 @@
 PE_DesktopFileVersion=1092
 
 [Desktop]
-StartupPrj=C:\Users\Z196944\Documents\Project_4\Project_4.pe
+StartupPrj=C:\Users\Marcelo\workspace\xmobile\Project_4\Project_4.pe
 
 [PE_IDE_PlugIn]
 
 [CpuExpert]
 
 [AppPanel]
-Status=hiden
+Status=Visible
 WindowState=NORMAL
-Rect=[-1105|289|310|496]
+Rect=[0|154|347|618]
+AllFocusedNode=AS1:AsynchroSerial
+ConfigurationsInAllExpanded=Yes
+CPUsInAllExpanded=Yes
+FPGAsInAllExpanded=No
+OperatingSystemInAllExpanded=Yes
+BeansInAllExpanded=Yes
+TasksInAllExpanded=No
+ProgramsInAllExpanded=Yes
+Gen_ProgramsInAllExpanded=Yes
+Gen_BeanModulesInAllExpanded=Yes
+ExternModulesInAllExpanded=No
+DocumentationInAllExpanded=Yes
+PESLInAllExpanded=No
+PESL_moduleInAllExpanded=No
+ViewEnabledItemsOnly=No
 
 [CpuPanel]
 Status=Visible
 WindowState=NORMAL
-Rect=[765|88|549|457]
+Rect=[335|204|577|396]
 CpuPanViewMode=Default
 ViewSizeIndex=0
 
 [ErrorPanel]
-Status=Visible
+Status=hiden
 WindowState=NORMAL
-Rect=[0|659|657|153]
+Rect=[71|379|657|153]
 
 [ResourceMeter]
 Status=hiden
 WindowState=NORMAL
-Rect=[0|850|657|131]
+Rect=[0|796|657|131]
 
 [BeanSelector]
 Status=Visible
 WindowState=NORMAL
-Rect=[918|545|396|457]
+Rect=[885|401|396|457]
 BF_ForTgtCpuOnly=Yes
 BF_LicensedOnly=Yes
 BF_BA_AllQuestions=Yes
@@ -41,10 +56,10 @@ BF_BA_AllQuestions=Yes
 [ObjInspector]
 Status=Visible
 WindowState=NORMAL
-Rect=[0|88|680|915]
+Rect=[0|88|869|860]
 ObjInspectorDockedWithPrphInit=No
-ColWidth01=219
-ColWidth02=438
+ColWidth01=283
+ColWidth02=567
 ColWidth11=248
 ColWidth12=497
 ColWidth21=248

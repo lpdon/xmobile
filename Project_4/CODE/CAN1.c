@@ -6,7 +6,7 @@
 **     Component : FreescaleCAN
 **     Version   : Component 02.355, Driver 01.29, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 13.05.2015, 15:21
+**     Date/Time : 14.06.2015, 01:49
 **     Abstract  :
 **         This component "FreescaleCAN" implements a CAN serial channel.
 **     Settings  :
@@ -53,6 +53,12 @@
 #include "EI2C1.h"
 #include "Inhr1.h"
 #include "Inhr2.h"
+#include "AD1.h"
+#include "AS1.h"
+#include "PWM8.h"
+#include "PWM9.h"
+#include "PWM10.h"
+#include "PWM11.h"
 #include "Events.h"
 
 #define CAN_STANDARD_FRAME_MAX_ID    0x07FFU /* Max ID of the standard frame */

@@ -5,7 +5,7 @@
 **     Processor : MC9S12C32CFU16
 **     Version   : Component 02.001, Driver 02.06, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 12.05.2015, 15:27
+**     Date/Time : 13.06.2015, 22:33
 **     Abstract  :
 **         This component "MC9S12C32_80" implements properties, methods,
 **         and events of the CPU.
@@ -22,6 +22,12 @@
 #include "Inhr1.h"
 #include "Inhr2.h"
 #include "CAN1.h"
+#include "AD1.h"
+#include "AS1.h"
+#include "PWM8.h"
+#include "PWM9.h"
+#include "PWM10.h"
+#include "PWM11.h"
 
 /* ISR prototype */
 typedef void (*near tIsrFunc)(void);
@@ -70,9 +76,9 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF80U = { /* Interrupt vector t
   &Cpu_Interrupt,                      /* 0x19  0xFFCC   1  ivVReserved25 unused by PE */
   &Cpu_Interrupt,                      /* 0x18  0xFFCE   1  ivVportj      unused by PE */
   &Cpu_Interrupt,                      /* 0x17  0xFFD0   1  ivVReserved23 unused by PE */
-  &Cpu_Interrupt,                      /* 0x16  0xFFD2   1  ivVatd0       unused by PE */
+  &AD1_Interrupt,                      /* 0x16  0xFFD2   1  ivVatd0       used by PE */
   &Cpu_Interrupt,                      /* 0x15  0xFFD4   1  ivVReserved21 unused by PE */
-  &Cpu_Interrupt,                      /* 0x14  0xFFD6   1  ivVsci        unused by PE */
+  &AS1_Interrupt,                      /* 0x14  0xFFD6   1  ivVsci        used by PE */
   &Cpu_Interrupt,                      /* 0x13  0xFFD8   1  ivVspi        unused by PE */
   &Cpu_Interrupt,                      /* 0x12  0xFFDA   1  ivVtimpaie    unused by PE */
   &Cpu_Interrupt,                      /* 0x11  0xFFDC   1  ivVtimpaovf   unused by PE */
