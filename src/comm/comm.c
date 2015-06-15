@@ -39,59 +39,67 @@ SOFTWARE.*/
 
 static void comm_initTransmissionMessages(void);
 static void comm_cyclicTransmission(void);
-static void comm_readMessageFromBuffer(tCommCyclicMessage * const arg_message);
-static void comm_writeMessageToBuffer(const tCommCyclicMessage * const arg_message);
-static void comm_transmitCyclicMessage(tCommCyclicMessage * const arg_message);
+static void comm_readMessageFromBuffer(tCommMessage * const arg_message);
+static void comm_writeMessageToBuffer(const tCommMessage * const arg_message);
+static void comm_transmitCyclicMessage(tCommMessage * const arg_message);
 
-tCommCyclicMessage msgControl =
+tCommMessage msgControl =
 {
 	{
-			E_COMM_MSG_CONTROL_ID,
-			{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
-			0xFFU
+		E_COMM_MSG_CONTROL_ID,
+		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
+		0xFFU
 	},
-	E_COMM_INIT,
+	E_COMM_MSG_STATE_INIT,
 	COMM_TIMEOUT,
-	E_COMM_MSG_INACTIVE
+	E_COMM_MSG_STATUS_INACTIVE,
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_STATUS_FAILED
 };
 
-tCommCyclicMessage msgCurrent =
+tCommMessage msgCurrent =
 {
 	{
 		E_COMM_MSG_CURRENT_ID,
 		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
 		0xFFU
 	},
-	E_COMM_INIT,
+	E_COMM_MSG_STATE_INIT,
 	COMM_TIMEOUT,
-	E_COMM_MSG_INACTIVE
+	E_COMM_MSG_STATUS_INACTIVE,
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_STATUS_FAILED
 };
 
-tCommCyclicMessage msgSuspension =
+tCommMessage msgSuspension =
 {
 	{
 		E_COMM_MSG_SUSP_ID,
 		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
 		0xFFU
 	},
-	E_COMM_INIT,
+	E_COMM_MSG_STATE_INIT,
 	COMM_TIMEOUT,
-	E_COMM_MSG_INACTIVE
+	E_COMM_MSG_STATUS_INACTIVE,
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_STATUS_FAILED
 };
 
-tCommCyclicMessage msgDirection =
+tCommMessage msgDirection =
 {
 	{
 		E_COMM_MSG_DIR_ID,
 		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
 		0xFFU
 	},
-	E_COMM_INIT,
+	E_COMM_MSG_STATE_INIT,
 	COMM_TIMEOUT,
-	E_COMM_MSG_INACTIVE
+	E_COMM_MSG_STATUS_INACTIVE,
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_STATUS_FAILED
 };
 
-static tCommCyclicMessage * transmitMessages[] =
+static tCommMessage * transmitMessages[] =
 {
 	&msgCurrent,
 	&msgSuspension,
@@ -116,11 +124,11 @@ void comm_end(void)
 
 void comm_initTransmissionMessages(void)
 {
-	tCommCyclicMessage ** pMessage = transmitMessages;
+	tCommMessage ** pMessage = transmitMessages;
 
 	while (*pMessage != NULL)
 	{
-		(*pMessage)->status = E_COMM_MSG_ACTIVE;
+		(*pMessage)->status = E_COMM_MSG_STATUS_ACTIVE;
 		pMessage++;
 	}
 }
@@ -132,7 +140,7 @@ void comm_cyclic(void)
 
 void comm_cyclicTransmission(void)
 {
-	tCommCyclicMessage ** pMessage = transmitMessages;
+	tCommMessage ** pMessage = transmitMessages;
 
 	while (*pMessage != NULL)
 	{
@@ -141,7 +149,7 @@ void comm_cyclicTransmission(void)
 	}
 }
 
-void comm_readMessageFromBuffer(tCommCyclicMessage * const arg_message)
+void comm_readMessageFromBuffer(tCommMessage * const arg_message)
 {
 	uint8_t i;
 	uint8_t loc_buffer[sizeof(tCommMessageBody)];
@@ -158,7 +166,7 @@ void comm_readMessageFromBuffer(tCommCyclicMessage * const arg_message)
 	memcpy(arg_message, loc_buffer, sizeof(tCommMessageBody));
 }
 
-void comm_writeMessageToBuffer(const tCommCyclicMessage * const arg_message)
+void comm_writeMessageToBuffer(const tCommMessage * const arg_message)
 {
 	uint8_t i;
 	uint8_t loc_buffer[sizeof(tCommMessageBody)];
@@ -174,28 +182,30 @@ void comm_writeMessageToBuffer(const tCommCyclicMessage * const arg_message)
 	}
 }
 
-void comm_transmitCyclicMessage(tCommCyclicMessage * const arg_message)
+void comm_transmitCyclicMessage(tCommMessage * const arg_message)
 {
-	const uint8_t loc_messageId = arg_message->body.messageId;
+	const eCommMessageId loc_messageId = arg_message->body.messageId;
 	const eCommMessageStatus loc_messageStatus = arg_message->status;
 	uint8_t loc_timeout = arg_message->timeout;
 	eCommMessageState loc_state = arg_message->state;
+	eCommStatus loc_ack = arg_message->ack;
+	eCommMessageType loc_messageType = arg_message->type;
 
-	tCommCyclicMessage loc_message;
+	tCommMessage loc_message;
 	uint8_t loc_crc;
 
 	switch (loc_state)
 	{
-		case E_COMM_INIT:
+		case E_COMM_MSG_STATE_INIT:
 		{
-			if (loc_messageStatus == E_COMM_MSG_ACTIVE)
+			if (loc_messageStatus == E_COMM_MSG_STATUS_ACTIVE)
 			{
-				loc_state = E_COMM_TX_READY;
+				loc_state = E_COMM_MSG_STATE_TX_READY;
 			}
 
 			break;
 		}
-		case E_COMM_TX_READY:
+		case E_COMM_MSG_STATE_TX_READY:
 		{
 			/*If the UART buffer is available, start transmission*/
 //			if (bufferAvailable)
@@ -203,14 +213,17 @@ void comm_transmitCyclicMessage(tCommCyclicMessage * const arg_message)
 //				loc_state = E_COMM_TRANSMIT;
 //			}
 #if defined(WIN32)
-			loc_state = E_COMM_TRANSMIT;
+			loc_state = E_COMM_MSG_STATE_TRANSMIT;
 #endif
 			break;
 		}
-		case E_COMM_TRANSMIT:
+		case E_COMM_MSG_STATE_TRANSMIT:
 		{
 			/*Reset timeout*/
 			loc_timeout = COMM_TIMEOUT;
+
+			/*Reset ack flag*/
+			loc_ack = E_COMM_STATUS_FAILED;
 
 			/*Calculate crc*/
 			loc_crc = crc8(arg_message->body.data, sizeof(arg_message->body.data));
@@ -222,43 +235,30 @@ void comm_transmitCyclicMessage(tCommCyclicMessage * const arg_message)
 			/*Write message to UART buffer*/
 			comm_writeMessageToBuffer(&loc_message);
 
-			loc_state = E_COMM_WAITFORACK;
+			loc_state = E_COMM_MSG_STATE_WAITFORACK;
 			break;
 		}
-		case E_COMM_WAITFORACK:
+		case E_COMM_MSG_STATE_WAITFORACK:
 		{
 			if (loc_timeout > 0)
 			{
 				loc_timeout = loc_timeout - 1;
 
 				/*Verify if ACK was received*/
-				tCommCyclicMessage loc_ackMessage;
-				comm_readMessageFromBuffer(&loc_ackMessage);
-				const uint8_t loc_ackMessageId = loc_ackMessage.body.messageId;
-
-				if ((loc_ackMessageId && COMM_IDMASK) == loc_messageId)
+				if (loc_ack == E_COMM_STATUS_OK)
 				{
-					if (loc_ackMessageId & COMM_ACK)
-					{
-						/*Everything ok, can transmit again*/
-						loc_state = E_COMM_TX_READY;
-					}
-					else
-					{
-						/*NACK received or something else, retransmit*/
-						loc_state = E_COMM_TRANSMIT;
-					}
+					loc_state = E_COMM_MSG_STATE_TX_READY;
 				}
 			}
 			/*Timeout expired*/
 			else
 			{
-				loc_state = E_COMM_TRANSMIT;
+				loc_state = E_COMM_MSG_STATE_TRANSMIT;
 			}
 			break;
 		}
 		default:
-		case E_COMM_END:
+		case E_COMM_MSG_STATE_END:
 		{
 
 			break;
@@ -267,4 +267,47 @@ void comm_transmitCyclicMessage(tCommCyclicMessage * const arg_message)
 
 	arg_message->state = loc_state;
 	arg_message->timeout = loc_timeout;
+	arg_message->ack = loc_ack;
+}
+
+/*This function is called by the UART RX interrupt routine*/
+void comm_receiveMessages(void)
+{
+	uint8_t loc_buffer[sizeof(tCommMessageBody)];
+	tCommMessageBody loc_messageBody;
+	uint8_t loc_receiveResult;
+
+#if defined(WIN32)
+	loc_receiveResult = RS232_PollComport(UART_PORT, loc_buffer, sizeof(tCommMessageBody));
+
+	if (loc_receiveResult == sizeof(tCommMessageBody))
+	{
+		memcpy(&loc_messageBody, loc_buffer, sizeof(tCommMessageBody));
+		const eCommMessageId loc_messageId = loc_messageBody.messageId;
+
+		/*Detect if the message received is a reply*/
+		if ((loc_messageId & COMM_REPLYMASK) != 0U)
+		{
+			tCommMessage ** pMessage = transmitMessages;
+
+			while (*pMessage != NULL)
+			{
+				const eCommMessageId loc_maskedMessageId = loc_messageId & COMM_IDMASK;
+				if ((*pMessage)->body.messageId == loc_maskedMessageId)
+				{
+					if (loc_messageId & COMM_ACK)
+					{
+						(*pMessage)->ack = E_COMM_STATUS_OK;
+					}
+					break;
+				}
+				pMessage++;
+			}
+		}
+		else
+		{
+			//TODO
+		}
+	}
+#endif
 }

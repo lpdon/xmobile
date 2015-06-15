@@ -28,14 +28,15 @@ SOFTWARE.*/
 #define COMM_ACK                   0x01U
 #define COMM_NACK                  0x02U
 #define COMM_IDMASK                0xF0U
+#define COMM_REPLYMASK             (COMM_ACK | COMM_NACK)
 
 /*Timeout in ms*/
 #define COMM_TIMEOUT                 10U
 
 typedef enum
 {
-	E_COMM_OK,
-	E_COMM_FAILED
+	E_COMM_STATUS_OK,
+	E_COMM_STATUS_FAILED
 } eCommStatus;
 
 typedef enum
@@ -44,26 +45,32 @@ typedef enum
 	E_COMM_MSG_CURRENT_ID =        0x20U,
 	E_COMM_MSG_SUSP_ID    =        0x30U,
 	E_COMM_MSG_DIR_ID     =        0x40U
-} eCommMessages;
+} eCommMessageId;
 
 typedef enum
 {
-	E_COMM_INIT,
-	E_COMM_TX_READY,
-	E_COMM_TRANSMIT,
-	E_COMM_WAITFORACK,
-	E_COMM_END
+	E_COMM_MSG_STATE_INIT,
+	E_COMM_MSG_STATE_TX_READY,
+	E_COMM_MSG_STATE_TRANSMIT,
+	E_COMM_MSG_STATE_WAITFORACK,
+	E_COMM_MSG_STATE_END
 } eCommMessageState;
 
 typedef enum
 {
-	E_COMM_MSG_ACTIVE,
-	E_COMM_MSG_INACTIVE
+	E_COMM_MSG_STATUS_ACTIVE,
+	E_COMM_MSG_STATUS_INACTIVE
 } eCommMessageStatus;
+
+typedef enum
+{
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_MSG_TYPE_TRIGGERED
+} eCommMessageType;
 
 typedef struct
 {
-	uint8_t messageId;
+	eCommMessageId messageId;
 	uint8_t data[8];
 	uint8_t crc;
 } tCommMessageBody;
@@ -74,14 +81,18 @@ typedef struct
 	eCommMessageState state;
 	uint8_t timeout;
 	eCommMessageStatus status;
-} tCommCyclicMessage;
+	eCommMessageType type;
+	eCommStatus ack;
+} tCommMessage;
 
-extern tCommCyclicMessage msgCurrent;
-extern tCommCyclicMessage msgSuspension;
-extern tCommCyclicMessage msgDirection;
+extern tCommMessage msgCurrent;
+extern tCommMessage msgSuspension;
+extern tCommMessage msgDirection;
 
 void comm_init(void);
 void comm_end(void);
 void comm_cyclic(void);
+
+void comm_receiveMessages(void);
 
 #endif
