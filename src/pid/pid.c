@@ -71,7 +71,6 @@ uint8_t pid(uint16_t arg_setpoint, uint16_t arg_actualValue)
 {
 	const int16_t loc_error = arg_setpoint - arg_actualValue;
 
-	const int16_t loc_offset = (int16_t)(PID_OFFSET);
 	const int16_t loc_iTerm = pid_calcI(loc_error);
 	const int16_t loc_dTerm = pid_calcD(loc_error);
 	int16_t loc_value;

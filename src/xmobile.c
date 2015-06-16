@@ -13,6 +13,7 @@
 
 #include "crc/crc.h"
 #include "pid/pid.h"
+#include "comm/comm.h"
 
 int main(void) {
 	puts("Hallo Welt"); /* prints Hallo Welt */
@@ -23,12 +24,22 @@ int main(void) {
 
 	printf("crc: %x", crc);
 
-	int i = 0;
+//	int i = 0;
+//
+//	for (i = 0; i<10; i++)
+//	{
+//		printf("out: %i \n", (int)(pid(88, 90)));
+//	}
 
-	for (i = 0; i<10; i++)
+	comm_init();
+
+	int i;
+	for (i = 0; i < 10; i++)
 	{
-		printf("out: %i \n", (int)(pid(88, 90)));
+		comm_cyclic();
 	}
+
+	comm_end();
 
 
 	return EXIT_SUCCESS;
