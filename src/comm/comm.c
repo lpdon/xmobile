@@ -37,11 +37,11 @@ SOFTWARE.*/
 	#define UART_MODE "8N1"
 #endif
 
-static void comm_initTransmissionMessages(void);
+static void comm_initTransmissionCyclicMessages(void);
 static void comm_cyclicTransmission(void);
-static void comm_readMessageFromBuffer(tCommMessage * const arg_message);
+static eCommStatus comm_readMessageFromBuffer(tCommMessage * const arg_message);
 static void comm_writeMessageToBuffer(const tCommMessage * const arg_message);
-static void comm_transmitCyclicMessage(tCommMessage * const arg_message);
+static void comm_transmitMessage(tCommMessage * const arg_message);
 
 tCommMessage msgControl =
 {
@@ -52,9 +52,10 @@ tCommMessage msgControl =
 	},
 	E_COMM_MSG_STATE_INIT,
 	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
 	E_COMM_MSG_STATUS_INACTIVE,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_STATUS_FAILED
+	E_COMM_STATUS_FAILED,
+	E_COMM_MSG_TYPE_CYCLIC
 };
 
 tCommMessage msgCurrent =
@@ -66,9 +67,10 @@ tCommMessage msgCurrent =
 	},
 	E_COMM_MSG_STATE_INIT,
 	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
 	E_COMM_MSG_STATUS_INACTIVE,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_STATUS_FAILED
+	E_COMM_STATUS_FAILED,
+	E_COMM_MSG_TYPE_CYCLIC
 };
 
 tCommMessage msgSuspension =
@@ -80,9 +82,10 @@ tCommMessage msgSuspension =
 	},
 	E_COMM_MSG_STATE_INIT,
 	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
 	E_COMM_MSG_STATUS_INACTIVE,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_STATUS_FAILED
+	E_COMM_STATUS_FAILED,
+	E_COMM_MSG_TYPE_CYCLIC
 };
 
 tCommMessage msgDirection =
@@ -94,9 +97,10 @@ tCommMessage msgDirection =
 	},
 	E_COMM_MSG_STATE_INIT,
 	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
 	E_COMM_MSG_STATUS_INACTIVE,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_STATUS_FAILED
+	E_COMM_STATUS_FAILED,
+	E_COMM_MSG_TYPE_CYCLIC
 };
 
 static tCommMessage * transmitMessages[] =
@@ -107,9 +111,14 @@ static tCommMessage * transmitMessages[] =
 	NULL
 };
 
+static tCommMessage * receiveMessages[] =
+{
+	NULL
+};
+
 void comm_init(void)
 {
-	comm_initTransmissionMessages();
+	comm_initTransmissionCyclicMessages();
 #if defined(WIN32)
 	RS232_OpenComport(UART_PORT, UART_BAUD, UART_MODE);
 #endif
@@ -122,13 +131,14 @@ void comm_end(void)
 #endif
 }
 
-void comm_initTransmissionMessages(void)
+void comm_initTransmissionCyclicMessages(void)
 {
 	tCommMessage ** pMessage = transmitMessages;
 
 	while (*pMessage != NULL)
 	{
-		(*pMessage)->status = E_COMM_MSG_STATUS_ACTIVE;
+		const eCommMessageType loc_type = (*pMessage)->type;
+		(*pMessage)->status = (loc_type == E_COMM_MSG_TYPE_CYCLIC) ? E_COMM_MSG_STATUS_ACTIVE : E_COMM_MSG_STATUS_INACTIVE;
 		pMessage++;
 	}
 }
@@ -144,18 +154,19 @@ void comm_cyclicTransmission(void)
 
 	while (*pMessage != NULL)
 	{
-		comm_transmitCyclicMessage(*pMessage);
+		comm_transmitMessage(*pMessage);
 		pMessage++;
 	}
 }
 
-void comm_readMessageFromBuffer(tCommMessage * const arg_message)
+eCommStatus comm_readMessageFromBuffer(tCommMessage * const arg_message)
 {
-	uint8_t i;
+	uint8_t loc_bytesRead;
 	uint8_t loc_buffer[sizeof(tCommMessageBody)];
+	eCommStatus loc_result = E_COMM_STATUS_FAILED;
 
 #if defined(WIN32)
-		RS232_PollComport(UART_PORT, loc_buffer, sizeof(tCommMessageBody));
+		loc_bytesRead = RS232_PollComport(UART_PORT, loc_buffer, sizeof(tCommMessageBody));
 #else
 	for (i = 0U; i < sizeof(tCommMessageBody); i++)
 		{
@@ -163,7 +174,13 @@ void comm_readMessageFromBuffer(tCommMessage * const arg_message)
 		}
 #endif
 
-	memcpy(arg_message, loc_buffer, sizeof(tCommMessageBody));
+	if (loc_bytesRead == sizeof(tCommMessageBody))
+	{
+		memcpy(arg_message, loc_buffer, sizeof(tCommMessageBody));
+		loc_result = E_COMM_STATUS_OK;
+	}
+
+	return loc_result;
 }
 
 void comm_writeMessageToBuffer(const tCommMessage * const arg_message)
@@ -182,14 +199,16 @@ void comm_writeMessageToBuffer(const tCommMessage * const arg_message)
 	}
 }
 
-void comm_transmitCyclicMessage(tCommMessage * const arg_message)
+void comm_transmitMessage(tCommMessage * const arg_message)
 {
 	const eCommMessageId loc_messageId = arg_message->body.messageId;
-	const eCommMessageStatus loc_messageStatus = arg_message->status;
-	uint8_t loc_timeout = arg_message->timeout;
+	const eCommMessageType loc_type = arg_message->type;
+
 	eCommMessageState loc_state = arg_message->state;
+	uint8_t loc_timeout = arg_message->timeout;
+	uint8_t loc_retransmissions = arg_message->retransmissions;
+	eCommMessageStatus loc_messageStatus = arg_message->status;
 	eCommStatus loc_ack = arg_message->ack;
-	eCommMessageType loc_messageType = arg_message->type;
 
 	tCommMessage loc_message;
 	uint8_t loc_crc;
@@ -208,10 +227,7 @@ void comm_transmitCyclicMessage(tCommMessage * const arg_message)
 		case E_COMM_MSG_STATE_TX_READY:
 		{
 			/*If the UART buffer is available, start transmission*/
-//			if (bufferAvailable)
-//			{
-//				loc_state = E_COMM_TRANSMIT;
-//			}
+			//TODO uC
 #if defined(WIN32)
 			loc_state = E_COMM_MSG_STATE_TRANSMIT;
 #endif
@@ -242,60 +258,70 @@ void comm_transmitCyclicMessage(tCommMessage * const arg_message)
 		{
 			if (loc_timeout > 0)
 			{
-				loc_timeout = loc_timeout - 1;
-
 				/*Verify if ACK was received*/
 				if (loc_ack == E_COMM_STATUS_OK)
 				{
-					loc_state = E_COMM_MSG_STATE_TX_READY;
+					/*If the message is cyclic it can be prepared to be transmitted once again*/
+					if (loc_type == E_COMM_MSG_TYPE_CYCLIC)
+					{
+						loc_state = E_COMM_MSG_STATE_TX_READY;
+					}
+					/*Otherwise, the next transmission must be triggered*/
+					else
+					{
+						loc_state = E_COMM_MSG_STATE_INIT;
+						loc_messageStatus = E_COMM_MSG_STATUS_INACTIVE;
+					}
 				}
+
+				loc_timeout--;
 			}
 			/*Timeout expired*/
 			else
 			{
-				loc_state = E_COMM_MSG_STATE_TRANSMIT;
+				loc_state = (loc_retransmissions > 0U) ? E_COMM_MSG_STATE_TRANSMIT : E_COMM_MSG_STATE_END;
+				loc_retransmissions--;
 			}
 			break;
 		}
 		default:
 		case E_COMM_MSG_STATE_END:
 		{
-
+			//TODO TRM Shutdown :)
 			break;
 		}
 	}
 
 	arg_message->state = loc_state;
 	arg_message->timeout = loc_timeout;
+	arg_message->retransmissions = loc_retransmissions;
+	arg_message->status = loc_messageStatus;
 	arg_message->ack = loc_ack;
 }
 
 /*This function is called by the UART RX interrupt routine*/
 void comm_receiveMessages(void)
 {
-	uint8_t loc_buffer[sizeof(tCommMessageBody)];
-	tCommMessageBody loc_messageBody;
-	uint8_t loc_receiveResult;
+	tCommMessage loc_receivedMessage;
 
-#if defined(WIN32)
-	loc_receiveResult = RS232_PollComport(UART_PORT, loc_buffer, sizeof(tCommMessageBody));
+	const eCommStatus loc_receiveResult = comm_readMessageFromBuffer(&loc_receivedMessage);
 
-	if (loc_receiveResult == sizeof(tCommMessageBody))
+	if (loc_receiveResult == E_COMM_STATUS_OK)
 	{
-		memcpy(&loc_messageBody, loc_buffer, sizeof(tCommMessageBody));
-		const eCommMessageId loc_messageId = loc_messageBody.messageId;
+		const tCommMessageBody loc_receivedMessageBody = loc_receivedMessage.body;
+		const eCommMessageId loc_receivedMessageId = loc_receivedMessageBody.messageId;
 
 		/*Detect if the message received is a reply*/
-		if ((loc_messageId & COMM_REPLYMASK) != 0U)
+		if ((loc_receivedMessageId & COMM_REPLYMASK) != 0U)
 		{
 			tCommMessage ** pMessage = transmitMessages;
 
 			while (*pMessage != NULL)
 			{
-				const eCommMessageId loc_maskedMessageId = loc_messageId & COMM_IDMASK;
+				const eCommMessageId loc_maskedMessageId = loc_receivedMessageId & COMM_IDMASK;
 				if ((*pMessage)->body.messageId == loc_maskedMessageId)
 				{
-					if (loc_messageId & COMM_ACK)
+					if (loc_receivedMessageId & COMM_ACK)
 					{
 						(*pMessage)->ack = E_COMM_STATUS_OK;
 					}
@@ -306,8 +332,43 @@ void comm_receiveMessages(void)
 		}
 		else
 		{
-			//TODO
+			tCommMessage ** pMessage = receiveMessages;
+
+			while (*pMessage != NULL)
+			{
+				if ((*pMessage)->body.messageId == loc_receivedMessageId)
+				{
+					const tCommMessageBody * loc_body = &((*pMessage)->body);
+					const eCommStatus loc_checkCRC = comm_checkCRC(loc_body);
+
+					if (loc_checkCRC == E_COMM_STATUS_OK)
+					{
+						/* Send ack. Content of the message is not important */
+						tCommMessage loc_message;
+						loc_message.body.messageId = (loc_receivedMessageId | COMM_ACK);
+						comm_writeMessageToBuffer(&loc_message);
+					}
+					else
+					{
+						/* Send nack. Content of the message is not important */
+						tCommMessage loc_message;
+						loc_message.body.messageId = (loc_receivedMessageId | COMM_NACK);
+						comm_writeMessageToBuffer(&loc_message);
+					}
+
+					break;
+				}
+				pMessage++;
+			}
 		}
 	}
-#endif
+}
+
+eCommStatus comm_checkCRC(const tCommMessageBody * const arg_messageBody)
+{
+	const uint8_t loc_receivedCRC = arg_messageBody->crc;
+	const uint8_t loc_calculatedCRC = crc8(arg_messageBody->data, sizeof(arg_messageBody->data));
+	const eCommStatus loc_result = (loc_receivedCRC == loc_calculatedCRC) ? E_COMM_STATUS_OK : E_COMM_STATUS_FAILED;
+
+	return loc_result;
 }

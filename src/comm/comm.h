@@ -32,6 +32,7 @@ SOFTWARE.*/
 
 /*Timeout in ms*/
 #define COMM_TIMEOUT                 10U
+#define COMM_MAXRETRANSMISSIONS       3U
 
 typedef enum
 {
@@ -80,9 +81,10 @@ typedef struct
 	tCommMessageBody body;
 	eCommMessageState state;
 	uint8_t timeout;
+	uint8_t retransmissions;
 	eCommMessageStatus status;
-	eCommMessageType type;
 	eCommStatus ack;
+	eCommMessageType type;
 } tCommMessage;
 
 extern tCommMessage msgCurrent;
@@ -94,5 +96,6 @@ void comm_end(void);
 void comm_cyclic(void);
 
 void comm_receiveMessages(void);
+eCommStatus comm_checkCRC(const tCommMessageBody * const arg_messageBody);
 
 #endif
