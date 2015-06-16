@@ -372,3 +372,9 @@ eCommStatus comm_checkCRC(const tCommMessageBody * const arg_messageBody)
 
 	return loc_result;
 }
+
+void comm_kickoutMessage(tCommMessage * const arg_message)
+{
+	const eCommMessageStatus loc_status = arg_message->status;
+	arg_message->status = (loc_status == E_COMM_MSG_STATUS_INACTIVE) ? E_COMM_MSG_STATUS_ACTIVE : E_COMM_MSG_STATUS_INACTIVE;
+}
