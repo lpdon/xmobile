@@ -39,15 +39,16 @@ SOFTWARE.*/
 
 static void comm_initTransmissionCyclicMessages(void);
 static void comm_cyclicTransmission(void);
-static eCommStatus comm_readMessageFromBuffer(tCommMessage * const arg_message);
+static const eCommStatus comm_readMessageFromBuffer(tCommMessage * const arg_message);
 static void comm_writeMessageToBuffer(const tCommMessage * const arg_message);
 static void comm_transmitMessage(tCommMessage * const arg_message);
+static const eCommStatus comm_checkMessageId(const uint8_t arg_messageId);
 
 tCommMessage msgControl =
 {
 	{
 		E_COMM_MSG_CONTROL_ID,
-		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
 	E_COMM_MSG_STATE_INIT,
@@ -62,7 +63,7 @@ tCommMessage msgCurrent =
 {
 	{
 		E_COMM_MSG_CURRENT_ID,
-		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
 	E_COMM_MSG_STATE_INIT,
@@ -77,7 +78,7 @@ tCommMessage msgSuspension =
 {
 	{
 		E_COMM_MSG_SUSP_ID,
-		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
 	E_COMM_MSG_STATE_INIT,
@@ -92,7 +93,7 @@ tCommMessage msgDirection =
 {
 	{
 		E_COMM_MSG_DIR_ID,
-		{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU},
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
 	E_COMM_MSG_STATE_INIT,
@@ -115,6 +116,21 @@ static tCommMessage * receiveMessages[] =
 {
 	NULL
 };
+
+void comm_setData(eCommMessageId arg_id, const void * const arg_data)
+{
+	tCommMessage ** pMessage = transmitMessages;
+	const eCommMessageId loc_id = (*pMessage)->body.messageId;
+
+	while (*pMessage != NULL)
+	{
+		if (loc_id == arg_id)
+		{
+			memcpy((*pMessage)->body.data.rawData, arg_data, COMM_DATASIZE);
+			break;
+		}
+	}
+}
 
 void comm_init(void)
 {
@@ -159,25 +175,42 @@ void comm_cyclicTransmission(void)
 	}
 }
 
-eCommStatus comm_readMessageFromBuffer(tCommMessage * const arg_message)
+const eCommStatus comm_readMessageFromBuffer(tCommMessage * const arg_message)
 {
 	uint8_t loc_bytesRead;
-	uint8_t loc_buffer[sizeof(tCommMessageBody)];
+	tCommMessageBody loc_messageBody;
+	eCommStatus loc_validId = E_COMM_STATUS_FAILED;
 	eCommStatus loc_result = E_COMM_STATUS_FAILED;
 
+	/*Read 1 byte to check if it is really the beginning of a message*/
 #if defined(WIN32)
-		loc_bytesRead = RS232_PollComport(UART_PORT, loc_buffer, sizeof(tCommMessageBody));
+	loc_bytesRead = RS232_PollComport(UART_PORT, &loc_messageBody.messageId, sizeof(uint8_t));
 #else
-	for (i = 0U; i < sizeof(tCommMessageBody); i++)
+	//TODO
+#endif
+
+	if (loc_bytesRead > 0)
+	{
+		loc_validId = comm_checkMessageId(loc_messageBody.messageId);
+	}
+
+	if (loc_validId == E_COMM_STATUS_OK)
+	{
+#if defined(WIN32)
+		loc_bytesRead += RS232_PollComport(UART_PORT, loc_messageBody.data.rawData, sizeof(uCommMessageData));
+		loc_bytesRead += RS232_PollComport(UART_PORT, &loc_messageBody.crc, sizeof(uint8_t));
+#else
+		for (i = 0U; i < sizeof(tCommMessageBody); i++)
 		{
 	//		loc_buffer[i] = fifo_in();
 		}
 #endif
 
-	if (loc_bytesRead == sizeof(tCommMessageBody))
-	{
-		memcpy(arg_message, loc_buffer, sizeof(tCommMessageBody));
-		loc_result = E_COMM_STATUS_OK;
+		if (loc_bytesRead == sizeof(tCommMessageBody))
+		{
+			memcpy(arg_message, &loc_messageBody, sizeof(tCommMessageBody));
+			loc_result = E_COMM_STATUS_OK;
+		}
 	}
 
 	return loc_result;
@@ -242,10 +275,10 @@ void comm_transmitMessage(tCommMessage * const arg_message)
 			loc_ack = E_COMM_STATUS_FAILED;
 
 			/*Calculate crc*/
-			loc_crc = crc8(arg_message->body.data, sizeof(arg_message->body.data));
+			loc_crc = crc8(arg_message->body.data.rawData, sizeof(arg_message->body.data.rawData));
 
 			loc_message.body.messageId = loc_messageId;
-			memcpy(loc_message.body.data, arg_message->body.data, sizeof(arg_message->body.data));
+			memcpy(loc_message.body.data.rawData, arg_message->body.data.rawData, sizeof(arg_message->body.data.rawData));
 			loc_message.body.crc = loc_crc;
 
 			/*Write message to UART buffer*/
@@ -367,7 +400,7 @@ void comm_receiveMessages(void)
 eCommStatus comm_checkCRC(const tCommMessageBody * const arg_messageBody)
 {
 	const uint8_t loc_receivedCRC = arg_messageBody->crc;
-	const uint8_t loc_calculatedCRC = crc8(arg_messageBody->data, sizeof(arg_messageBody->data));
+	const uint8_t loc_calculatedCRC = crc8(arg_messageBody->data.rawData, sizeof(uCommMessageData));
 	const eCommStatus loc_result = (loc_receivedCRC == loc_calculatedCRC) ? E_COMM_STATUS_OK : E_COMM_STATUS_FAILED;
 
 	return loc_result;
@@ -377,4 +410,38 @@ void comm_kickoutMessage(tCommMessage * const arg_message)
 {
 	const eCommMessageStatus loc_status = arg_message->status;
 	arg_message->status = (loc_status == E_COMM_MSG_STATUS_INACTIVE) ? E_COMM_MSG_STATUS_ACTIVE : E_COMM_MSG_STATUS_INACTIVE;
+}
+
+const eCommStatus comm_checkMessageId(const uint8_t arg_messageId)
+{
+	eCommStatus loc_result = E_COMM_STATUS_FAILED;
+
+	tCommMessage ** pMessage = receiveMessages;
+	const uint8_t loc_maskedMessageId = arg_messageId & COMM_IDMASK;
+
+	while (*pMessage != NULL)
+	{
+		if ((*pMessage)->body.messageId == loc_maskedMessageId)
+		{
+			loc_result = E_COMM_STATUS_OK;
+			break;
+		}
+
+		pMessage++;
+	}
+
+	pMessage = transmitMessages;
+
+	while (*pMessage != NULL)
+	{
+		if ((*pMessage)->body.messageId == loc_maskedMessageId)
+		{
+			loc_result = E_COMM_STATUS_OK;
+			break;
+		}
+
+		pMessage++;
+	}
+
+	return loc_result;
 }
