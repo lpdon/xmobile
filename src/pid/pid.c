@@ -24,12 +24,40 @@ SOFTWARE.*/
 	#include "pid.h"
 #endif
 
+#include <string.h>
+
 tPid pid[PID_NUMINST];
 
 static int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error);
 static int16_t pid_calcD(tPid * const arg_pid, int16_t arg_error);
 
+static void pid_initInst(tPid * const arg_pid);
 static void pid_updateValues(tPid * const arg_pid);
+
+void pid_init(void)
+{
+	uint8_t i;
+
+	for(i = 0U; i < PID_NUMINST; i++)
+	{
+		pid_initInst(&pid[i]);
+	}
+}
+
+void pid_cyclic(void)
+{
+	uint8_t i;
+
+	for(i = 0U; i < PID_NUMINST; i++)
+	{
+		pid_updateValues(&pid[i]);
+	}
+}
+
+void pid_initInst(tPid * const arg_pid)
+{
+	memset(arg_pid, 0, sizeof(tPid));
+}
 
 int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error)
 {
@@ -58,17 +86,6 @@ int16_t pid_calcD(tPid * const arg_pid, int16_t arg_error)
 
 	return loc_value;
 }
-
-void pid_cyclic(void)
-{
-	uint8_t i;
-
-	for(i = 0U; i < PID_NUMINST; i++)
-	{
-		pid_updateValues(&pid[i]);
-	}
-}
-
 void pid_updateValues(tPid * const arg_pid)
 {
 	const int16_t loc_error = arg_pid->input.setpoint - arg_pid->input.actualValue;

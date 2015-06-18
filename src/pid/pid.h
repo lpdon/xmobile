@@ -48,7 +48,7 @@ typedef struct
 
 extern tPid pid[PID_NUMINST];
 
-/*Returns a value between PID_MIN - PID_MAX*/
+void pid_init(void);
 void pid_cyclic(void);
 
 #endif
