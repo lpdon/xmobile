@@ -86,6 +86,7 @@ int16_t pid_calcD(tPid * const arg_pid, int16_t arg_error)
 
 	return loc_value;
 }
+
 void pid_updateValues(tPid * const arg_pid)
 {
 	const int16_t loc_error = arg_pid->input.setpoint - arg_pid->input.actualValue;

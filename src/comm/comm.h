@@ -30,7 +30,7 @@ SOFTWARE.*/
 #define COMM_IDMASK                0xF0U
 #define COMM_REPLYMASK             (COMM_ACK | COMM_NACK)
 
-/*Timeout in ms*/
+#define COMM_DATASIZE                 8U
 #define COMM_TIMEOUT                 10U
 #define COMM_MAXRETRANSMISSIONS       3U
 
@@ -71,8 +71,31 @@ typedef enum
 
 typedef struct
 {
-	eCommMessageId messageId;
-	uint8_t data[8];
+	uint16_t current[4];
+} tCommCurrentData;
+
+typedef struct
+{
+	uint8_t suspension[8];
+} tCommSuspensionData;
+
+typedef struct
+{
+	uint8_t direction[8];
+} tCommDirectionData;
+
+typedef union
+{
+	uint8_t rawData[COMM_DATASIZE];
+	tCommCurrentData currentData;
+	tCommSuspensionData suspensionData;
+	tCommDirectionData directionData;
+} uCommMessageData;
+
+typedef struct
+{
+	uint8_t messageId;
+	uCommMessageData data;
 	uint8_t crc;
 } tCommMessageBody;
 
@@ -90,6 +113,8 @@ typedef struct
 extern tCommMessage msgCurrent;
 extern tCommMessage msgSuspension;
 extern tCommMessage msgDirection;
+
+void comm_setData(eCommMessageId arg_id, const void * const arg_data);
 
 void comm_init(void);
 void comm_end(void);
