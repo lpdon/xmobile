@@ -24,60 +24,61 @@ SOFTWARE.*/
 	#include "pid.h"
 #endif
 
-/*Timestamp of the pid in ms*/
-uint16_t pid_timestep = 10U;
+tPid pid[PID_NUMINST];
 
-uint16_t pid_pFactor = 1U;
-uint16_t pid_iFactor = 1U;
-uint16_t pid_dFactor = 1U;
+static int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error);
+static int16_t pid_calcD(tPid * const arg_pid, int16_t arg_error);
 
-static const uint8_t PID_OFFSET = 50U;
+static void pid_updateValues(tPid * const arg_pid);
 
-/*Accumulated error ~ integral*/
-static int16_t pid_iError;
-
-/*Differential error ~ derivative*/
-static int16_t pid_dError;
-
-static int16_t pid_calcI(int16_t arg_error)
+int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error)
 {
-	const uint16_t loc_iFactor = pid_iFactor;
-	const int16_t loc_error = (arg_error + pid_iError);
+	const uint16_t loc_iFactor = arg_pid->iFactor;
+	const int16_t loc_error = (arg_error + arg_pid->iError);
 	int16_t loc_value;
 
 	loc_value = loc_iFactor * loc_error;
 
 	//updates accumulated error
-	pid_iError = pid_iError + arg_error;
+	arg_pid->iError = arg_pid->iError + arg_error;
 
 	return loc_value;
 }
 
-static int16_t pid_calcD(int16_t arg_error)
+int16_t pid_calcD(tPid * const arg_pid, int16_t arg_error)
 {
-	const uint16_t loc_dFactor = pid_dFactor;
-	const int16_t loc_error = (arg_error - pid_dError);
+	const uint16_t loc_dFactor = arg_pid->dFactor;
+	const int16_t loc_error = (arg_error - arg_pid->dError);
 	int16_t loc_value;
 
 	loc_value = loc_dFactor * loc_error;
 
 	//updates stored error
-	pid_dError = arg_error;
+	arg_pid->dError = arg_error;
 
 	return loc_value;
 }
 
-uint8_t pid(uint16_t arg_setpoint, uint16_t arg_actualValue)
+void pid_cyclic(void)
 {
-	const int16_t loc_error = arg_setpoint - arg_actualValue;
+	uint8_t i;
 
-	const int16_t loc_iTerm = pid_calcI(loc_error);
-	const int16_t loc_dTerm = pid_calcD(loc_error);
+	for(i = 0U; i < PID_NUMINST; i++)
+	{
+		pid_updateValues(&pid[i]);
+	}
+}
+
+void pid_updateValues(tPid * const arg_pid)
+{
+	const int16_t loc_error = arg_pid->input.setpoint - arg_pid->input.actualValue;
+
+	const int16_t loc_iTerm = pid_calcI(arg_pid, loc_error);
+	const int16_t loc_dTerm = pid_calcD(arg_pid, loc_error);
 	int16_t loc_value;
 
-	loc_value = pid_pFactor * (loc_error + loc_iTerm + loc_dTerm);
+	loc_value = arg_pid->pFactor * (loc_error + loc_iTerm + loc_dTerm);
 
-	//loc_value = loc_value + loc_offset;
 	if (loc_value < 0)
 	{
 		loc_value = PID_MAX + loc_value;
@@ -93,5 +94,5 @@ uint8_t pid(uint16_t arg_setpoint, uint16_t arg_actualValue)
 		loc_value = PID_MIN;
 	}
 
-	return (uint8_t)(loc_value);
+	arg_pid->output = loc_value;
 }

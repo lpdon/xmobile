@@ -25,16 +25,30 @@ SOFTWARE.*/
 
 #include <stdint.h>
 
-#define PID_MIN 0
-#define PID_MAX 100
+#define PID_NUMINST     3
+#define PID_MIN         0
+#define PID_MAX       100
 
-extern uint16_t pid_timestep;
+typedef struct
+{
+	uint16_t pFactor;
+	uint16_t iFactor;
+	uint16_t dFactor;
+	int16_t iError;
+	int16_t dError;
 
-extern uint16_t pid_pFactor;
-extern uint16_t pid_iFactor;
-extern uint16_t pid_dFactor;
+	struct
+	{
+		int16_t setpoint;
+		int16_t actualValue;
+	} input;
+
+	int16_t output;
+} tPid;
+
+extern tPid pid[PID_NUMINST];
 
 /*Returns a value between PID_MIN - PID_MAX*/
-uint8_t pid(uint16_t arg_setpoint, uint16_t arg_actualValue);
+void pid_cyclic(void);
 
 #endif
