@@ -1,0 +1,78 @@
+/** ###################################################################
+**     Filename  : Project.c
+**     Project   : Project
+**     Processor : MC9S12C32MFA25
+**     Version   : Driver 01.14
+**     Compiler  : CodeWarrior HC12 C Compiler
+**     Date/Time : 18.06.2015, 19:31
+**     Abstract  :
+**         Main module.
+**         This module contains user's application code.
+**     Settings  :
+**     Contents  :
+**         No public methods
+**
+** ###################################################################*/
+/* MODULE Project */
+
+/* Including needed modules to compile this module/procedure */
+#include "Cpu.h"
+#include "Events.h"
+#include "EI2C1.h"
+#include "Inhr1.h"
+#include "Inhr2.h"
+#include "PWM6.h"
+#include "PWM7.h"
+/* Include shared modules, which are used for whole project */
+#include "PE_Types.h"
+#include "PE_Error.h"
+#include "PE_Const.h"
+#include "IO_Map.h"
+
+/* User includes (#include below this line is not maintained by Processor Expert) */
+#include "nunchuk.h"
+
+uint8_t error_code = 0;
+
+void main(void)
+{
+  /* Write your local variable definition here */
+
+  /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
+  PE_low_level_init();
+  /*** End of Processor Expert internal initialization.                    ***/
+
+  /* Write your code here */
+  error_code = initJoystick();
+
+  /*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/
+  for(;;){
+    
+      error_code = updateJoystickInput();
+      if( joystick.axisX > 0 ){
+       PWM6_SetRatio16( (joystick.axisX << 8) & 0xFF00 );
+       PWM6_SetRatio17( 0 );
+      }else if( joystick.axisX < 0 ){
+       PWM6_SetRatio17( ((uint16_t)(-joystick.axisX) << 8) & 0xFF00 );
+       PWM6_SetRatio16( 0 ); 
+      }else{
+       PWM6_SetRatio17( 0 );
+       PWM6_SetRatio16( 0 );      
+      }
+      
+      
+      Cpu_Delay100US(1000);  
+  
+  }
+  /*** Processor Expert end of main routine. DON'T WRITE CODE BELOW!!! ***/
+} /*** End of main routine. DO NOT MODIFY THIS TEXT!!! ***/
+
+/* END Project */
+/*
+** ###################################################################
+**
+**     This file was created by Processor Expert 3.02 [04.44]
+**     for the Freescale HCS12 series of microcontrollers.
+**
+** ###################################################################
+*/
