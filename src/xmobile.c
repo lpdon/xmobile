@@ -10,10 +10,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "crc/crc.h"
 #include "pid/pid.h"
 #include "comm/comm.h"
+
+void delay(int milliseconds);
 
 int main(void) {
 	puts("Hallo Welt"); /* prints Hallo Welt */
@@ -33,14 +36,26 @@ int main(void) {
 
 	comm_init();
 
-	int i;
-	for (i = 0; i < 10; i++)
+	while (1)
 	{
 		comm_cyclic();
+		delay(100);
 	}
+
 
 	comm_end();
 
 
 	return EXIT_SUCCESS;
+}
+
+void delay(int milliseconds)
+{
+    long pause;
+    clock_t now,then;
+
+    pause = milliseconds*(CLOCKS_PER_SEC/1000);
+    now = then = clock();
+    while( (now-then) < pause )
+        now = clock();
 }

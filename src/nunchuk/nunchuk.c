@@ -2,6 +2,8 @@
 	#include "nunchuk.h"
 #endif
 
+#if !defined(WIN32)
+
 //don't forget to initialize the I2C before using this function
 uint8_t initJoystick()
 {
@@ -15,7 +17,7 @@ uint8_t initJoystick()
   return error_code;
 }
 
-unit8_t updateJoystickInput()
+uint8_t updateJoystickInput()
 {
   uint8_t received[6];
   uint8_t length;
@@ -33,3 +35,5 @@ unit8_t updateJoystickInput()
   
   return error_code;
 }
+
+#endif

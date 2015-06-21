@@ -23,7 +23,9 @@ SOFTWARE.*/
 #ifndef PID_H
 #define PID_H
 
-#include <stdint.h>
+#if defined(WIN32)
+	#include <stdint.h>
+#endif
 
 #define PID_NUMINST     3
 #define PID_MIN         0

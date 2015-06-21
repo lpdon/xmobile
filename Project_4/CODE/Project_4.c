@@ -35,6 +35,9 @@
 #include "IO_Map.h"
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
+#include "comm.h"
+
+
 #define CURRENT_CONVERSION 2
 
 void main(void)
@@ -61,29 +64,15 @@ void main(void)
   error_code = EI2C1_SendBlock(init_block+2, 2, &length);
   //if( error_code ) for(;;){} 
   
+  comm_init();
+  
   for(;;){   
-      error_code = EI2C1_SendChar(0x00);
-      error_code = EI2C1_RecvBlock(received,6,&length);
+      //error_code = AS1_SendChar(can_data[0]);
       
-      if(length>5){
-        joystickX = (received[0] - 0x1a)-100;
-        joystickY = (received[1] - 0x1d)-100; 
-        buttonC = (received[5] & 0x02) ? 0 : 1;
-        buttonZ = (received[5] & 0x01) ? 0 : 1;    
-      }
+      //error_code = AS1_RecvChar(&ler_rec);
       
-      can_data[0] = joystickX & 0xff;
-      can_data[1] = joystickY & 0xff;
-      can_data[2] = buttonC & 0x01;
-      can_data[3] = buttonZ & 0x01; 
-      error_code = AS1_SendChar(can_data[0]);
+      comm_cyclic();
       
-      error_code = CAN1_SendFrameExt(0x01,DATA_FRAME,0x04,can_data);
-      
-      if (error_code != 0 && error_code != 11) for(;;){} 
-      
-      error_code = AS1_RecvChar(&ler_rec);
-      if(!error_code) for(;;){}
       Cpu_Delay100US(100);  
   }
   /*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/

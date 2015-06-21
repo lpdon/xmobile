@@ -23,7 +23,11 @@ SOFTWARE.*/
 #ifndef COMM_H
 #define COMM_H
 
-#include <stdint.h>
+#if defined(WIN32)
+	#include <stdint.h>
+#else
+	#include "PE_Types.h"
+#endif
 
 #define COMM_ACK                   0x01U
 #define COMM_NACK                  0x02U
@@ -87,9 +91,9 @@ typedef struct
 typedef union
 {
 	uint8_t rawData[COMM_DATASIZE];
-	tCommCurrentData currentData;
-	tCommSuspensionData suspensionData;
-	tCommDirectionData directionData;
+//	tCommCurrentData currentData;
+//	tCommSuspensionData suspensionData;
+//	tCommDirectionData directionData;
 } uCommMessageData;
 
 typedef struct
@@ -120,7 +124,8 @@ void comm_init(void);
 void comm_end(void);
 void comm_cyclic(void);
 
-void comm_receiveMessages(void);
+//void comm_receiveMessages(void);
+void comm_setDataAvailable(void);
 eCommStatus comm_checkCRC(const tCommMessageBody * const arg_messageBody);
 void comm_kickoutMessage(tCommMessage * const arg_message);
 

@@ -23,7 +23,11 @@ SOFTWARE.*/
 #ifndef CRC_H
 #define CRC_H
 
-#include <stdint.h>
+#if defined(WIN32)
+	#include <stdint.h>
+#else
+	#include "PE_Types.h"
+#endif
 
 #define CRC_MASK_REV 0xB8 //SAE J1850
 

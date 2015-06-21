@@ -23,6 +23,8 @@
 #include "Events.h"
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
+#include "comm.h"
+
 int16_t Values[8];
 int16_t i16CurrentADC;
 int16_t i16SteeringADC;
@@ -212,8 +214,9 @@ void AS1_OnRxChar(void)
 {
   /* Write your code here ... */
   char received;
-  AS1_RecvChar(&received);
-  AS1_SendChar(received);
+  //AS1_RecvChar(&received);
+  //AS1_SendChar(received);
+  comm_setDataAvailable();
 }
 
 /*
