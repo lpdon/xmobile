@@ -28,22 +28,11 @@ SOFTWARE.*/
 	#include "../crc/crc.h"
 #endif
 
-#include <string.h>
-
-#if defined(WIN32)
-	#include "../uart_windows/rs232.h"
-	#define UART_PORT 15
-	#define UART_BAUD 9600
-	#define UART_MODE "8N1"
-#else
-	#ifndef __AS1
-		#include "AS1.h"
-	#endif
-
-	#ifndef __PE_Error_H
-		#include "PE_Error.h"
-	#endif
+#ifndef UART_INTERFACE_H
+	#include "../uart_interface/uart_interface.h"
 #endif
+
+#include <string.h>
 
 static void comm_initTransmissionCyclicMessages(void);
 static void comm_cyclicReception(void);
@@ -120,7 +109,7 @@ tCommMessage msgDirection =
 	E_COMM_MSG_TYPE_CYCLIC
 };
 
-#if defined(WIN32)
+#if NODE==CONTROL
 static tCommMessage * transmitMessages[] =
 {
 	&msgControl,
@@ -166,16 +155,12 @@ void comm_setData(eCommMessageId arg_id, const void * const arg_data)
 void comm_init(void)
 {
 	comm_initTransmissionCyclicMessages();
-#if defined(WIN32)
-	RS232_OpenComport(UART_PORT, UART_BAUD, UART_MODE);
-#endif
+	uart_init();
 }
 
 void comm_end(void)
 {
-#if defined(WIN32)
-	RS232_CloseComport(UART_PORT);
-#endif
+	uart_end();
 }
 
 void comm_initTransmissionCyclicMessages(void)
@@ -442,40 +427,29 @@ const eCommStatus comm_checkMessageId(const uint8_t arg_messageId)
 	return loc_result;
 }
 
-
-
 const eCommStatus comm_readMessageFromBuffer(tCommMessage * arg_message)
 {
-	uint16_t loc_bytesRead = 0U;
 	uint16_t loc_totalBytesRead = 0U;
 	tCommMessageBody loc_messageBody;
 	eCommStatus loc_validId = E_COMM_STATUS_FAILED;
 	eCommStatus loc_result = E_COMM_STATUS_FAILED;
+	eUartStatus loc_uartResult = E_UART_STATUS_FAILED;
 
 	/*Read 1 byte to check if it is really the beginning of a message*/
-#if defined(WIN32)
-	loc_totalBytesRead = RS232_PollComport(UART_PORT, &loc_messageBody.messageId, sizeof(uint8_t));
-#else
-	AS1_RecvBlock(&loc_messageBody.messageId, sizeof(uint8_t), &loc_bytesRead);
-	loc_totalBytesRead += loc_bytesRead;
-#endif
+	loc_uartResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
 
-	if (loc_totalBytesRead > 0)
+	if (loc_uartResult == E_UART_STATUS_OK)
 	{
 		loc_validId = comm_checkMessageId(loc_messageBody.messageId);
 	}
 
 	if (loc_validId == E_COMM_STATUS_OK)
 	{
-#if defined(WIN32)
-		loc_totalBytesRead += RS232_PollComport(UART_PORT, loc_messageBody.data.rawData, sizeof(uCommMessageData));
-		loc_totalBytesRead += RS232_PollComport(UART_PORT, &loc_messageBody.crc, sizeof(uint8_t));
-#else
-		AS1_RecvBlock(loc_messageBody.data.rawData, sizeof(uCommMessageData), &loc_bytesRead);
-		loc_totalBytesRead += loc_bytesRead;
-		AS1_RecvBlock(&loc_messageBody.crc, sizeof(uint8_t), &loc_bytesRead);
-		loc_totalBytesRead += loc_bytesRead;
-#endif
+		loc_uartResult = uart_readFromBuffer(loc_messageBody.data.rawData, sizeof(uCommMessageData));
+		loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uCommMessageData) : 0U;
+		loc_uartResult = uart_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
+		loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uint8_t) : 0U;
+
 		if (loc_totalBytesRead == sizeof(tCommMessageBody))
 		{
 			memcpy(arg_message, &loc_messageBody, sizeof(tCommMessageBody));
@@ -488,17 +462,8 @@ const eCommStatus comm_readMessageFromBuffer(tCommMessage * arg_message)
 
 void comm_writeMessageToBuffer(const tCommMessage * const arg_message)
 {
-	uint8_t i;
 	uint8_t loc_buffer[sizeof(tCommMessageBody)];
 
 	memcpy(loc_buffer, arg_message, sizeof(tCommMessageBody));
-
-	for (i = 0U; i < sizeof(tCommMessageBody); i++)
-	{
-#if defined(WIN32)
-		RS232_SendByte(UART_PORT, loc_buffer[i]);
-#else
-		AS1_SendChar(loc_buffer[i]);
-#endif
-	}
+	uart_writeToBuffer(loc_buffer, sizeof(tCommMessageBody));
 }
