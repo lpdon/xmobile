@@ -31,6 +31,13 @@ SOFTWARE.*/
 
 #define CRC_MASK_REV 0xB8 //SAE J1850
 
-uint8_t crc8 (const uint8_t * const arg_data, uint8_t arg_length);
+typedef enum
+{
+	E_CRC_STATUS_OK,
+	E_CRC_STATUS_FAILED
+} eCrcStatus;
+
+uint8_t crc8 (const uint8_t * const arg_data, const uint8_t arg_length);
+eCrcStatus checkCRC(const uint8_t * const arg_data, const uint8_t arg_length, const uint8_t arg_calculatedCRC);
 
 #endif

@@ -125,8 +125,6 @@ void comm_end(void);
 void comm_cyclic(void);
 
 //void comm_receiveMessages(void);
-void comm_setDataAvailable(void);
-eCommStatus comm_checkCRC(const tCommMessageBody * const arg_messageBody);
 void comm_kickoutMessage(tCommMessage * const arg_message);
 
 #endif

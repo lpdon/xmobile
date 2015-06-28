@@ -29,9 +29,14 @@ SOFTWARE.*/
 	#include "PE_Types.h"
 #endif
 
-#define HANDSHAKE_DATASIZE           8U
-#define HANDSHAKE_CYCLETIME        100U
-#define HANDSHAKE_RETRANSMISSIONS  100U
+#define HANDSHAKE_ACK                   0x01U
+#define HANDSHAKE_NACK                  0x02U
+#define HANDSHAKE_IDMASK                0xF0U
+#define HANDSHAKE_REPLYMASK             (HANDSHAKE_ACK | HANDSHAKE_NACK)
+
+#define HANDSHAKE_DATASIZE                 8U
+#define HANDSHAKE_CYCLETIME              100U
+#define HANDSHAKE_RETRANSMISSIONS        100U
 
 typedef enum
 {
@@ -48,7 +53,7 @@ typedef enum
 typedef enum
 {
 	E_HANDSHAKE_RQST_ID     =     0xF0U,
-	E_HANDSHAKE_RESPONSE_ID =     0xDAU
+	E_HANDSHAKE_RESPONSE_ID =     0xD0U
 } eHandshakeMessageId;
 
 typedef enum
@@ -87,5 +92,7 @@ typedef struct
 
 void handshake_init(void);
 void handshake_cyclic(void);
+
+eHandshakeStatus handshake_getStatus(void);
 
 #endif

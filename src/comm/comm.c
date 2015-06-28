@@ -341,9 +341,11 @@ void comm_receiveMessages(void)
 				{
 					if ((*pMessage)->body.messageId == loc_receivedMessageId)
 					{
-						const eCommStatus loc_checkCRC = comm_checkCRC(&loc_receivedMessageBody);
+						const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
+																 sizeof(uCommMessageData),
+																 loc_receivedMessageBody.crc);
 
-						if (loc_checkCRC == E_COMM_STATUS_OK)
+						if (loc_checkCRC == E_CRC_STATUS_OK)
 						{
 							/* Send ack. Content of the message is not important */
 							tCommMessage loc_message;
@@ -371,11 +373,6 @@ void comm_receiveMessages(void)
 #if !defined(WIN32)
 	comm_dataAvailable = E_COMM_STATUS_FAILED;
 #endif
-}
-
-void comm_setDataAvailable(void)
-{
-	comm_dataAvailable = E_COMM_STATUS_OK;
 }
 
 eCommStatus comm_checkCRC(const tCommMessageBody * const arg_messageBody)

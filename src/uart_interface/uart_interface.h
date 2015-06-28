@@ -39,5 +39,8 @@ eUartStatus uart_init(void);
 void uart_end(void);
 eUartStatus uart_writeToBuffer(const uint8_t * const arg_buffer, const uint8_t arg_length);
 eUartStatus uart_readFromBuffer(const uint8_t * const arg_buffer, const uint8_t arg_length);
+void uart_setDataAvailable(void);
+void uart_clearDataAvailable(void);
+eUartStatus uart_getDataAvailable(void);
 
 #endif

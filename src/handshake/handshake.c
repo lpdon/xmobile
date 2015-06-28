@@ -34,6 +34,12 @@ SOFTWARE.*/
 
 #include <string.h>
 
+static void handshake_cyclicReception(void);
+static void handshake_cyclicTransmission(void);
+static void handshake_transmitMessage(tHandshakeMessage * const arg_message);
+static void handshake_receiveMessages(void);
+
+const eHandshakeStatus handshake_readMessageFromBuffer(tHandshakeMessage * arg_message);
 static void handshake_writeMessageToBuffer(const tHandshakeMessage * const arg_message);
 eHandshakeStatus handshake_checkCRC(const tHandshakeMessageBody * const arg_messageBody);
 
@@ -59,7 +65,7 @@ tHandshakeMessage handshakeResponse =
 		0xFFU
 	},
 	E_HANDSHAKE_STATE_INIT,
-	HANDSHAKE_CYCLETIME,
+	1,
 	HANDSHAKE_RETRANSMISSIONS,
 	E_HANDSHAKE_MSG_STATUS_INACTIVE,
 	E_HANDSHAKE_STATUS_FAILED
@@ -77,16 +83,23 @@ void handshake_init(void)
 {
 #if NODE==CONTROL
 	handshakeRqst.status = E_HANDSHAKE_MSG_STATUS_ACTIVE;
-#else
-	handshakeResponse.status = E_HANDSHAKE_MSG_STATUS_ACTIVE;
 #endif
 }
 
 void handshake_cyclic(void)
 {
-#if NODE==CONTROL
-//	eHandshakeMessageState
-#endif
+	handshake_cyclicReception();
+	handshake_cyclicTransmission();
+}
+
+void handshake_cyclicReception(void)
+{
+	handshake_receiveMessages();
+}
+
+void handshake_cyclicTransmission(void)
+{
+	handshake_transmitMessage(transmitMessage);
 }
 
 void handshake_transmitMessage(tHandshakeMessage * const arg_message)
@@ -166,20 +179,83 @@ void handshake_transmitMessage(tHandshakeMessage * const arg_message)
 	arg_message->status = loc_messageStatus;
 	arg_message->cycleTime = loc_cycleTime;
 }
+
+void handshake_receiveMessages(void)
+{
+	const eUartStatus loc_dataAvailable = uart_getDataAvailable();
+	tHandshakeMessage loc_receivedMessage;
+
+	if (loc_dataAvailable == E_UART_STATUS_OK)
+	{
+		while (handshake_readMessageFromBuffer(&loc_receivedMessage) == E_HANDSHAKE_STATUS_OK)
+		{
+			tHandshakeMessageBody loc_receivedMessageBody = loc_receivedMessage.body;
+			eHandshakeMessageId loc_receivedMessageId = loc_receivedMessageBody.messageId;
+
+			/*Detect if the message received is a reply*/
+			if ((loc_receivedMessageId & HANDSHAKE_REPLYMASK) != 0U)
+			{
+				const eHandshakeMessageId loc_maskedMessageId = loc_receivedMessageId & HANDSHAKE_IDMASK;
+				if (transmitMessage->body.messageId == loc_maskedMessageId)
+				{
+					if (loc_receivedMessageId & HANDSHAKE_ACK)
+					{
+						transmitMessage->ack = E_HANDSHAKE_STATUS_OK;
+					}
+				}
+			}
+			else
+			{
+				if (receiveMessage->body.messageId == loc_receivedMessageId)
+				{
+					const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
+															 sizeof(uHandshakeMessageData),
+															 loc_receivedMessageBody.crc);
+
+					if (loc_checkCRC == E_CRC_STATUS_OK)
+					{
+						/* Send ack. Content of the message is not important */
+						tHandshakeMessage loc_message;
+						loc_message.body.messageId = (loc_receivedMessageId | HANDSHAKE_ACK);
+						handshake_writeMessageToBuffer(&loc_message);
+
+						/* If the message received was a handshake request, activate the response*/
+						if (loc_receivedMessageId == E_HANDSHAKE_RQST_ID)
+						{
+							handshakeResponse.status = E_HANDSHAKE_MSG_STATUS_ACTIVE;
+						}
+					}
+					else
+					{
+						/* Send nack. Content of the message is not important */
+						tHandshakeMessage loc_message;
+						loc_message.body.messageId = (loc_receivedMessageId | HANDSHAKE_NACK);
+						handshake_writeMessageToBuffer(&loc_message);
+					}
+				}
+			}
+		}
+	}
+#if !defined(WIN32)
+	uart_clearDataAvailable();
+#endif
+}
+
 const eHandshakeStatus handshake_readMessageFromBuffer(tHandshakeMessage * arg_message)
 {
 	uint16_t loc_totalBytesRead = 0U;
 	tHandshakeMessageBody loc_messageBody;
 	eHandshakeStatus loc_validId = E_HANDSHAKE_STATUS_FAILED;
 	eHandshakeStatus loc_result = E_HANDSHAKE_STATUS_FAILED;
-	eUartStatus loc_uartResult = E_HANDSHAKE_STATUS_FAILED;
+	eUartStatus loc_uartResult = E_UART_STATUS_FAILED;
 
 	/*Read 1 byte to check if it is really the beginning of a message*/
 	loc_uartResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
 
 	if (loc_uartResult == E_UART_STATUS_OK)
 	{
-		loc_validId = 1;
+		loc_validId = E_HANDSHAKE_STATUS_OK;
+		loc_totalBytesRead++;
 	}
 
 	if (loc_validId == E_HANDSHAKE_STATUS_OK)
@@ -212,6 +288,19 @@ eHandshakeStatus handshake_checkCRC(const tHandshakeMessageBody * const arg_mess
 	const uint8_t loc_receivedCRC = arg_messageBody->crc;
 	const uint8_t loc_calculatedCRC = crc8(arg_messageBody->data.rawData, sizeof(uHandshakeMessageData));
 	const eHandshakeStatus loc_result = (loc_receivedCRC == loc_calculatedCRC) ? E_HANDSHAKE_STATUS_OK : E_HANDSHAKE_STATUS_FAILED;
+
+	return loc_result;
+}
+
+eHandshakeStatus handshake_getStatus(void)
+{
+	eHandshakeStatus loc_result = E_HANDSHAKE_STATUS_FAILED;
+
+	if  ((handshakeResponse.state == E_HANDSHAKE_STATE_END_SUCCESS) &&
+		 (handshakeRqst.state == E_HANDSHAKE_STATE_END_SUCCESS))
+	{
+		loc_result = E_HANDSHAKE_STATUS_OK;
+	}
 
 	return loc_result;
 }

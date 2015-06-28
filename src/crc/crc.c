@@ -24,7 +24,7 @@ SOFTWARE.*/
 	#include "crc.h"
 #endif
 
-uint8_t crc8 (const uint8_t * const arg_data, uint8_t arg_length)
+uint8_t crc8 (const uint8_t * const arg_data, const uint8_t arg_length)
 {
 	uint8_t loc_crc = 0xFFU;
 	uint8_t i;
@@ -44,4 +44,13 @@ uint8_t crc8 (const uint8_t * const arg_data, uint8_t arg_length)
 	loc_crc = loc_crc & 0xFF;
 
 	return loc_crc;
+}
+
+eCrcStatus checkCRC(const uint8_t * const arg_data, const uint8_t arg_length, const uint8_t arg_calculatedCRC)
+{
+	const uint8_t loc_receivedCRC = arg_calculatedCRC;
+	const uint8_t loc_calculatedCRC = crc8(arg_data, arg_length);
+	const eCrcStatus loc_result = (loc_receivedCRC == loc_calculatedCRC) ? E_CRC_STATUS_OK : E_CRC_STATUS_FAILED;
+
+	return loc_result;
 }

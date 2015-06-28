@@ -15,6 +15,8 @@
 #include "crc/crc.h"
 #include "pid/pid.h"
 #include "comm/comm.h"
+#include "handshake/handshake.h"
+#include "uart_interface/uart_interface.h"
 
 void delay(int milliseconds);
 
@@ -34,12 +36,15 @@ int main(void) {
 //		printf("out: %i \n", (int)(pid(88, 90)));
 //	}
 
-	comm_init();
+//	comm_init();
+	uart_init();
+	handshake_init();
 
 	while (1)
 	{
-		comm_cyclic();
-		delay(100);
+//		comm_cyclic();
+		handshake_cyclic();
+		delay(10);
 	}
 
 

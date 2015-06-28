@@ -39,6 +39,12 @@ SOFTWARE.*/
 	#endif
 #endif
 
+#if !defined(_WIN32)
+static eUartStatus uart_dataAvailable = E_UART_STATUS_FAILED;
+#else
+static eUartStatus uart_dataAvailable = E_UART_STATUS_OK;
+#endif
+
 eUartStatus uart_init(void)
 {
 	eUartStatus loc_result = E_UART_STATUS_FAILED;
@@ -60,41 +66,46 @@ void uart_end(void)
 
 eUartStatus uart_writeToBuffer(const uint8_t * const arg_buffer, const uint8_t arg_length)
 {
-	const uint8_t loc_length = arg_length;
-
 	eUartStatus loc_result = E_UART_STATUS_FAILED;
-	uint8_t loc_buffer[loc_length];
 	uint16_t loc_totalBytesSent = 0U;
 
-	memcpy(loc_buffer, arg_buffer, loc_length);
-
 #if defined(WIN32)
-	loc_totalBytesSent += RS232_SendBuf(UART_PORT, loc_buffer, loc_length);
+	loc_totalBytesSent += RS232_SendBuf(UART_PORT, (uint8_t*)arg_buffer, arg_length);
 #else
-	AS1_SendBlock(loc_buffer, loc_length, &loc_totalBytesSent);
+	AS1_SendBlock((uint8_t*)arg_buffer, arg_length, &loc_totalBytesSent);
 #endif
 
-	loc_result = (loc_totalBytesSent == loc_length) ? E_UART_STATUS_OK : E_UART_STATUS_FAILED;
+	loc_result = (loc_totalBytesSent == arg_length) ? E_UART_STATUS_OK : E_UART_STATUS_FAILED;
 	return loc_result;
 }
 
 eUartStatus uart_readFromBuffer(const uint8_t * const arg_buffer, const uint8_t arg_length)
 {
-	const uint8_t loc_length = arg_length;
-
 	eUartStatus loc_result = E_UART_STATUS_FAILED;
-	uint8_t loc_buffer[loc_length];
 	uint16_t loc_totalBytesRead = 0U;
 
-	memcpy(loc_buffer, arg_buffer, loc_length);
-
 #if defined(WIN32)
-	loc_totalBytesRead = RS232_PollComport(UART_PORT, loc_buffer, loc_length);
+	loc_totalBytesRead = RS232_PollComport(UART_PORT, (uint8_t*)arg_buffer, arg_length);
 #else
-	AS1_RecvBlock(loc_buffer, loc_length, &loc_totalBytesRead);
+	AS1_RecvBlock((uint8_t*)arg_buffer, arg_length, &loc_totalBytesRead);
 #endif
 
-	loc_result = (loc_totalBytesRead == loc_length) ? E_UART_STATUS_OK : E_UART_STATUS_FAILED;
+	loc_result = (loc_totalBytesRead == arg_length) ? E_UART_STATUS_OK : E_UART_STATUS_FAILED;
 	return loc_result;
 }
 
+void uart_setDataAvailable(void)
+{
+	uart_dataAvailable = E_UART_STATUS_OK;
+}
+
+void uart_clearDataAvailable(void)
+{
+	uart_dataAvailable = E_UART_STATUS_FAILED;
+}
+
+eUartStatus uart_getDataAvailable(void)
+{
+	const eUartStatus loc_result = uart_dataAvailable;
+	return loc_result;
+}
