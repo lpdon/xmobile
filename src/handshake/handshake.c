@@ -42,6 +42,7 @@ static void handshake_receiveMessages(void);
 const eHandshakeStatus handshake_readMessageFromBuffer(tHandshakeMessage * arg_message);
 static void handshake_writeMessageToBuffer(const tHandshakeMessage * const arg_message);
 eHandshakeStatus handshake_checkCRC(const tHandshakeMessageBody * const arg_messageBody);
+static const eHandshakeStatus handshake_checkMessageId(const uint8_t arg_messageId);
 
 tHandshakeMessage handshakeRqst =
 {
@@ -51,7 +52,10 @@ tHandshakeMessage handshakeRqst =
 		0xFFU
 	},
 	E_HANDSHAKE_STATE_INIT,
-	HANDSHAKE_CYCLETIME,
+	{
+		HANDSHAKE_CYCLETIME,
+		HANDSHAKE_CYCLETIME
+	},
 	HANDSHAKE_RETRANSMISSIONS,
 	E_HANDSHAKE_MSG_STATUS_INACTIVE,
 	E_HANDSHAKE_STATUS_FAILED
@@ -65,7 +69,10 @@ tHandshakeMessage handshakeResponse =
 		0xFFU
 	},
 	E_HANDSHAKE_STATE_INIT,
-	1,
+	{
+		1U,
+		1U
+	},
 	HANDSHAKE_RETRANSMISSIONS,
 	E_HANDSHAKE_MSG_STATUS_INACTIVE,
 	E_HANDSHAKE_STATUS_FAILED
@@ -108,7 +115,7 @@ void handshake_transmitMessage(tHandshakeMessage * const arg_message)
 
 	eHandshakeMessageState loc_state = arg_message->state;
 	uint8_t loc_retransmissions = arg_message->retransmissions;
-	uint8_t loc_cycleTime = arg_message->cycleTime;
+	uint8_t loc_cycleTime = arg_message->cycleTime.current;
 	eHandshakeMessageStatus loc_messageStatus = arg_message->status;
 	eHandshakeStatus loc_ack = arg_message->ack;
 
@@ -136,7 +143,7 @@ void handshake_transmitMessage(tHandshakeMessage * const arg_message)
 		case E_HANDSHAKE_STATE_TRANSMIT:
 		{
 			/*Reset cycle time*/
-			loc_cycleTime = HANDSHAKE_CYCLETIME;
+			loc_cycleTime = arg_message->cycleTime.initial;
 
 			/*Reset ack flag*/
 			loc_ack = E_HANDSHAKE_STATUS_FAILED;
@@ -177,7 +184,7 @@ void handshake_transmitMessage(tHandshakeMessage * const arg_message)
 	arg_message->state = loc_state;
 	arg_message->retransmissions = loc_retransmissions;
 	arg_message->status = loc_messageStatus;
-	arg_message->cycleTime = loc_cycleTime;
+	arg_message->cycleTime.current = loc_cycleTime;
 }
 
 void handshake_receiveMessages(void)
@@ -251,25 +258,27 @@ const eHandshakeStatus handshake_readMessageFromBuffer(tHandshakeMessage * arg_m
 
 	/*Read 1 byte to check if it is really the beginning of a message*/
 	loc_uartResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
-
-	if (loc_uartResult == E_UART_STATUS_OK)
+	while (loc_uartResult == E_UART_STATUS_OK)
 	{
-		loc_validId = E_HANDSHAKE_STATUS_OK;
-		loc_totalBytesRead++;
-	}
+		loc_totalBytesRead = 0U;
+		loc_validId = handshake_checkMessageId(loc_messageBody.messageId);
 
-	if (loc_validId == E_HANDSHAKE_STATUS_OK)
-	{
-		loc_uartResult = uart_readFromBuffer(loc_messageBody.data.rawData, sizeof(uHandshakeMessageData));
-		loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uHandshakeMessageData) : 0U;
-		loc_uartResult = uart_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
-		loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uint8_t) : 0U;
-
-		if (loc_totalBytesRead == sizeof(tHandshakeMessageBody))
+		if (loc_validId == E_HANDSHAKE_STATUS_OK)
 		{
-			memcpy(arg_message, &loc_messageBody, sizeof(tHandshakeMessageBody));
-			loc_result = E_HANDSHAKE_STATUS_OK;
+			loc_totalBytesRead++;
+			loc_uartResult = uart_readFromBuffer(loc_messageBody.data.rawData, sizeof(uHandshakeMessageData));
+			loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uHandshakeMessageData) : 0U;
+			loc_uartResult = uart_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
+			loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uint8_t) : 0U;
+
+			if (loc_totalBytesRead == sizeof(tHandshakeMessageBody))
+			{
+				memcpy(arg_message, &loc_messageBody, sizeof(tHandshakeMessageBody));
+				loc_result = E_HANDSHAKE_STATUS_OK;
+			}
 		}
+
+		loc_uartResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
 	}
 
 	return loc_result;
@@ -298,6 +307,21 @@ eHandshakeStatus handshake_getStatus(void)
 
 	if  ((handshakeResponse.state == E_HANDSHAKE_STATE_END_SUCCESS) &&
 		 (handshakeRqst.state == E_HANDSHAKE_STATE_END_SUCCESS))
+	{
+		loc_result = E_HANDSHAKE_STATUS_OK;
+	}
+
+	return loc_result;
+}
+
+const eHandshakeStatus handshake_checkMessageId(const uint8_t arg_messageId)
+{
+	eHandshakeStatus loc_result = E_HANDSHAKE_STATUS_FAILED;
+
+	const uint8_t loc_maskedMessageId = arg_messageId & HANDSHAKE_IDMASK;
+
+	if ((loc_maskedMessageId == handshakeResponse.body.messageId) ||
+	    (loc_maskedMessageId == handshakeRqst.body.messageId))
 	{
 		loc_result = E_HANDSHAKE_STATUS_OK;
 	}

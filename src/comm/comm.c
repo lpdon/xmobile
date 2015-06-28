@@ -32,6 +32,10 @@ SOFTWARE.*/
 	#include "../uart_interface/uart_interface.h"
 #endif
 
+#ifndef HANDSHAKE_H
+	#include "../handshake/handshake.h"
+#endif
+
 #include <string.h>
 
 static void comm_initTransmissionCyclicMessages(void);
@@ -177,8 +181,11 @@ void comm_initTransmissionCyclicMessages(void)
 
 void comm_cyclic(void)
 {
-	comm_cyclicReception();
-	comm_cyclicTransmission();
+	if (handshake_getStatus() == E_HANDSHAKE_STATUS_OK)
+	{
+		comm_cyclicReception();
+		comm_cyclicTransmission();
+	}
 }
 
 void comm_cyclicReception(void)
@@ -434,24 +441,27 @@ const eCommStatus comm_readMessageFromBuffer(tCommMessage * arg_message)
 
 	/*Read 1 byte to check if it is really the beginning of a message*/
 	loc_uartResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
-
-	if (loc_uartResult == E_UART_STATUS_OK)
+	while (loc_uartResult == E_UART_STATUS_OK)
 	{
+		loc_totalBytesRead = 0U;
 		loc_validId = comm_checkMessageId(loc_messageBody.messageId);
-	}
 
-	if (loc_validId == E_COMM_STATUS_OK)
-	{
-		loc_uartResult = uart_readFromBuffer(loc_messageBody.data.rawData, sizeof(uCommMessageData));
-		loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uCommMessageData) : 0U;
-		loc_uartResult = uart_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
-		loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uint8_t) : 0U;
-
-		if (loc_totalBytesRead == sizeof(tCommMessageBody))
+		if (loc_validId == E_COMM_STATUS_OK)
 		{
-			memcpy(arg_message, &loc_messageBody, sizeof(tCommMessageBody));
-			loc_result = E_COMM_STATUS_OK;
+			loc_totalBytesRead++;
+			loc_uartResult = uart_readFromBuffer(loc_messageBody.data.rawData, sizeof(uCommMessageData));
+			loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uCommMessageData) : 0U;
+			loc_uartResult = uart_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
+			loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uint8_t) : 0U;
+
+			if (loc_totalBytesRead == sizeof(tCommMessageBody))
+			{
+				memcpy(arg_message, &loc_messageBody, sizeof(tCommMessageBody));
+				loc_result = E_COMM_STATUS_OK;
+			}
 		}
+
+		loc_uartResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
 	}
 
 	return loc_result;

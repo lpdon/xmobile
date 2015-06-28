@@ -82,9 +82,15 @@ typedef struct
 
 typedef struct
 {
+	uint8_t initial;
+	uint8_t current;
+} tHandshakeMessageCycleTime;
+
+typedef struct
+{
 	tHandshakeMessageBody body;
 	eHandshakeMessageState state;
-	uint8_t cycleTime;
+	tHandshakeMessageCycleTime cycleTime;
 	uint8_t retransmissions;
 	eHandshakeMessageStatus status;
 	eHandshakeStatus ack;
