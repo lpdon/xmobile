@@ -79,7 +79,7 @@ eUartStatus uart_writeToBuffer(const uint8_t * const arg_buffer, const uint8_t a
 	return loc_result;
 }
 
-eUartStatus uart_readFromBuffer(const uint8_t * const arg_buffer, const uint8_t arg_length)
+eUartStatus uart_readFromBuffer(uint8_t * const arg_buffer, const uint8_t arg_length)
 {
 	eUartStatus loc_result = E_UART_STATUS_FAILED;
 	uint16_t loc_totalBytesRead = 0U;

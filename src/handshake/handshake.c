@@ -29,7 +29,7 @@ SOFTWARE.*/
 #endif
 
 #ifndef UART_INTERFACE_H
-	#include "../uart_interface/uart_interface.h"
+	#include "../bus_interface/uart_interface.h"
 #endif
 
 #include <string.h>

@@ -20,8 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 
-#ifndef UART_INTERFACE_H
-#define UART_INTERFACE_H
+#ifndef CAN_INTERFACE_H
+#define CAN_INTERFACE_H
 
 #if defined(WIN32)
 	#include <stdint.h>
@@ -31,16 +31,16 @@ SOFTWARE.*/
 
 typedef enum
 {
-	E_UART_STATUS_OK,
-	E_UART_STATUS_FAILED
-} eUartStatus;
+	E_CAN_STATUS_OK,
+	E_CAN_STATUS_FAILED
+} eCanStatus;
 
-eUartStatus uart_init(void);
-void uart_end(void);
-eUartStatus uart_writeToBuffer(const uint8_t * const arg_buffer, const uint8_t arg_length);
-eUartStatus uart_readFromBuffer(const uint8_t * const arg_buffer, const uint8_t arg_length);
-void uart_setDataAvailable(void);
-void uart_clearDataAvailable(void);
-eUartStatus uart_getDataAvailable(void);
+eCanStatus can_init(void);
+void can_end(void);
+eCanStatus can_writeToBuffer(const uint8_t arg_messageId, const uint8_t * const arg_buffer, const uint8_t arg_length);
+eCanStatus can_readFromBuffer(const uint8_t arg_messageId, uint8_t * const arg_buffer, const uint8_t arg_length);
+void can_setDataAvailable(void);
+void can_clearDataAvailable(void);
+eCanStatus can_getDataAvailable(void);
 
 #endif

@@ -28,8 +28,12 @@ SOFTWARE.*/
 	#include "../crc/crc.h"
 #endif
 
-#ifndef UART_INTERFACE_H
-	#include "../uart_interface/uart_interface.h"
+//#ifndef UART_INTERFACE_H
+//	#include "../bus_interface/uart_interface.h"
+//#endif
+
+#ifndef BUS_INTERFACE_H
+#include "../bus_interface/bus_interface.h"
 #endif
 
 #ifndef HANDSHAKE_H
@@ -65,7 +69,8 @@ tCommMessage msgControl =
 	COMM_MAXRETRANSMISSIONS,
 	E_COMM_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_MSG_BUS_UART
 };
 
 tCommMessage msgCurrent =
@@ -80,7 +85,8 @@ tCommMessage msgCurrent =
 	COMM_MAXRETRANSMISSIONS,
 	E_COMM_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_MSG_BUS_UART
 };
 
 tCommMessage msgSuspension =
@@ -95,7 +101,8 @@ tCommMessage msgSuspension =
 	COMM_MAXRETRANSMISSIONS,
 	E_COMM_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_MSG_BUS_UART
 };
 
 tCommMessage msgDirection =
@@ -110,7 +117,72 @@ tCommMessage msgDirection =
 	COMM_MAXRETRANSMISSIONS,
 	E_COMM_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_MSG_BUS_UART
+};
+
+tCommMessage msgW1 =
+{
+	{
+		E_COMM_MSG_W1_ID,
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_COMM_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_COMM_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_MSG_BUS_CAN
+};
+
+tCommMessage msgW2 =
+{
+	{
+		E_COMM_MSG_W2_ID,
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_COMM_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_COMM_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_MSG_BUS_CAN
+};
+
+tCommMessage msgW3 =
+{
+	{
+		E_COMM_MSG_W3_ID,
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_COMM_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_COMM_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_MSG_BUS_CAN
+};
+
+tCommMessage msgW4 =
+{
+	{
+		E_COMM_MSG_W4_ID,
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_COMM_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_COMM_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_COMM_MSG_TYPE_CYCLIC,
+	E_COMM_MSG_BUS_CAN
 };
 
 #if NODE==CONTROL
@@ -437,11 +509,12 @@ const eCommStatus comm_readMessageFromBuffer(tCommMessage * arg_message)
 	tCommMessageBody loc_messageBody;
 	eCommStatus loc_validId = E_COMM_STATUS_FAILED;
 	eCommStatus loc_result = E_COMM_STATUS_FAILED;
-	eUartStatus loc_uartResult = E_UART_STATUS_FAILED;
+	eBusStatus loc_busResult = E_BUS_STATUS_FAILED;
 
 	/*Read 1 byte to check if it is really the beginning of a message*/
-	loc_uartResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
-	while (loc_uartResult == E_UART_STATUS_OK)
+	loc_busResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
+	loc_busResult = bus_readFromBuffer();
+	while (loc_busResult == E_UART_STATUS_OK)
 	{
 		loc_totalBytesRead = 0U;
 		loc_validId = comm_checkMessageId(loc_messageBody.messageId);

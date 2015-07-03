@@ -16,7 +16,7 @@
 #include "pid/pid.h"
 #include "comm/comm.h"
 #include "handshake/handshake.h"
-#include "uart_interface/uart_interface.h"
+#include "bus_interface/uart_interface.h"
 
 void delay(int milliseconds);
 
