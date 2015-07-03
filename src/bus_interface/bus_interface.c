@@ -215,8 +215,12 @@ eBusStatus bus_getDataAvailable(eBusType arg_busType)
 	{
 		case E_BUS_TYPE_UART:
 		{
+#if !defined(_WIN32)
 			const eUartStatus loc_sts_uart = uart_getDataAvailable();
 			loc_result = (loc_sts_uart == E_UART_STATUS_OK) ? E_BUS_STATUS_OK : E_BUS_STATUS_FAILED;
+#else
+			loc_result = E_BUS_STATUS_OK;
+#endif
 			break;
 		}
 		case E_BUS_TYPE_CAN:

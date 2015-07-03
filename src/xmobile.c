@@ -36,14 +36,14 @@ int main(void) {
 //		printf("out: %i \n", (int)(pid(88, 90)));
 //	}
 
-//	comm_init();
-	uart_init();
+	comm_init();
+//	uart_init();
 	handshake_init();
 
 	while (1)
 	{
-//		comm_cyclic();
 		handshake_cyclic();
+		comm_cyclic();
 		delay(10);
 	}
 

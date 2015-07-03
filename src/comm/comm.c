@@ -51,12 +51,6 @@ static void comm_writeMessageToBus(const tMessage * const arg_message);
 static void comm_transmitMessage(tMessage * const arg_message);
 static const eCommStatus comm_checkMessageId(const uint8_t arg_messageId);
 
-#if !defined(WIN32)
-static eCommStatus comm_dataAvailable = E_COMM_STATUS_FAILED;
-#else
-static eCommStatus comm_dataAvailable = E_COMM_STATUS_OK;
-#endif
-
 tMessage msgControl =
 {
 	{
@@ -386,7 +380,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 
 void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 {
-	const eCommStatus loc_dataAvailable = comm_dataAvailable;
+	const eCommStatus loc_dataAvailable = bus_getDataAvailable(arg_busType);
 	tMessage loc_receivedMessage;
 
 	if (loc_dataAvailable == E_COMM_STATUS_OK)
@@ -457,9 +451,7 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 			}
 		}
 	}
-#if !defined(WIN32)
-	comm_dataAvailable = E_COMM_STATUS_FAILED;
-#endif
+	bus_setDataAvailable(arg_busType);
 }
 
 eCommStatus comm_checkCRC(const tMessageBody * const arg_messageBody)

@@ -225,6 +225,7 @@ void handshake_receiveMessages(void)
 						tHandshakeMessage loc_message;
 						loc_message.body.messageId = (loc_receivedMessageId | HANDSHAKE_ACK);
 						handshake_writeMessageToBuffer(&loc_message);
+						receiveMessage->state = E_HANDSHAKE_STATE_END_SUCCESS;
 
 						/* If the message received was a handshake request, activate the response*/
 						if (loc_receivedMessageId == E_HANDSHAKE_RQST_ID)
