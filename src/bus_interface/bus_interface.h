@@ -30,7 +30,7 @@ SOFTWARE.*/
 #endif
 
 #ifndef COMMTYPES_H
-	#include "../comm/comm_types.h"
+	#include "../comm/message.h"
 #endif
 
 typedef enum
@@ -41,14 +41,14 @@ typedef enum
 
 typedef enum
 {
-	E_BUS_TYPE_UART = E_COMM_MSG_BUS_UART,
-	E_BUS_TYPE_CAN = E_COMM_MSG_BUS_CAN
+	E_BUS_TYPE_UART = E_MSG_BUS_UART,
+	E_BUS_TYPE_CAN = E_MSG_BUS_CAN
 } eBusType;
 
 eBusStatus bus_init(eBusType arg_busType);
 void bus_end(eBusType arg_busType);
-eBusStatus bus_writeToBuffer(const eBusType arg_busType, const tCommMessageBody * const arg_messageBody);
-eBusStatus bus_readFromBuffer(const eBusType arg_busType, tCommMessageBody * const arg_messageBody);
+eBusStatus bus_writeMessageToBuffer(const eBusType arg_busType, const tMessageBody * const arg_messageBody);
+eBusStatus bus_readMessageFromBuffer(const eBusType arg_busType, tMessageBody * const arg_messageBody);
 void bus_setDataAvailable(eBusType arg_busType);
 void bus_clearDataAvailable(eBusType arg_busType);
 eBusStatus bus_getDataAvailable(eBusType arg_busType);

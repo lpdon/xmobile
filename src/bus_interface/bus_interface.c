@@ -32,6 +32,14 @@ SOFTWARE.*/
 	#include "can_interface.h"
 #endif
 
+#ifndef MESSAGE_H
+	#include "../comm/message.h"
+#endif
+
+#include <string.h>
+
+static const eBusStatus bus_checkMessageId(const uint8_t arg_messageId);
+
 eBusStatus bus_init(eBusType arg_busType)
 {
 	switch (arg_busType)
@@ -76,7 +84,7 @@ void bus_end(eBusType arg_busType)
 	}
 }
 
-eBusStatus bus_writeToBuffer(const eBusType arg_busType, const tCommMessageBody * const arg_messageBody)
+eBusStatus bus_writeMessageToBuffer(const eBusType arg_busType, const tMessageBody * const arg_messageBody)
 {
 	eBusStatus loc_result = E_BUS_STATUS_FAILED;
 
@@ -84,13 +92,13 @@ eBusStatus bus_writeToBuffer(const eBusType arg_busType, const tCommMessageBody 
 	{
 		case E_BUS_TYPE_UART:
 		{
-			const eUartStatus loc_sts_uart = uart_writeToBuffer((uint8_t *)arg_messageBody, sizeof(tCommMessageBody));
+			const eUartStatus loc_sts_uart = uart_writeToBuffer((uint8_t *)arg_messageBody, sizeof(tMessageBody));
 			loc_result = (loc_sts_uart == E_UART_STATUS_OK) ? E_BUS_STATUS_OK : E_BUS_STATUS_FAILED;
 			break;
 		}
 		case E_BUS_TYPE_CAN:
 		{
-			const eCanStatus loc_sts_can = can_writeToBuffer(arg_messageBody->messageId, arg_messageBody->data.rawData, sizeof(uCommMessageData));
+			const eCanStatus loc_sts_can = can_writeToBuffer(arg_messageBody->messageId, arg_messageBody->data.rawData, sizeof(uMessageData));
 			loc_result = (loc_sts_can == E_CAN_STATUS_OK) ? E_BUS_STATUS_OK : E_BUS_STATUS_FAILED;
 			break;
 		}
@@ -103,21 +111,48 @@ eBusStatus bus_writeToBuffer(const eBusType arg_busType, const tCommMessageBody 
 	return loc_result;
 }
 
-eBusStatus bus_readFromBuffer(const eBusType arg_busType, tCommMessageBody * const arg_messageBody)
+eBusStatus bus_readMessageFromBuffer(const eBusType arg_busType, tMessageBody * const arg_messageBody)
 {
 	eBusStatus loc_result = E_BUS_STATUS_FAILED;
+	tMessageBody loc_messageBody;
 
 	switch (arg_busType)
 	{
 		case E_BUS_TYPE_UART:
 		{
-			const eUartStatus loc_sts_uart = uart_readFromBuffer((uint8_t *)arg_messageBody, sizeof(tCommMessageBody));
-			loc_result = (loc_sts_uart == E_UART_STATUS_OK) ? E_BUS_STATUS_OK : E_BUS_STATUS_FAILED;
+			uint16_t loc_totalBytesRead = 0U;
+			eBusStatus loc_validId = E_BUS_STATUS_FAILED;
+			eUartStatus loc_sts_uart = E_UART_STATUS_FAILED;
+
+			/*Read 1 byte to check if it is really the beginning of a message*/
+			loc_sts_uart = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
+			while(loc_sts_uart == E_UART_STATUS_OK)
+			{
+				loc_totalBytesRead = 0U;
+				loc_validId = bus_checkMessageId(loc_messageBody.messageId);
+
+				if (loc_validId == E_BUS_STATUS_OK)
+				{
+					loc_totalBytesRead++;
+					loc_sts_uart = uart_readFromBuffer(loc_messageBody.data.rawData, sizeof(uMessageData));
+					loc_totalBytesRead += (loc_sts_uart == E_UART_STATUS_OK) ? sizeof(uMessageData) : 0U;
+					loc_sts_uart = uart_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
+					loc_totalBytesRead += (loc_sts_uart == E_UART_STATUS_OK) ? sizeof(uint8_t) : 0U;
+
+					if (loc_totalBytesRead == sizeof(tMessageBody))
+					{
+						memcpy(arg_messageBody, &loc_messageBody, sizeof(tMessageBody));
+						loc_result = E_BUS_STATUS_OK;
+					}
+				}
+
+				loc_sts_uart = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
+			}
 			break;
 		}
 		case E_BUS_TYPE_CAN:
 		{
-			const eCanStatus loc_sts_can = can_readFromBuffer(arg_messageBody->messageId, arg_messageBody->data.rawData, sizeof(uCommMessageData));
+			const eCanStatus loc_sts_can = can_readFromBuffer(arg_messageBody->messageId, arg_messageBody->data.rawData, sizeof(uMessageData));
 			loc_result = (loc_sts_can == E_CAN_STATUS_OK) ? E_BUS_STATUS_OK : E_BUS_STATUS_FAILED;
 			break;
 		}
@@ -188,6 +223,34 @@ eBusStatus bus_getDataAvailable(eBusType arg_busType)
 		{
 			const eCanStatus loc_sts_can = can_getDataAvailable();
 			loc_result = (loc_sts_can == E_CAN_STATUS_OK) ? E_BUS_STATUS_OK : E_BUS_STATUS_FAILED;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	return loc_result;
+}
+
+const eBusStatus bus_checkMessageId(const uint8_t arg_messageId)
+{
+	const uint8_t loc_maskedMessageId = arg_messageId & MSG_IDMASK;
+	eBusStatus loc_result = E_BUS_STATUS_FAILED;
+
+	switch ((eMessageId)loc_maskedMessageId)
+	{
+		case E_MSG_CONTROL_ID:
+		case E_MSG_CURRENT_ID:
+		case E_MSG_DIR_ID:
+		case E_MSG_SUSP_ID:
+		case E_MSG_W1_ID:
+		case E_MSG_W2_ID:
+		case E_MSG_W3_ID:
+		case E_MSG_W4_ID:
+		{
+			loc_result = E_BUS_STATUS_OK;
 			break;
 		}
 		default:

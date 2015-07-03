@@ -29,33 +29,34 @@ SOFTWARE.*/
 	#include "PE_Types.h"
 #endif
 
-#ifndef COMMTYPES_H
-	#include "comm_types.h"
+#ifndef MESSAGE_H
+	#include "message.h"
 #endif
-
-#define COMM_ACK                   0x01U
-#define COMM_NACK                  0x02U
-#define COMM_IDMASK                0xF0U
-#define COMM_REPLYMASK             (COMM_ACK | COMM_NACK)
 
 #define COMM_TIMEOUT                 10U
 #define COMM_MAXRETRANSMISSIONS       3U
 
-extern tCommMessage msgCurrent;
-extern tCommMessage msgSuspension;
-extern tCommMessage msgDirection;
-extern tCommMessage msgW1;
-extern tCommMessage msgW2;
-extern tCommMessage msgW3;
-extern tCommMessage msgW4;
+typedef enum
+{
+	E_COMM_STATUS_OK,
+	E_COMM_STATUS_FAILED
+} eCommStatus;
 
-void comm_setData(eCommMessageId arg_id, const void * const arg_data);
+extern tMessage msgCurrent;
+extern tMessage msgSuspension;
+extern tMessage msgDirection;
+extern tMessage msgW1;
+extern tMessage msgW2;
+extern tMessage msgW3;
+extern tMessage msgW4;
+
+void comm_setData(eMessageId arg_id, const void * const arg_data);
 
 void comm_init(void);
 void comm_end(void);
 void comm_cyclic(void);
 
 //void comm_receiveMessages(void);
-void comm_kickoutMessage(tCommMessage * const arg_message);
+void comm_kickoutMessage(tMessage * const arg_message);
 
 #endif

@@ -45,10 +45,10 @@ SOFTWARE.*/
 static void comm_initTransmissionCyclicMessages(void);
 static void comm_cyclicReception(void);
 static void comm_cyclicTransmission(void);
-static void comm_receiveMessages(void);
-static const eCommStatus comm_readMessageFromBuffer(tCommMessage * const arg_message);
-static void comm_writeMessageToBuffer(const tCommMessage * const arg_message);
-static void comm_transmitMessage(tCommMessage * const arg_message);
+static void comm_receiveMessagesFromBus(const eMessageBus arg_busType);
+static const eCommStatus comm_readMessageFromBus(const eMessageBus arg_busType, tMessage * const arg_message);
+static void comm_writeMessageToBus(const tMessage * const arg_message);
+static void comm_transmitMessage(tMessage * const arg_message);
 static const eCommStatus comm_checkMessageId(const uint8_t arg_messageId);
 
 #if !defined(WIN32)
@@ -57,142 +57,142 @@ static eCommStatus comm_dataAvailable = E_COMM_STATUS_FAILED;
 static eCommStatus comm_dataAvailable = E_COMM_STATUS_OK;
 #endif
 
-tCommMessage msgControl =
+tMessage msgControl =
 {
 	{
-		E_COMM_MSG_CONTROL_ID,
+		E_MSG_CONTROL_ID,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
-	E_COMM_MSG_STATE_INIT,
+	E_MSG_STATE_INIT,
 	COMM_TIMEOUT,
 	COMM_MAXRETRANSMISSIONS,
-	E_COMM_MSG_STATUS_INACTIVE,
+	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_MSG_BUS_UART
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_UART
 };
 
-tCommMessage msgCurrent =
+tMessage msgCurrent =
 {
 	{
-		E_COMM_MSG_CURRENT_ID,
+		E_MSG_CURRENT_ID,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
-	E_COMM_MSG_STATE_INIT,
+	E_MSG_STATE_INIT,
 	COMM_TIMEOUT,
 	COMM_MAXRETRANSMISSIONS,
-	E_COMM_MSG_STATUS_INACTIVE,
+	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_MSG_BUS_UART
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_UART
 };
 
-tCommMessage msgSuspension =
+tMessage msgSuspension =
 {
 	{
-		E_COMM_MSG_SUSP_ID,
+		E_MSG_SUSP_ID,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
-	E_COMM_MSG_STATE_INIT,
+	E_MSG_STATE_INIT,
 	COMM_TIMEOUT,
 	COMM_MAXRETRANSMISSIONS,
-	E_COMM_MSG_STATUS_INACTIVE,
+	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_MSG_BUS_UART
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_UART
 };
 
-tCommMessage msgDirection =
+tMessage msgDirection =
 {
 	{
-		E_COMM_MSG_DIR_ID,
+		E_MSG_DIR_ID,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
-	E_COMM_MSG_STATE_INIT,
+	E_MSG_STATE_INIT,
 	COMM_TIMEOUT,
 	COMM_MAXRETRANSMISSIONS,
-	E_COMM_MSG_STATUS_INACTIVE,
+	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_MSG_BUS_UART
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_UART
 };
 
-tCommMessage msgW1 =
+tMessage msgW1 =
 {
 	{
-		E_COMM_MSG_W1_ID,
+		E_MSG_W1_ID,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
-	E_COMM_MSG_STATE_INIT,
+	E_MSG_STATE_INIT,
 	COMM_TIMEOUT,
 	COMM_MAXRETRANSMISSIONS,
-	E_COMM_MSG_STATUS_INACTIVE,
+	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_MSG_BUS_CAN
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN
 };
 
-tCommMessage msgW2 =
+tMessage msgW2 =
 {
 	{
-		E_COMM_MSG_W2_ID,
+		E_MSG_W2_ID,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
-	E_COMM_MSG_STATE_INIT,
+	E_MSG_STATE_INIT,
 	COMM_TIMEOUT,
 	COMM_MAXRETRANSMISSIONS,
-	E_COMM_MSG_STATUS_INACTIVE,
+	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_MSG_BUS_CAN
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN
 };
 
-tCommMessage msgW3 =
+tMessage msgW3 =
 {
 	{
-		E_COMM_MSG_W3_ID,
+		E_MSG_W3_ID,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
-	E_COMM_MSG_STATE_INIT,
+	E_MSG_STATE_INIT,
 	COMM_TIMEOUT,
 	COMM_MAXRETRANSMISSIONS,
-	E_COMM_MSG_STATUS_INACTIVE,
+	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_MSG_BUS_CAN
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN
 };
 
-tCommMessage msgW4 =
+tMessage msgW4 =
 {
 	{
-		E_COMM_MSG_W4_ID,
+		E_MSG_W4_ID,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
-	E_COMM_MSG_STATE_INIT,
+	E_MSG_STATE_INIT,
 	COMM_TIMEOUT,
 	COMM_MAXRETRANSMISSIONS,
-	E_COMM_MSG_STATUS_INACTIVE,
+	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_MSG_BUS_CAN
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN
 };
 
 #if NODE==CONTROL
-static tCommMessage * transmitMessages[] =
+static tMessage * transmitMessages[] =
 {
 	&msgControl,
 	NULL
 };
 
-static tCommMessage * receiveMessages[] =
+static tMessage * receiveMessages[] =
 {
 	&msgCurrent,
 //	&msgSuspension,
@@ -200,29 +200,29 @@ static tCommMessage * receiveMessages[] =
 	NULL
 };
 #else
-static tCommMessage * transmitMessages[] =
+static tMessage * transmitMessages[] =
 {
 	&msgCurrent,
 	NULL
 };
 
-static tCommMessage * receiveMessages[] =
+static tMessage * receiveMessages[] =
 {
 	&msgControl,
 	NULL
 };
 #endif
 
-void comm_setData(eCommMessageId arg_id, const void * const arg_data)
+void comm_setData(eMessageId arg_id, const void * const arg_data)
 {
-	tCommMessage ** pMessage = transmitMessages;
-	const eCommMessageId loc_id = (*pMessage)->body.messageId;
+	tMessage ** pMessage = transmitMessages;
+	const eMessageId loc_id = (*pMessage)->body.messageId;
 
 	while (*pMessage != NULL)
 	{
 		if (loc_id == arg_id)
 		{
-			memcpy((*pMessage)->body.data.rawData, arg_data, COMM_DATASIZE);
+			memcpy((*pMessage)->body.data.rawData, arg_data, MSG_DATASIZE);
 			break;
 		}
 	}
@@ -231,22 +231,24 @@ void comm_setData(eCommMessageId arg_id, const void * const arg_data)
 void comm_init(void)
 {
 	comm_initTransmissionCyclicMessages();
-	uart_init();
+	bus_init(E_BUS_TYPE_UART);
+	bus_init(E_BUS_TYPE_CAN);
 }
 
 void comm_end(void)
 {
-	uart_end();
+	bus_end(E_BUS_TYPE_UART);
+	bus_end(E_BUS_TYPE_CAN);
 }
 
 void comm_initTransmissionCyclicMessages(void)
 {
-	tCommMessage ** pMessage = transmitMessages;
+	tMessage ** pMessage = transmitMessages;
 
 	while (*pMessage != NULL)
 	{
-		const eCommMessageType loc_type = (*pMessage)->type;
-		(*pMessage)->status = (loc_type == E_COMM_MSG_TYPE_CYCLIC) ? E_COMM_MSG_STATUS_ACTIVE : E_COMM_MSG_STATUS_INACTIVE;
+		const eMessageType loc_type = (*pMessage)->type;
+		(*pMessage)->status = (loc_type == E_MSG_TYPE_CYCLIC) ? E_MSG_STATUS_ACTIVE : E_MSG_STATUS_INACTIVE;
 		pMessage++;
 	}
 }
@@ -262,12 +264,13 @@ void comm_cyclic(void)
 
 void comm_cyclicReception(void)
 {
-	comm_receiveMessages();
+	comm_receiveMessagesFromBus(E_BUS_TYPE_UART);
+	comm_receiveMessagesFromBus(E_BUS_TYPE_CAN);
 }
 
 void comm_cyclicTransmission(void)
 {
-	tCommMessage ** pMessage = transmitMessages;
+	tMessage ** pMessage = transmitMessages;
 
 	while (*pMessage != NULL)
 	{
@@ -276,43 +279,43 @@ void comm_cyclicTransmission(void)
 	}
 }
 
-void comm_transmitMessage(tCommMessage * const arg_message)
+void comm_transmitMessage(tMessage * const arg_message)
 {
-	const eCommMessageId loc_messageId = arg_message->body.messageId;
-	const eCommMessageType loc_type = arg_message->type;
+	const eMessageId loc_messageId = arg_message->body.messageId;
+	const eMessageType loc_type = arg_message->type;
 
-	eCommMessageState loc_state = arg_message->state;
+	eMessageState loc_state = arg_message->state;
 	uint8_t loc_timeout = arg_message->timeout;
 	uint8_t loc_retransmissions = arg_message->retransmissions;
-	eCommMessageStatus loc_messageStatus = arg_message->status;
+	eMessageStatus loc_messageStatus = arg_message->status;
 	eCommStatus loc_ack = arg_message->ack;
 
-	tCommMessage loc_message;
+	tMessage loc_message;
 	uint8_t loc_crc;
 
 	switch (loc_state)
 	{
-		case E_COMM_MSG_STATE_INIT:
+		case E_MSG_STATE_INIT:
 		{
 			/*Reset retransmissions*/
 			loc_timeout = COMM_TIMEOUT;
 
-			if (loc_messageStatus == E_COMM_MSG_STATUS_ACTIVE)
+			if (loc_messageStatus == E_MSG_STATUS_ACTIVE)
 			{
-				loc_state = E_COMM_MSG_STATE_TX_READY;
+				loc_state = E_MSG_STATE_TX_READY;
 			}
 
 			break;
 		}
-		case E_COMM_MSG_STATE_TX_READY:
+		case E_MSG_STATE_TX_READY:
 		{
 			/*If the UART buffer is available, start transmission*/
 //#if defined(WIN32)
-			loc_state = E_COMM_MSG_STATE_TRANSMIT;
+			loc_state = E_MSG_STATE_TRANSMIT;
 //#endif
 			break;
 		}
-		case E_COMM_MSG_STATE_TRANSMIT:
+		case E_MSG_STATE_TRANSMIT:
 		{
 			/*Reset timeout*/
 			loc_timeout = COMM_TIMEOUT;
@@ -328,12 +331,12 @@ void comm_transmitMessage(tCommMessage * const arg_message)
 			loc_message.body.crc = loc_crc;
 
 			/*Write message to UART buffer*/
-			comm_writeMessageToBuffer(&loc_message);
+			comm_writeMessageToBus(&loc_message);
 
-			loc_state = E_COMM_MSG_STATE_WAITFORACK;
+			loc_state = E_MSG_STATE_WAITFORACK;
 			break;
 		}
-		case E_COMM_MSG_STATE_WAITFORACK:
+		case E_MSG_STATE_WAITFORACK:
 		{
 			if (loc_timeout > 0)
 			{
@@ -341,15 +344,15 @@ void comm_transmitMessage(tCommMessage * const arg_message)
 				if (loc_ack == E_COMM_STATUS_OK)
 				{
 					/*If the message is cyclic it can be prepared to be transmitted once again*/
-					if (loc_type == E_COMM_MSG_TYPE_CYCLIC)
+					if (loc_type == E_MSG_TYPE_CYCLIC)
 					{
-						loc_state = E_COMM_MSG_STATE_TX_READY;
+						loc_state = E_MSG_STATE_TX_READY;
 					}
 					/*Otherwise, the next transmission must be triggered*/
 					else
 					{
-						loc_state = E_COMM_MSG_STATE_INIT;
-						loc_messageStatus = E_COMM_MSG_STATUS_INACTIVE;
+						loc_state = E_MSG_STATE_INIT;
+						loc_messageStatus = E_MSG_STATUS_INACTIVE;
 					}
 				}
 
@@ -358,17 +361,17 @@ void comm_transmitMessage(tCommMessage * const arg_message)
 			/*Timeout expired*/
 			else
 			{
-				loc_state = (loc_retransmissions > 0U) ? E_COMM_MSG_STATE_TRANSMIT : E_COMM_MSG_STATE_END;
+				loc_state = (loc_retransmissions > 0U) ? E_MSG_STATE_TRANSMIT : E_MSG_STATE_END;
 				loc_retransmissions--;
 			}
 			break;
 		}
 		default:
-		case E_COMM_MSG_STATE_END:
+		case E_MSG_STATE_END:
 		{
 			//TODO TRM Shutdown :)
 //#if defined(WIN32)
-			loc_state = E_COMM_MSG_STATE_INIT;
+			loc_state = E_MSG_STATE_INIT;
 //#endif
 			break;
 		}
@@ -381,70 +384,75 @@ void comm_transmitMessage(tCommMessage * const arg_message)
 	arg_message->ack = loc_ack;
 }
 
-void comm_receiveMessages(void)
+void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 {
 	const eCommStatus loc_dataAvailable = comm_dataAvailable;
-	tCommMessage loc_receivedMessage;
+	tMessage loc_receivedMessage;
 
 	if (loc_dataAvailable == E_COMM_STATUS_OK)
 	{
-		while (comm_readMessageFromBuffer(&loc_receivedMessage) == E_COMM_STATUS_OK)
+		while (comm_readMessageFromBus(arg_busType, &loc_receivedMessage) == E_COMM_STATUS_OK)
 		{
-			tCommMessageBody loc_receivedMessageBody = loc_receivedMessage.body;
-			eCommMessageId loc_receivedMessageId = loc_receivedMessageBody.messageId;
+			tMessageBody loc_receivedMessageBody = loc_receivedMessage.body;
+			eMessageId loc_receivedMessageId = loc_receivedMessageBody.messageId;
+			eCommStatus loc_checkId = comm_checkMessageId(loc_receivedMessageId);
 
-			/*Detect if the message received is a reply*/
-			if ((loc_receivedMessageId & COMM_REPLYMASK) != 0U)
+			/*Check if message is transmitted/received by node*/
+			if (loc_checkId == E_COMM_STATUS_OK)
 			{
-				tCommMessage ** pMessage = transmitMessages;
-
-				while (*pMessage != NULL)
+				/*Detect if the message received is a reply*/
+				if ((loc_receivedMessageId & MSG_REPLYMASK) != 0U)
 				{
-					const eCommMessageId loc_maskedMessageId = loc_receivedMessageId & COMM_IDMASK;
-					if ((*pMessage)->body.messageId == loc_maskedMessageId)
+					tMessage ** pMessage = transmitMessages;
+
+					while (*pMessage != NULL)
 					{
-						if (loc_receivedMessageId & COMM_ACK)
+						const eMessageId loc_maskedMessageId = loc_receivedMessageId & MSG_IDMASK;
+						if ((*pMessage)->body.messageId == loc_maskedMessageId)
 						{
-							(*pMessage)->ack = E_COMM_STATUS_OK;
+							if (loc_receivedMessageId & MSG_ACK)
+							{
+								(*pMessage)->ack = E_COMM_STATUS_OK;
+							}
+							break;
 						}
-						break;
+						pMessage++;
 					}
-					pMessage++;
 				}
-			}
-			else
-			{
-				tCommMessage ** pMessage = receiveMessages;
-
-				while (*pMessage != NULL)
+				else
 				{
-					if ((*pMessage)->body.messageId == loc_receivedMessageId)
+					tMessage ** pMessage = receiveMessages;
+
+					while (*pMessage != NULL)
 					{
-						const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
-																 sizeof(uCommMessageData),
-																 loc_receivedMessageBody.crc);
-
-						if (loc_checkCRC == E_CRC_STATUS_OK)
+						if ((*pMessage)->body.messageId == loc_receivedMessageId)
 						{
-							/* Send ack. Content of the message is not important */
-							tCommMessage loc_message;
-							loc_message.body.messageId = (loc_receivedMessageId | COMM_ACK);
-							comm_writeMessageToBuffer(&loc_message);
+							const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
+																	 sizeof(uMessageData),
+																	 loc_receivedMessageBody.crc);
 
-							/* Write valid values */
-							(*pMessage)->body = loc_receivedMessageBody;
-						}
-						else
-						{
-							/* Send nack. Content of the message is not important */
-							tCommMessage loc_message;
-							loc_message.body.messageId = (loc_receivedMessageId | COMM_NACK);
-							comm_writeMessageToBuffer(&loc_message);
-						}
+							if (loc_checkCRC == E_CRC_STATUS_OK)
+							{
+								/* Send ack. Content of the message is not important */
+								tMessage loc_message;
+								loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
+								comm_writeMessageToBus(&loc_message);
 
-						break;
+								/* Write valid values */
+								(*pMessage)->body = loc_receivedMessageBody;
+							}
+							else
+							{
+								/* Send nack. Content of the message is not important */
+								tMessage loc_message;
+								loc_message.body.messageId = (loc_receivedMessageId | MSG_NACK);
+								comm_writeMessageToBus(&loc_message);
+							}
+
+							break;
+						}
+						pMessage++;
 					}
-					pMessage++;
 				}
 			}
 		}
@@ -454,27 +462,27 @@ void comm_receiveMessages(void)
 #endif
 }
 
-eCommStatus comm_checkCRC(const tCommMessageBody * const arg_messageBody)
+eCommStatus comm_checkCRC(const tMessageBody * const arg_messageBody)
 {
 	const uint8_t loc_receivedCRC = arg_messageBody->crc;
-	const uint8_t loc_calculatedCRC = crc8(arg_messageBody->data.rawData, sizeof(uCommMessageData));
+	const uint8_t loc_calculatedCRC = crc8(arg_messageBody->data.rawData, sizeof(uMessageData));
 	const eCommStatus loc_result = (loc_receivedCRC == loc_calculatedCRC) ? E_COMM_STATUS_OK : E_COMM_STATUS_FAILED;
 
 	return loc_result;
 }
 
-void comm_kickoutMessage(tCommMessage * const arg_message)
+void comm_kickoutMessage(tMessage * const arg_message)
 {
-	const eCommMessageStatus loc_status = arg_message->status;
-	arg_message->status = (loc_status == E_COMM_MSG_STATUS_INACTIVE) ? E_COMM_MSG_STATUS_ACTIVE : E_COMM_MSG_STATUS_INACTIVE;
+	const eMessageStatus loc_status = arg_message->status;
+	arg_message->status = (loc_status == E_MSG_STATUS_INACTIVE) ? E_MSG_STATUS_ACTIVE : E_MSG_STATUS_INACTIVE;
 }
 
 const eCommStatus comm_checkMessageId(const uint8_t arg_messageId)
 {
 	eCommStatus loc_result = E_COMM_STATUS_FAILED;
 
-	tCommMessage ** pMessage = receiveMessages;
-	const uint8_t loc_maskedMessageId = arg_messageId & COMM_IDMASK;
+	tMessage ** pMessage = receiveMessages;
+	const uint8_t loc_maskedMessageId = arg_messageId & MSG_IDMASK;
 
 	while (*pMessage != NULL)
 	{
@@ -503,47 +511,13 @@ const eCommStatus comm_checkMessageId(const uint8_t arg_messageId)
 	return loc_result;
 }
 
-const eCommStatus comm_readMessageFromBuffer(tCommMessage * arg_message)
+const eCommStatus comm_readMessageFromBus(const eMessageBus arg_busType, tMessage * arg_message)
 {
-	uint16_t loc_totalBytesRead = 0U;
-	tCommMessageBody loc_messageBody;
-	eCommStatus loc_validId = E_COMM_STATUS_FAILED;
-	eCommStatus loc_result = E_COMM_STATUS_FAILED;
-	eBusStatus loc_busResult = E_BUS_STATUS_FAILED;
-
-	/*Read 1 byte to check if it is really the beginning of a message*/
-	loc_busResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
-	loc_busResult = bus_readFromBuffer();
-	while (loc_busResult == E_UART_STATUS_OK)
-	{
-		loc_totalBytesRead = 0U;
-		loc_validId = comm_checkMessageId(loc_messageBody.messageId);
-
-		if (loc_validId == E_COMM_STATUS_OK)
-		{
-			loc_totalBytesRead++;
-			loc_uartResult = uart_readFromBuffer(loc_messageBody.data.rawData, sizeof(uCommMessageData));
-			loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uCommMessageData) : 0U;
-			loc_uartResult = uart_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
-			loc_totalBytesRead += (loc_uartResult == E_UART_STATUS_OK) ? sizeof(uint8_t) : 0U;
-
-			if (loc_totalBytesRead == sizeof(tCommMessageBody))
-			{
-				memcpy(arg_message, &loc_messageBody, sizeof(tCommMessageBody));
-				loc_result = E_COMM_STATUS_OK;
-			}
-		}
-
-		loc_uartResult = uart_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
-	}
-
+	eBusStatus loc_result = bus_readMessageFromBuffer(arg_busType, &arg_message->body);
 	return loc_result;
 }
 
-void comm_writeMessageToBuffer(const tCommMessage * const arg_message)
+void comm_writeMessageToBus(const tMessage * const arg_message)
 {
-	uint8_t loc_buffer[sizeof(tCommMessageBody)];
-
-	memcpy(loc_buffer, arg_message, sizeof(tCommMessageBody));
-	uart_writeToBuffer(loc_buffer, sizeof(tCommMessageBody));
+	bus_writeMessageToBuffer(arg_message->bus, &arg_message->body);
 }

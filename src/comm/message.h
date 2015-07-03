@@ -20,96 +20,101 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 
-#ifndef COMMTYPES_H
-#define COMMTYPES_H
+#ifndef MESSAGE_H
+#define MESSAGE_H
 
-#define COMM_DATASIZE                 8U
+#define MSG_DATASIZE                 8U
 
-typedef enum
-{
-	E_COMM_STATUS_OK,
-	E_COMM_STATUS_FAILED
-} eCommStatus;
-
-typedef enum
-{
-	E_COMM_MSG_CONTROL_ID =        0x10U,
-	E_COMM_MSG_CURRENT_ID =        0x20U,
-	E_COMM_MSG_SUSP_ID    =        0x30U,
-	E_COMM_MSG_DIR_ID     =        0x40U,
-	E_COMM_MSG_W1_ID      =        0x50U,
-	E_COMM_MSG_W2_ID      =        0x60U,
-	E_COMM_MSG_W3_ID      =        0x70U,
-	E_COMM_MSG_W4_ID      =        0x80U
-} eCommMessageId;
+#define MSG_ACK                   0x01U
+#define MSG_NACK                  0x02U
+#define MSG_IDMASK                0xF0U
+#define MSG_REPLYMASK             (MSG_ACK | MSG_NACK)
 
 typedef enum
 {
-	E_COMM_MSG_STATE_INIT,
-	E_COMM_MSG_STATE_TX_READY,
-	E_COMM_MSG_STATE_TRANSMIT,
-	E_COMM_MSG_STATE_WAITFORACK,
-	E_COMM_MSG_STATE_END
-} eCommMessageState;
+	E_MSG_ACK_OK,
+	E_MSG_ACK_FAILED
+} eMessageAck;
 
 typedef enum
 {
-	E_COMM_MSG_STATUS_ACTIVE,
-	E_COMM_MSG_STATUS_INACTIVE
-} eCommMessageStatus;
+	E_MSG_CONTROL_ID =        0x10U,
+	E_MSG_CURRENT_ID =        0x20U,
+	E_MSG_SUSP_ID    =        0x30U,
+	E_MSG_DIR_ID     =        0x40U,
+	E_MSG_W1_ID      =        0x50U,
+	E_MSG_W2_ID      =        0x60U,
+	E_MSG_W3_ID      =        0x70U,
+	E_MSG_W4_ID      =        0x80U
+} eMessageId;
 
 typedef enum
 {
-	E_COMM_MSG_TYPE_CYCLIC,
-	E_COMM_MSG_TYPE_TRIGGERED
-} eCommMessageType;
+	E_MSG_STATE_INIT,
+	E_MSG_STATE_TX_READY,
+	E_MSG_STATE_TRANSMIT,
+	E_MSG_STATE_WAITFORACK,
+	E_MSG_STATE_END
+} eMessageState;
 
 typedef enum
 {
-	E_COMM_MSG_BUS_UART,
-	E_COMM_MSG_BUS_CAN
-} eCommMessageBus;
+	E_MSG_STATUS_ACTIVE,
+	E_MSG_STATUS_INACTIVE
+} eMessageStatus;
+
+typedef enum
+{
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_TYPE_TRIGGERED
+} eMessageType;
+
+typedef enum
+{
+	E_MSG_BUS_UART,
+	E_MSG_BUS_CAN
+} eMessageBus;
 
 typedef struct
 {
 	uint16_t current[4];
-} tCommCurrentData;
+} tMessageCurrentData;
 
 typedef struct
 {
 	uint8_t suspension[8];
-} tCommSuspensionData;
+} tMessageSuspensionData;
 
 typedef struct
 {
 	uint8_t direction[8];
-} tCommDirectionData;
+} tMessageDirectionData;
 
 typedef union
 {
-	uint8_t rawData[COMM_DATASIZE];
+	uint8_t rawData[MSG_DATASIZE];
 //	tCommCurrentData currentData;
 //	tCommSuspensionData suspensionData;
 //	tCommDirectionData directionData;
-} uCommMessageData;
+} uMessageData;
 
 typedef struct
 {
 	uint8_t messageId;
-	uCommMessageData data;
+	uMessageData data;
 	uint8_t crc;
-} tCommMessageBody;
+} tMessageBody;
 
 typedef struct
 {
-	tCommMessageBody body;
-	eCommMessageState state;
+	tMessageBody body;
+	eMessageState state;
 	uint8_t timeout;
 	uint8_t retransmissions;
-	eCommMessageStatus status;
-	eCommStatus ack;
-	eCommMessageType type;
-	eCommMessageBus bus;
-} tCommMessage;
+	eMessageStatus status;
+	eMessageAck ack;
+	eMessageType type;
+	eMessageBus bus;
+} tMessage;
 
 #endif
