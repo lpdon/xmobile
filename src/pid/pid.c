@@ -70,6 +70,15 @@ int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error)
 	//updates accumulated error
 	arg_pid->iError = arg_pid->iError + arg_error;
 
+	if (arg_pid->iError > PID_IMAXERROR)
+	{
+		arg_pid->iError = PID_IMAXERROR;
+	}
+	else if (arg_pid->iError < -PID_IMAXERROR)
+	{
+		arg_pid->iError = -PID_IMAXERROR;
+	}
+
 	return loc_value;
 }
 

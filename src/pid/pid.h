@@ -30,6 +30,7 @@ SOFTWARE.*/
 #define PID_NUMINST     3
 #define PID_MIN         0
 #define PID_MAX       100
+#define PID_IMAXERROR (PID_MAX >> 3)
 
 typedef struct
 {
