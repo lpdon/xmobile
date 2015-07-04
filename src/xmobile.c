@@ -38,11 +38,11 @@ int main(void) {
 
 	comm_init();
 //	uart_init();
-	handshake_init();
+//	handshake_init();
 
 	while (1)
 	{
-		handshake_cyclic();
+//		handshake_cyclic();
 		comm_cyclic();
 		delay(10);
 	}

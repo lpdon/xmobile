@@ -158,19 +158,18 @@ void handshake_transmitMessage(tHandshakeMessage * const arg_message)
 			/*Write message to UART buffer*/
 			handshake_writeMessageToBuffer(&loc_message);
 
-			loc_state = E_HANDSHAKE_STATE_WAITFORACK;
+			loc_state = E_HANDSHAKE_STATE_WAITFORACKORRESPONSE;
 			break;
 		}
-		case E_HANDSHAKE_STATE_WAITFORACK:
+		case E_HANDSHAKE_STATE_WAITFORACKORRESPONSE:
 		{
-			/*Verify if ACK was received*/
-			if (loc_ack == E_HANDSHAKE_STATUS_OK)
+			if (loc_ack == E_HANDSHAKE_STATUS_OK || handshakeResponse.state == E_HANDSHAKE_STATE_END_SUCCESS)
 			{
 				loc_state = E_HANDSHAKE_STATE_END_SUCCESS;
 			}
 			else
 			{
-				loc_state = (loc_cycleTime > 0) ? E_HANDSHAKE_STATE_WAITFORACK : E_HANDSHAKE_STATE_TRANSMIT;
+				loc_state = (loc_cycleTime > 0) ? E_HANDSHAKE_STATE_WAITFORACKORRESPONSE : E_HANDSHAKE_STATE_TRANSMIT;
 				loc_cycleTime--;
 			}
 			break;
@@ -225,12 +224,18 @@ void handshake_receiveMessages(void)
 						tHandshakeMessage loc_message;
 						loc_message.body.messageId = (loc_receivedMessageId | HANDSHAKE_ACK);
 						handshake_writeMessageToBuffer(&loc_message);
-						receiveMessage->state = E_HANDSHAKE_STATE_END_SUCCESS;
 
-						/* If the message received was a handshake request, activate the response*/
+						/* If the message received was a handshake request, activate the response */
 						if (loc_receivedMessageId == E_HANDSHAKE_RQST_ID)
 						{
+							handshakeRqst.state = E_HANDSHAKE_STATE_END_SUCCESS;
 							handshakeResponse.status = E_HANDSHAKE_MSG_STATUS_ACTIVE;
+						}
+
+						/* If the message received was a handshake response, set the handshake to success */
+						if (loc_receivedMessageId == E_HANDSHAKE_RESPONSE_ID)
+						{
+							handshakeResponse.state = E_HANDSHAKE_STATE_END_SUCCESS;
 						}
 					}
 					else
@@ -306,8 +311,9 @@ eHandshakeStatus handshake_getStatus(void)
 {
 	eHandshakeStatus loc_result = E_HANDSHAKE_STATUS_FAILED;
 
-	if  ((handshakeResponse.state == E_HANDSHAKE_STATE_END_SUCCESS) &&
-		 (handshakeRqst.state == E_HANDSHAKE_STATE_END_SUCCESS))
+	if  (  (handshakeResponse.state == E_HANDSHAKE_STATE_END_SUCCESS)
+		&& (handshakeRqst.state == E_HANDSHAKE_STATE_END_SUCCESS)
+		)
 	{
 		loc_result = E_HANDSHAKE_STATUS_OK;
 	}

@@ -240,7 +240,8 @@ eBusStatus bus_getDataAvailable(eBusType arg_busType)
 
 const eBusStatus bus_checkMessageId(const uint8_t arg_messageId)
 {
-	const uint8_t loc_maskedMessageId = arg_messageId & MSG_IDMASK;
+//	const uint8_t loc_maskedMessageId = arg_messageId & MSG_IDMASK;
+	volatile uint8_t loc_maskedMessageId = arg_messageId & MSG_IDMASK;
 	eBusStatus loc_result = E_BUS_STATUS_FAILED;
 
 	switch ((eMessageId)loc_maskedMessageId)

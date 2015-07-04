@@ -115,69 +115,69 @@ tMessage msgDirection =
 	E_MSG_BUS_UART
 };
 
-tMessage msgW1 =
-{
-	{
-		E_MSG_W1_ID,
-		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
-		0xFFU
-	},
-	E_MSG_STATE_INIT,
-	COMM_TIMEOUT,
-	COMM_MAXRETRANSMISSIONS,
-	E_MSG_STATUS_INACTIVE,
-	E_COMM_STATUS_FAILED,
-	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_CAN
-};
-
-tMessage msgW2 =
-{
-	{
-		E_MSG_W2_ID,
-		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
-		0xFFU
-	},
-	E_MSG_STATE_INIT,
-	COMM_TIMEOUT,
-	COMM_MAXRETRANSMISSIONS,
-	E_MSG_STATUS_INACTIVE,
-	E_COMM_STATUS_FAILED,
-	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_CAN
-};
-
-tMessage msgW3 =
-{
-	{
-		E_MSG_W3_ID,
-		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
-		0xFFU
-	},
-	E_MSG_STATE_INIT,
-	COMM_TIMEOUT,
-	COMM_MAXRETRANSMISSIONS,
-	E_MSG_STATUS_INACTIVE,
-	E_COMM_STATUS_FAILED,
-	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_CAN
-};
-
-tMessage msgW4 =
-{
-	{
-		E_MSG_W4_ID,
-		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
-		0xFFU
-	},
-	E_MSG_STATE_INIT,
-	COMM_TIMEOUT,
-	COMM_MAXRETRANSMISSIONS,
-	E_MSG_STATUS_INACTIVE,
-	E_COMM_STATUS_FAILED,
-	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_CAN
-};
+//tMessage msgW1 =
+//{
+//	{
+//		E_MSG_W1_ID,
+//		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+//		0xFFU
+//	},
+//	E_MSG_STATE_INIT,
+//	COMM_TIMEOUT,
+//	COMM_MAXRETRANSMISSIONS,
+//	E_MSG_STATUS_INACTIVE,
+//	E_COMM_STATUS_FAILED,
+//	E_MSG_TYPE_CYCLIC,
+//	E_MSG_BUS_CAN
+//};
+//
+//tMessage msgW2 =
+//{
+//	{
+//		E_MSG_W2_ID,
+//		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+//		0xFFU
+//	},
+//	E_MSG_STATE_INIT,
+//	COMM_TIMEOUT,
+//	COMM_MAXRETRANSMISSIONS,
+//	E_MSG_STATUS_INACTIVE,
+//	E_COMM_STATUS_FAILED,
+//	E_MSG_TYPE_CYCLIC,
+//	E_MSG_BUS_CAN
+//};
+//
+//tMessage msgW3 =
+//{
+//	{
+//		E_MSG_W3_ID,
+//		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+//		0xFFU
+//	},
+//	E_MSG_STATE_INIT,
+//	COMM_TIMEOUT,
+//	COMM_MAXRETRANSMISSIONS,
+//	E_MSG_STATUS_INACTIVE,
+//	E_COMM_STATUS_FAILED,
+//	E_MSG_TYPE_CYCLIC,
+//	E_MSG_BUS_CAN
+//};
+//
+//tMessage msgW4 =
+//{
+//	{
+//		E_MSG_W4_ID,
+//		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+//		0xFFU
+//	},
+//	E_MSG_STATE_INIT,
+//	COMM_TIMEOUT,
+//	COMM_MAXRETRANSMISSIONS,
+//	E_MSG_STATUS_INACTIVE,
+//	E_COMM_STATUS_FAILED,
+//	E_MSG_TYPE_CYCLIC,
+//	E_MSG_BUS_CAN
+//};
 
 #if NODE==CONTROL
 static tMessage * transmitMessages[] =
@@ -249,7 +249,7 @@ void comm_initTransmissionCyclicMessages(void)
 
 void comm_cyclic(void)
 {
-	if (handshake_getStatus() == E_HANDSHAKE_STATUS_OK)
+//	if (handshake_getStatus() == E_HANDSHAKE_STATUS_OK)
 	{
 		comm_cyclicReception();
 		comm_cyclicTransmission();
@@ -277,6 +277,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 {
 	const eMessageId loc_messageId = arg_message->body.messageId;
 	const eMessageType loc_type = arg_message->type;
+	const eMessageBus loc_bus = arg_message->bus;
 
 	eMessageState loc_state = arg_message->state;
 	uint8_t loc_timeout = arg_message->timeout;
@@ -323,6 +324,9 @@ void comm_transmitMessage(tMessage * const arg_message)
 			loc_message.body.messageId = loc_messageId;
 			memcpy(loc_message.body.data.rawData, arg_message->body.data.rawData, sizeof(arg_message->body.data.rawData));
 			loc_message.body.crc = loc_crc;
+
+			/*Set bus type of the message*/
+			loc_message.bus = loc_bus;
 
 			/*Write message to UART buffer*/
 			comm_writeMessageToBus(&loc_message);
@@ -380,10 +384,10 @@ void comm_transmitMessage(tMessage * const arg_message)
 
 void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 {
-	const eCommStatus loc_dataAvailable = bus_getDataAvailable(arg_busType);
+	const eBusStatus loc_dataAvailable = bus_getDataAvailable(arg_busType);
 	tMessage loc_receivedMessage;
 
-	if (loc_dataAvailable == E_COMM_STATUS_OK)
+	if (loc_dataAvailable == E_BUS_STATUS_OK)
 	{
 		while (comm_readMessageFromBus(arg_busType, &loc_receivedMessage) == E_COMM_STATUS_OK)
 		{
@@ -451,7 +455,7 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 			}
 		}
 	}
-	bus_setDataAvailable(arg_busType);
+	bus_clearDataAvailable(arg_busType);
 }
 
 eCommStatus comm_checkCRC(const tMessageBody * const arg_messageBody)
