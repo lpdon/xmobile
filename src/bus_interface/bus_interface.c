@@ -152,7 +152,7 @@ eBusStatus bus_readMessageFromBuffer(const eBusType arg_busType, tMessageBody * 
 		}
 		case E_BUS_TYPE_CAN:
 		{
-			const eCanStatus loc_sts_can = can_readFromBuffer(arg_messageBody->messageId, arg_messageBody->data.rawData, sizeof(uMessageData));
+			const eCanStatus loc_sts_can = can_readFromBuffer(&arg_messageBody->messageId, arg_messageBody->data.rawData, sizeof(uMessageData));
 			loc_result = (loc_sts_can == E_CAN_STATUS_OK) ? E_BUS_STATUS_OK : E_BUS_STATUS_FAILED;
 			break;
 		}

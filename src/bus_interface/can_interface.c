@@ -68,7 +68,7 @@ eCanStatus can_writeToBuffer(const uint8_t arg_messageId, const uint8_t * const 
 	return loc_result;
 }
 
-eCanStatus can_readFromBuffer(const uint8_t arg_messageId, uint8_t * const arg_buffer, const uint8_t arg_length)
+eCanStatus can_readFromBuffer(uint8_t * const arg_messageId, uint8_t * const arg_buffer, const uint8_t arg_length)
 {
 	eCanStatus loc_result = E_CAN_STATUS_FAILED;
 	uint16_t loc_totalBytesRead = 0U;
@@ -79,8 +79,8 @@ eCanStatus can_readFromBuffer(const uint8_t arg_messageId, uint8_t * const arg_b
 #if !defined(WIN32)
 	//byte CAN1_ReadFrame(dword *MessageID, byte *FrameType, byte *FrameFormat, byte *Length, byte *Data);
 	CAN1_ReadFrame(&loc_messageId, &loc_frameType, &loc_frameFormat, &loc_totalBytesRead, arg_buffer);
+	*arg_messageId = (uint8_t)loc_messageId;
 #endif
-
 	loc_result = (loc_totalBytesRead == arg_length) ? E_CAN_STATUS_OK : E_CAN_STATUS_FAILED;
 	return loc_result;
 }

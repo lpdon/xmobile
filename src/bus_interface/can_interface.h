@@ -38,7 +38,7 @@ typedef enum
 eCanStatus can_init(void);
 void can_end(void);
 eCanStatus can_writeToBuffer(const uint8_t arg_messageId, const uint8_t * const arg_buffer, const uint8_t arg_length);
-eCanStatus can_readFromBuffer(const uint8_t arg_messageId, uint8_t * const arg_buffer, const uint8_t arg_length);
+eCanStatus can_readFromBuffer(uint8_t * const arg_messageId, uint8_t * const arg_buffer, const uint8_t arg_length);
 void can_setDataAvailable(void);
 void can_clearDataAvailable(void);
 eCanStatus can_getDataAvailable(void);
