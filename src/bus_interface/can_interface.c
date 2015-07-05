@@ -71,7 +71,7 @@ eCanStatus can_writeToBuffer(const uint8_t arg_messageId, const uint8_t * const 
 eCanStatus can_readFromBuffer(uint8_t * const arg_messageId, uint8_t * const arg_buffer, const uint8_t arg_length)
 {
 	eCanStatus loc_result = E_CAN_STATUS_FAILED;
-	uint16_t loc_totalBytesRead = 0U;
+	uint8_t loc_totalBytesRead = 0U;
 	uint32_t loc_messageId = 0U;
 	uint8_t loc_frameType = 0U;
 	uint8_t loc_frameFormat = 0U;

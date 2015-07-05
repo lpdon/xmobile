@@ -194,7 +194,8 @@ static tMessage * receiveMessages[] =
 {
 #if NODE==CONTROL
 #else
-	&msgControl,
+	//&msgControl,
+	//&msgW1,
 #endif
 //	&msgCurrent,
 //	&msgSuspension,
@@ -214,6 +215,7 @@ void comm_setData(eMessageId arg_id, const void * const arg_data)
 			memcpy((*pMessage)->body.data.rawData, arg_data, MSG_DATASIZE);
 			break;
 		}
+		pMessage++;
 	}
 }
 
@@ -229,6 +231,7 @@ void comm_getData(eMessageId arg_id, void * const arg_data)
 			memcpy((void *)arg_data, (*pMessage)->body.data.rawData, MSG_DATASIZE);
 			break;
 		}
+		pMessage++;
 	}
 }
 
@@ -435,26 +438,39 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 					{
 						if ((*pMessage)->body.messageId == loc_receivedMessageId)
 						{
-							const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
-																	 sizeof(uMessageData),
-																	 loc_receivedMessageBody.crc);
-
-							if (loc_checkCRC == E_CRC_STATUS_OK)
+							if (arg_busType == E_MSG_BUS_UART)
 							{
-								/* Send ack. Content of the message is not important */
+								const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
+																		 sizeof(uMessageData),
+																		 loc_receivedMessageBody.crc);
+
+								if (loc_checkCRC == E_CRC_STATUS_OK)
+								{
+									/* Send ack. Content of the message is not important */
+									tMessage loc_message;
+									loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
+									comm_writeMessageToBus(&loc_message);
+
+									/* Write valid values */
+									(*pMessage)->body = loc_receivedMessageBody;
+								}
+								else
+								{
+									/* Send nack. Content of the message is not important */
+									tMessage loc_message;
+									loc_message.body.messageId = (loc_receivedMessageId | MSG_NACK);
+									comm_writeMessageToBus(&loc_message);
+								}
+							}
+							else
+							{
+								/* Ignore CRC for CAN bus */
 								tMessage loc_message;
 								loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
 								comm_writeMessageToBus(&loc_message);
 
 								/* Write valid values */
 								(*pMessage)->body = loc_receivedMessageBody;
-							}
-							else
-							{
-								/* Send nack. Content of the message is not important */
-								tMessage loc_message;
-								loc_message.body.messageId = (loc_receivedMessageId | MSG_NACK);
-								comm_writeMessageToBus(&loc_message);
 							}
 
 							break;
