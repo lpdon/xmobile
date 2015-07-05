@@ -7,7 +7,7 @@
 **     Version   : Component 02.001, Driver 02.06, CPU db: 2.87.410
 **     Datasheet : MC9S12C128 Rev 01.23 05/2007
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 14.06.2015, 01:49
+**     Date/Time : 7/5/2015, 6:31 PM
 **     Abstract  :
 **         This component "MC9S12C32_80" implements properties, methods,
 **         and events of the CPU.
@@ -233,10 +233,10 @@ void _EntryPoint(void)
   setReg8(CLKSEL, 0x00U);              /* Select clock source from XTAL and set bits in CLKSEL reg. */ 
   /* PLLCTL: CME=1,PLLON=0,AUTO=1,ACQ=1,??=0,PRE=0,PCE=0,SCME=1 */
   setReg8(PLLCTL, 0xB1U);              /* Disable the PLL */ 
-  /* SYNR: ??=0,??=0,SYN5=0,SYN4=0,SYN3=0,SYN2=0,SYN1=0,SYN0=0 */
-  setReg8(SYNR, 0x00U);                /* Set the multiplier register */ 
-  /* REFDV: ??=0,??=0,??=0,??=0,REFDV3=0,REFDV2=0,REFDV1=0,REFDV0=1 */
-  setReg8(REFDV, 0x01U);               /* Set the divider register */ 
+  /* SYNR: ??=0,??=0,SYN5=0,SYN4=0,SYN3=0,SYN2=0,SYN1=0,SYN0=1 */
+  setReg8(SYNR, 0x01U);                /* Set the multiplier register */ 
+  /* REFDV: ??=0,??=0,??=0,??=0,REFDV3=0,REFDV2=0,REFDV1=1,REFDV0=0 */
+  setReg8(REFDV, 0x02U);               /* Set the divider register */ 
   /* PLLCTL: CME=1,PLLON=1,AUTO=1,ACQ=1,??=0,PRE=0,PCE=0,SCME=1 */
   setReg8(PLLCTL, 0xF1U);               
   while(CRGFLG_LOCK == 0U) {           /* Wait until the PLL is within the desired tolerance of the target frequency */

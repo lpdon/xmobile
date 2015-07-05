@@ -115,21 +115,21 @@ tMessage msgDirection =
 	E_MSG_BUS_UART
 };
 
-//tMessage msgW1 =
-//{
-//	{
-//		E_MSG_W1_ID,
-//		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
-//		0xFFU
-//	},
-//	E_MSG_STATE_INIT,
-//	COMM_TIMEOUT,
-//	COMM_MAXRETRANSMISSIONS,
-//	E_MSG_STATUS_INACTIVE,
-//	E_COMM_STATUS_FAILED,
-//	E_MSG_TYPE_CYCLIC,
-//	E_MSG_BUS_CAN
-//};
+tMessage msgW1 =
+{
+	{
+		E_MSG_W1_ID,
+		{{0xF0U, 0xDAU, 0xCEU, 0xF0U, 0xDAU, 0xCEU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN
+};
 //
 //tMessage msgW2 =
 //{
@@ -185,6 +185,7 @@ static tMessage * transmitMessages[] =
 #if NODE==CONTROL
 	&msgControl,
 #else
+	&msgW1,
 #endif
 	NULL
 };

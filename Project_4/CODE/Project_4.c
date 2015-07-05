@@ -35,10 +35,13 @@
 #include "IO_Map.h"
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
+#include "uart_interface.h"
 #include "comm.h"
+#include "handshake.h"   
+#include "message.h"
 
 
-#define CURRENT_CONVERSION 2
+#define CURRENT_CONVERSION 2              
 
 void main(void)
 {
@@ -51,7 +54,9 @@ void main(void)
   unsigned char can_data[8];
   unsigned int length;
   static char error_code = 0x00;
-  char ler_rec;
+  char ler_rec;                                         
+
+  tMessageControlData ctrlData; 
 
   /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
   PE_low_level_init();
@@ -62,16 +67,23 @@ void main(void)
   /*Init Sequence Black Nunchuk*/
   error_code = EI2C1_SendBlock(init_block, 2, &length);
   error_code = EI2C1_SendBlock(init_block+2, 2, &length);
-  //if( error_code ) for(;;){} 
-  
+  //if( error_code ) for(;;){}                                                   
+                  
+  //handshake_init();
   comm_init();
+  uart_init();
   
   for(;;){   
       //error_code = AS1_SendChar(can_data[0]);
       
       //error_code = AS1_RecvChar(&ler_rec);
       
+      //handshake_cyclic();      
       comm_cyclic();
+      
+      comm_getData(E_MSG_CONTROL_ID, &ctrlData);
+      //ctrlData.pwmTest[0] = 0x7FFF;
+      PWM11_SetRatio16(~(ctrlData.pwmTest[0]));
       
       Cpu_Delay100US(100);  
   }

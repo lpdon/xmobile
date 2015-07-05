@@ -6,7 +6,7 @@
 **     Component : AsynchroSerial
 **     Version   : Component 02.483, Driver 01.22, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 14.06.2015, 01:20
+**     Date/Time : 6/21/2015, 2:14 AM
 **     Abstract  :
 **         This component "AsynchroSerial" implements an asynchronous serial
 **         communication. The component supports different settings of
@@ -23,8 +23,8 @@
 **             Stop bits               : 1
 **             Parity                  : none
 **             Breaks                  : Disabled
-**             Input buffer size       : 16
-**             Output buffer size      : 16
+**             Input buffer size       : 128
+**             Output buffer size      : 128
 **
 **         Registers
 **             Input buffer            : SCIDRL    [$00CF]
@@ -104,8 +104,8 @@
 #pragma DATA_SEG AS1_DATA              /* Select data segment "AS1_DATA" */
 #pragma CODE_SEG AS1_CODE
 
-#define AS1_INP_BUF_SIZE 0x10U         /* Input buffer size */
-#define AS1_OUT_BUF_SIZE 0x10U         /* Output buffer size */
+#define AS1_INP_BUF_SIZE 0x80U         /* Input buffer size */
+#define AS1_OUT_BUF_SIZE 0x80U         /* Output buffer size */
 
 extern word AS1_OutLen;                /* Length of output bufer's content */
 extern word AS1_InpLen;                /* Length of input buffer's content */

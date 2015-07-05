@@ -7,7 +7,7 @@
 **     Version   : Component 02.001, Driver 02.06, CPU db: 2.87.410
 **     Datasheet : MC9S12C128 Rev 01.23 05/2007
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 14.06.2015, 01:49
+**     Date/Time : 7/5/2015, 6:31 PM
 **     Abstract  :
 **         This component "MC9S12C32_80" implements properties, methods,
 **         and events of the CPU.
@@ -48,9 +48,9 @@
 
 #define CPU_INSTR_CLK_HZ            0x007A1200UL /* Initial value of the instruction clock frequency in Hz */
 
-#define CPU_EXT_CLK_HZ              0x00F42400UL /* Value of the main clock frequency (crystal or external clock) in Hz */
+#define CPU_EXT_CLK_HZ              0x00B71B00UL /* Value of the main clock frequency (crystal or external clock) in Hz */
 
-#define CPU_TICK_NS                 0x3EU /* CPU tick is a unit derived from the frequency of external clock source. If no external clock is enabled or available it is derived from the value of internal clock source. The value of this constant represents period of the clock source in ns. */
+#define CPU_TICK_NS                 0x53LU /* CPU tick is a unit derived from the frequency of external clock source. If no external clock is enabled or available it is derived from the value of internal clock source. The value of this constant represents period of the clock source in ns. */
 
 #define CPU_CORE_HCS12                 /* Specification of the core type of the selected cpu */
 #define CPU_DERIVATIVE_MC9S12C32       /* Name of the selected cpu derivative */

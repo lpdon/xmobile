@@ -12,7 +12,7 @@
         <group name="Clock settings">
           <group name="Input clock">
             <Clock_type v="External clock source"/>
-            <Clock_frequency__MHz_ v="16"/>
+            <Clock_frequency__MHz_ v="12"/>
             <group name="Clock input pin">
               <Pin v="EXTAL"/>
               <Pin_signal v=""/>
@@ -414,11 +414,11 @@ asm(BGND);
         <Acceptance_mode v="Two 32-bit acceptance filters"/>
         <group name="Acceptance codes">
           <Acceptance_code_1 v="0"/>
-          <Acceptance_code_2 v="15"/>
+          <Acceptance_code_2 v="0"/>
         </group>
         <group name="Acceptance masks">
-          <Acceptance_mask_1 v="0"/>
-          <Acceptance_mask_2 v="15"/>
+          <Acceptance_mask_1 v="4294967295"/>
+          <Acceptance_mask_2 v="4294967295"/>
         </group>
         <Loop_mode v="no"/>
         <Listen_only_mode v="no"/>
@@ -647,8 +647,8 @@ asm(BGND);
         <Interrupt_TxD_priority v="medium priority"/>
         <Interrupt_Error v="Vsci"/>
         <Interrupt_Error_priority v="medium priority"/>
-        <Input_buffer_size v="16"/>
-        <Output_buffer_size v="16"/>
+        <Input_buffer_size v="128"/>
+        <Output_buffer_size v="128"/>
         <group name="Handshake">
           <boolgroup name="CTS" v="Disabled" />
           <boolgroup name="RTS" v="Disabled" />

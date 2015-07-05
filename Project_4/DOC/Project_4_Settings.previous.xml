@@ -12,7 +12,7 @@
         <group name="Clock settings">
           <group name="Input clock">
             <Clock_type v="External clock source"/>
-            <Clock_frequency__MHz_ v="12"/>
+            <Clock_frequency__MHz_ v="16"/>
             <group name="Clock input pin">
               <Pin v="EXTAL"/>
               <Pin_signal v=""/>
@@ -647,8 +647,8 @@ asm(BGND);
         <Interrupt_TxD_priority v="medium priority"/>
         <Interrupt_Error v="Vsci"/>
         <Interrupt_Error_priority v="medium priority"/>
-        <Input_buffer_size v="16"/>
-        <Output_buffer_size v="16"/>
+        <Input_buffer_size v="128"/>
+        <Output_buffer_size v="128"/>
         <group name="Handshake">
           <boolgroup name="CTS" v="Disabled" />
           <boolgroup name="RTS" v="Disabled" />

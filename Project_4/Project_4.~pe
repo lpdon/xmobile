@@ -1,11 +1,11 @@
 Processor Expert Version 0444
-ProjectModificationStamp=48
+ProjectModificationStamp=49
 
 [Header]
 Name=Project_4
 SavedBy=Leandro
-ModificationStamp=48
-Date=2015-06-29
+ModificationStamp=49
+Date=2015-07-05
 Product=Processor Expert version 3.02 for Freescale HCS12(X) family
 IDE=CW Plug-In IDE
 PEversion=4.44.0.5282
@@ -103,7 +103,7 @@ EnumSymbVal=0
 ItemSymbol=Xtal
 ReadOnly=No
 UserReadOnly=No
-Value=16
+Value=12
 [ItemState]
 ItemSymbol=OSC1_Grp
 ReadOnly=No
@@ -3573,7 +3573,7 @@ AsmDataFormat=HEX
 AsmBitsFormat=HEX
 xxxxxxxxxxxxxxxx=
 MC9S12C32CFU16
- 1.60000000000000E+0001
+ 1.20000000000000E+0001
  0.00000000000000E+0000
 ..@start
 ..@end
@@ -4871,7 +4871,7 @@ List=GrupItem
 ItemSymbol=AccCode2
 ReadOnly=No
 UserReadOnly=No
-Value=15
+Value=0
 Base=3
 
 [EndOfChilds]
@@ -4889,7 +4889,7 @@ List=GrupItem
 ItemSymbol=AccMask
 ReadOnly=No
 UserReadOnly=No
-Value=0
+Value=4294967295
 Base=3
 [ItemState]
 ItemSymbol=Non_HC08
@@ -4902,7 +4902,7 @@ List=GrupItem
 ItemSymbol=AccMask2
 ReadOnly=No
 UserReadOnly=No
-Value=15
+Value=4294967295
 Base=3
 
 [EndOfChilds]
@@ -5061,7 +5061,7 @@ ReqSrcClkPrescHigh=-1
 ReqSrcClkPrescLow=-1
 ReqSrcClkPrescSlow=-1
 InitValue=250 kbit/s
-Precision=5
+Precision=1
 PrecInProc=Yes
 LowLimit=
 HighLimit=

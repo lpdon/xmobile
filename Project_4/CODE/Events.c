@@ -23,7 +23,7 @@
 #include "Events.h"
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
-#include "comm.h"
+#include "uart_interface.h"
 
 int16_t Values[8];
 int16_t i16CurrentADC;
@@ -216,7 +216,7 @@ void AS1_OnRxChar(void)
   char received;
   //AS1_RecvChar(&received);
   //AS1_SendChar(received);
-  comm_setDataAvailable();
+  uart_setDataAvailable();
 }
 
 /*

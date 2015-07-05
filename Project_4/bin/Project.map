@@ -1,5 +1,5 @@
 
-PROGRAM "C:\Users\Marcelo\workspace\xmobile\Project_4\bin\Project.abs"
+PROGRAM "D:\Users\Leandro\workspace\xmobile\Project_4\bin\Project.abs"
 
 *********************************************************************************************
 TARGET SECTION
@@ -13,6 +13,7 @@ Linker      : SmartLinker V-5.0.40 Build 10203, Jul 23 2010
 FILE SECTION
 ---------------------------------------------------------------------------------------------
 Start12.c.o                             Model: SMALL,         Lang: ANSI-C
+STRING.C.o (ansisi.lib)                 Model: SMALL,         Lang: ANSI-C
 rtshc12.c.o (ansisi.lib)                Model: SMALL,         Lang: ANSI-C
 Cpu.c.o                                 Model: SMALL,         Lang: ANSI-C
 EI2C1.c.o                               Model: SMALL,         Lang: ANSI-C
@@ -29,6 +30,11 @@ PWM8.c.o                                Model: SMALL,         Lang: ANSI-C
 PWM9.c.o                                Model: SMALL,         Lang: ANSI-C
 PWM10.c.o                               Model: SMALL,         Lang: ANSI-C
 PWM11.c.o                               Model: SMALL,         Lang: ANSI-C
+comm.c.o                                Model: SMALL,         Lang: ANSI-C
+crc.c.o                                 Model: SMALL,         Lang: ANSI-C
+bus_interface.c.o                       Model: SMALL,         Lang: ANSI-C
+can_interface.c.o                       Model: SMALL,         Lang: ANSI-C
+uart_interface.c.o                      Model: SMALL,         Lang: ANSI-C
 
 *********************************************************************************************
 STARTUP SECTION
@@ -37,8 +43,8 @@ Entry point: 0xC00F (_EntryPoint)
 _startupData is allocated at 0xC039 and uses 6 Bytes
 extern struct _tagStartup {
   unsigned nofZeroOut     1
-  _Range   pZeroOut       0x3800     71
-  _Copy    *toCopyDownBeg 0xC90B
+  _Range   pZeroOut       0x3800     351
+  _Copy    *toCopyDownBeg 0xCD98
 } _startupData;
 
 *********************************************************************************************
@@ -48,8 +54,9 @@ Section Name                    Size  Type     From       To       Segment
 .init                             57     R     0xC000     0xC038   ROM_C000
 .startData                        10     R     0xC039     0xC042   ROM_C000
 NON_BANKED                       358     R     0xC043     0xC1A8   ROM_C000
-.text                            430     R     0xC1A9     0xC356   ROM_C000
-.copy                              2     R     0xC90B     0xC90C   ROM_C000
+.text                           1568     R     0xC1A9     0xC7C8   ROM_C000
+.copy                             62     R     0xCD98     0xCDD5   ROM_C000
+.data                             56   R/W     0x3800     0x3837   RAM
 .abs_section_8                     1   N/I        0x8        0x8   .absSeg0
 .abs_section_9                     1   N/I        0x9        0x9   .absSeg1
 .abs_section_a                     1   N/I        0xA        0xA   .absSeg2
@@ -272,33 +279,33 @@ NON_BANKED                       358     R     0xC043     0xC1A8   ROM_C000
 .abs_section_16e                   2   N/I      0x16E      0x16F   .absSeg219
 .abs_section_17e                   2   N/I      0x17E      0x17F   .absSeg220
 .abs_section_ff80                128     R     0xFF80     0xFFFF   .absSeg221
-.bss                               2   R/W     0x3800     0x3801   RAM
-RUNTIME                           17     R     0xC357     0xC367   ROM_C000
-.common                            1   R/W     0x3802     0x3802   RAM
-EI2C1_CODE                       710     R     0xC368     0xC62D   ROM_C000
-Inhr1_CODE                        13     R     0xC62E     0xC63A   ROM_C000
-Inhr2_CODE                        13     R     0xC63B     0xC647   ROM_C000
-CAN1_DATA                          2   R/W     0x3803     0x3804   RAM
-CAN1_CODE                        370     R     0xC648     0xC7B9   ROM_C000
-AD1_DATA                          11   R/W     0x3805     0x380F   RAM
-AD1_CODE                          17     R     0xC7BA     0xC7CA   ROM_C000
-AS1_DATA                          46   R/W     0x3810     0x383D   RAM
-AS1_CODE                         202     R     0xC7CB     0xC894   ROM_C000
-PWM8_CODE                         32     R     0xC895     0xC8B4   ROM_C000
-PWM9_CODE                         25     R     0xC8B5     0xC8CD   ROM_C000
-PWM10_CODE                        32     R     0xC8CE     0xC8ED   ROM_C000
-PWM11_CODE                        25     R     0xC8EE     0xC906   ROM_C000
-EI2C1_DATA                         1   R/W     0x383E     0x383E   RAM
-AD1_CONST                          4     R     0xC907     0xC90A   ROM_C000
-PWM8_DATA                          2   R/W     0x383F     0x3840   RAM
-PWM9_DATA                          2   R/W     0x3841     0x3842   RAM
-PWM10_DATA                         2   R/W     0x3843     0x3844   RAM
-PWM11_DATA                         2   R/W     0x3845     0x3846   RAM
-.stack                           128   R/W     0x3847     0x38C6   RAM
+.bss                               2   R/W     0x3838     0x3839   RAM
+RUNTIME                           88     R     0xC7C9     0xC820   ROM_C000
+.common                            1   R/W     0x383A     0x383A   RAM
+EI2C1_CODE                       301     R     0xC821     0xC94D   ROM_C000
+Inhr1_CODE                        13     R     0xC94E     0xC95A   ROM_C000
+Inhr2_CODE                        13     R     0xC95B     0xC967   ROM_C000
+CAN1_DATA                          2   R/W     0x383B     0x383C   RAM
+CAN1_CODE                        583     R     0xC968     0xCBAE   ROM_C000
+AD1_DATA                          11   R/W     0x383D     0x3847   RAM
+AD1_CODE                          17     R     0xCBAF     0xCBBF   ROM_C000
+AS1_DATA                         270   R/W     0x3848     0x3955   RAM
+AS1_CODE                         330     R     0xCBC0     0xCD09   ROM_C000
+PWM8_CODE                         32     R     0xCD0A     0xCD29   ROM_C000
+PWM9_CODE                         25     R     0xCD2A     0xCD42   ROM_C000
+PWM10_CODE                        32     R     0xCD43     0xCD62   ROM_C000
+PWM11_CODE                        49     R     0xCD63     0xCD93   ROM_C000
+EI2C1_DATA                         1   R/W     0x3956     0x3956   RAM
+AD1_CONST                          4     R     0xCD94     0xCD97   ROM_C000
+PWM8_DATA                          2   R/W     0x3957     0x3958   RAM
+PWM9_DATA                          2   R/W     0x3959     0x395A   RAM
+PWM10_DATA                         2   R/W     0x395B     0x395C   RAM
+PWM11_DATA                         2   R/W     0x395D     0x395E   RAM
+.stack                           128   R/W     0x395F     0x39DE   RAM
 
 Summary of section sizes per section type:
-READ_ONLY (R):         98D (dec:     2445)
-READ_WRITE (R/W):       C7 (dec:      199)
+READ_ONLY (R):         E56 (dec:     3670)
+READ_WRITE (R/W):      1DF (dec:      479)
 NO_INIT (N/I):         104 (dec:      260)
 
 *********************************************************************************************
@@ -317,40 +324,44 @@ MODULE:                 -- Start12.c.o --
 - VARIABLES:
      _startupData                              C039       6       6       3   .startData  
 - LABELS:
-     __SEG_END_SSTACK                          38C7       0       0       1               
+     __SEG_END_SSTACK                          39DF       0       0       1               
+MODULE:                 -- STRING.C.o (ansisi.lib) --
+- PROCEDURES:
+     memcpy                                    C1DA      24      36       3   .text       
+- VARIABLES:
 MODULE:                 -- rtshc12.c.o (ansisi.lib) --
 - PROCEDURES:
-     _LSHL                                     C357      11      17       2   RUNTIME     
+     _LSHL                                     C7C9      11      17       2   RUNTIME     
+     _LSHRU                                    C7DA      11      17       2   RUNTIME     
+     _COPY                                     C7EB       8       8       2   RUNTIME     
+     _CASE_CHECKED_BYTE                        C7F3      14      20       1   RUNTIME     
+     _CASE_SEARCH_8_BYTE                       C807      1A      26       1   RUNTIME     
 - VARIABLES:
 MODULE:                 -- Cpu.c.o --
 - PROCEDURES:
-     PE_low_level_init                         C1DA      84     132       1   .text       
+     PE_low_level_init                         C1FE      84     132       1   .text       
      Cpu_Interrupt                             C000       2       2      56   .init       
      Cpu_Delay100US                            C002       D      13       1   .init       
      _EntryPoint                               C00F      2A      42       3   .init       
 - VARIABLES:
-     CCR_reg                                   3802       1       1       7   .common     
+     CCR_reg                                   383A       1       1       7   .common     
 MODULE:                 -- EI2C1.c.o --
 - PROCEDURES:
-     Delay                                     C043       9       9      18   NON_BANKED  
-     EI2C1_Init                                C368       6       6       1   EI2C1_CODE  
-     Write                                     C36E      51      81       5   EI2C1_CODE  
-     Read                                      C3BF      48      72       1   EI2C1_CODE  
-     GetAck                                    C407      28      40       5   EI2C1_CODE  
-     SetAck                                    C42F      41      65       1   EI2C1_CODE  
-     InternalStop                              C470      14      20       6   EI2C1_CODE  
-     EI2C1_SendChar                            C484      74     116       1   EI2C1_CODE  
-     EI2C1_SendBlock                           C4F8      9A     154       2   EI2C1_CODE  
-     EI2C1_RecvBlock                           C592      9C     156       1   EI2C1_CODE  
+     Delay                                     C043       9       9       7   NON_BANKED  
+     EI2C1_Init                                C821       6       6       1   EI2C1_CODE  
+     Write                                     C827      51      81       2   EI2C1_CODE  
+     GetAck                                    C878      28      40       2   EI2C1_CODE  
+     InternalStop                              C8A0      14      20       2   EI2C1_CODE  
+     EI2C1_SendBlock                           C8B4      9A     154       2   EI2C1_CODE  
 - VARIABLES:
-     SlaveAddr                                 383E       1       1       4   EI2C1_DATA  
+     SlaveAddr                                 3956       1       1       2   EI2C1_DATA  
 MODULE:                 -- Inhr1.c.o --
 - PROCEDURES:
-     Inhr1_SetDir                              C62E       D      13      15   Inhr1_CODE  
+     Inhr1_SetDir                              C94E       D      13       7   Inhr1_CODE  
 - VARIABLES:
 MODULE:                 -- Inhr2.c.o --
 - PROCEDURES:
-     Inhr2_SetDir                              C63B       D      13      16   Inhr2_CODE  
+     Inhr2_SetDir                              C95B       D      13       7   Inhr2_CODE  
 - VARIABLES:
 MODULE:                 -- IO_Map.c.o --
 - PROCEDURES:
@@ -467,11 +478,11 @@ MODULE:                 -- IO_Map.c.o --
      _CANIDMR5                                  15D       1       1       1   .abs_section_15d
      _CANIDMR6                                  15E       1       1       1   .abs_section_15e
      _CANIDMR7                                  15F       1       1       1   .abs_section_15f
-     _CANRXIDR0                                 160       1       1       0   .abs_section_160
-     _CANRXIDR1                                 161       1       1       0   .abs_section_161
-     _CANRXIDR2                                 162       1       1       0   .abs_section_162
-     _CANRXIDR3                                 163       1       1       0   .abs_section_163
-     _CANRXDSR0                                 164       1       1       0   .abs_section_164
+     _CANRXIDR0                                 160       1       1       1   .abs_section_160
+     _CANRXIDR1                                 161       1       1       2   .abs_section_161
+     _CANRXIDR2                                 162       1       1       1   .abs_section_162
+     _CANRXIDR3                                 163       1       1       2   .abs_section_163
+     _CANRXDSR0                                 164       1       1       1   .abs_section_164
      _CANRXDSR1                                 165       1       1       0   .abs_section_165
      _CANRXDSR2                                 166       1       1       0   .abs_section_166
      _CANRXDSR3                                 167       1       1       0   .abs_section_167
@@ -479,7 +490,7 @@ MODULE:                 -- IO_Map.c.o --
      _CANRXDSR5                                 169       1       1       0   .abs_section_169
      _CANRXDSR6                                 16A       1       1       0   .abs_section_16a
      _CANRXDSR7                                 16B       1       1       0   .abs_section_16b
-     _CANRXDLR                                  16C       1       1       0   .abs_section_16c
+     _CANRXDLR                                  16C       1       1       1   .abs_section_16c
      _CANTXIDR0                                 170       1       1       1   .abs_section_170
      _CANTXIDR1                                 171       1       1       0   .abs_section_171
      _CANTXIDR2                                 172       1       1       0   .abs_section_172
@@ -494,7 +505,7 @@ MODULE:                 -- IO_Map.c.o --
      _CANTXDSR7                                 17B       1       1       0   .abs_section_17b
      _CANTXDLR                                  17C       1       1       1   .abs_section_17c
      _CANTXTBPR                                 17D       1       1       1   .abs_section_17d
-     _PTT                                       240       1       1      22   .abs_section_240
+     _PTT                                       240       1       1      11   .abs_section_240
      _PTIT                                      241       1       1       0   .abs_section_241
      _DDRT                                      242       1       1       6   .abs_section_242
      _RDRT                                      243       1       1       1   .abs_section_243
@@ -573,7 +584,7 @@ MODULE:                 -- IO_Map.c.o --
      _PWMPER45                                   F6       2       2       2   .abs_section_f6
      _PWMDTY01                                   F8       2       2       0   .abs_section_f8
      _PWMDTY23                                   FA       2       2       2   .abs_section_fa
-     _PWMDTY45                                   FC       2       2       2   .abs_section_fc
+     _PWMDTY45                                   FC       2       2       3   .abs_section_fc
      _CANRXTSR                                  16E       2       2       0   .abs_section_16e
      _CANTXTSR                                  17E       2       2       0   .abs_section_17e
 MODULE:                 -- Vectors.c.o --
@@ -582,113 +593,185 @@ MODULE:                 -- Vectors.c.o --
      _InterruptVectorTable                     FF80      80     128       0   .abs_section_ff80
 MODULE:                 -- Events.c.o --
 - PROCEDURES:
-     EI2C1_OnRxChar                            C25E       1       1       1   .text       
-     EI2C1_OnTxChar                            C25F       1       1       2   .text       
-     EI2C1_OnNACK                              C260       1       1       3   .text       
-     CAN1_OnFreeTxBuffer                       C261       4       4       1   .text       
-     CAN1_OnFullRxBuffer                       C265       1       1       1   .text       
-     CAN1_OnBusOff                             C266       1       1       1   .text       
-     AD1_OnEnd                                 C267       1       1       1   .text       
-     AS1_OnError                               C268       1       1       2   .text       
-     AS1_OnRxChar                              C269       D      13       1   .text       
-     AS1_OnTxChar                              C276       1       1       1   .text       
-     AS1_OnFullRxBuf                           C277       1       1       1   .text       
-     AS1_OnFreeTxBuf                           C278       1       1       1   .text       
+     EI2C1_OnTxChar                            C282       1       1       1   .text       
+     EI2C1_OnNACK                              C283       1       1       1   .text       
+     CAN1_OnFreeTxBuffer                       C284       4       4       1   .text       
+     CAN1_OnFullRxBuffer                       C288       1       1       1   .text       
+     CAN1_OnBusOff                             C289       1       1       1   .text       
+     AD1_OnEnd                                 C28A       1       1       1   .text       
+     AS1_OnError                               C28B       1       1       2   .text       
+     AS1_OnRxChar                              C28C       3       3       1   .text       
+     AS1_OnTxChar                              C28F       1       1       1   .text       
+     AS1_OnFullRxBuf                           C290       1       1       1   .text       
+     AS1_OnFreeTxBuf                           C291       1       1       1   .text       
 - VARIABLES:
-     cont.1                                    3800       1       1       1   .bss        
+     cont.1                                    3838       1       1       1   .bss        
 MODULE:                 -- Project_4.c.o --
 - PROCEDURES:
-     main                                      C279      DE     222       2   .text       
+     main                                      C292      5E      94       1   .text       
 - VARIABLES:
-     error_code.1                              3801       1       1       7   .bss        
+     error_code.1                              3839       1       1       2   .bss        
 MODULE:                 -- CAN1.c.o --
 - PROCEDURES:
      CAN1_InterruptTx                          C04C      1A      26       1   NON_BANKED  
      CAN1_InterruptRx                          C066      29      41       1   NON_BANKED  
      CAN1_InterruptError                       C08F      29      41       1   NON_BANKED  
-     CAN1_SendFrameExt                         C648     112     274       2   CAN1_CODE   
-     CAN1_Init                                 C75A      60      96       1   CAN1_CODE   
+     CAN1_SendFrameExt                         C968     112     274       2   CAN1_CODE   
+     CAN1_ReadFrame                            CA7A      D6     214       2   CAN1_CODE   
+     CAN1_Init                                 CB50      5F      95       1   CAN1_CODE   
 - VARIABLES:
-     ErrFlag                                   3803       1       1       5   CAN1_DATA   
-     SerFlag                                   3804       1       1       4   CAN1_DATA   
+     ErrFlag                                   383B       1       1       5   CAN1_DATA   
+     SerFlag                                   383C       1       1       8   CAN1_DATA   
 MODULE:                 -- AD1.c.o --
 - PROCEDURES:
      AD1_Interrupt                             C0B8      2B      43       1   NON_BANKED  
-     AD1_Init                                  C7BA      11      17       1   AD1_CODE    
+     AD1_Init                                  CBAF      11      17       1   AD1_CODE    
 - VARIABLES:
-     OutFlg                                    3805       1       1       2   AD1_DATA    
-     SumChan                                   3806       1       1       3   AD1_DATA    
-     ModeFlg                                   3807       1       1       2   AD1_DATA    
-     AD1_OutV                                  3808       8       8       1   AD1_DATA    
-     Channels                                  C907       4       4       1   AD1_CONST   
+     OutFlg                                    383D       1       1       2   AD1_DATA    
+     SumChan                                   383E       1       1       3   AD1_DATA    
+     ModeFlg                                   383F       1       1       2   AD1_DATA    
+     AD1_OutV                                  3840       8       8       1   AD1_DATA    
+     Channels                                  CD94       4       4       1   AD1_CONST   
 MODULE:                 -- AS1.c.o --
 - PROCEDURES:
      AS1_Interrupt                             C0E3      C6     198       1   NON_BANKED  
-     AS1_RecvChar                              C7CB      51      81       2   AS1_CODE    
-     AS1_SendChar                              C81C      41      65       2   AS1_CODE    
-     AS1_Init                                  C85D      38      56       1   AS1_CODE    
+     AS1_RecvChar                              CBC0      51      81       1   AS1_CODE    
+     AS1_RecvBlock                             CC11      43      67       1   AS1_CODE    
+     AS1_SendBlock                             CC54      7E     126       1   AS1_CODE    
+     AS1_Init                                  CCD2      38      56       1   AS1_CODE    
 - VARIABLES:
-     SerFlag                                   3810       1       1       8   AS1_DATA    
-     AS1_InpLen                                3811       2       2       7   AS1_DATA    
-     InpPtrR                                   3813       2       2       5   AS1_DATA    
-     InpPtrW                                   3815       2       2       4   AS1_DATA    
-     InpBuffer                                 3817      10      16       6   AS1_DATA    
-     AS1_OutLen                                3827       2       2       6   AS1_DATA    
-     OutPtrR                                   3829       2       2       4   AS1_DATA    
-     OutPtrW                                   382B       2       2       4   AS1_DATA    
-     OutBuffer                                 382D      10      16       6   AS1_DATA    
-     OnFreeTxBuf_semaphore                     383D       1       1       2   AS1_DATA    
+     SerFlag                                   3848       1       1       8   AS1_DATA    
+     AS1_InpLen                                3849       2       2       7   AS1_DATA    
+     InpPtrR                                   384B       2       2       5   AS1_DATA    
+     InpPtrW                                   384D       2       2       4   AS1_DATA    
+     InpBuffer                                 384F      80     128       6   AS1_DATA    
+     AS1_OutLen                                38CF       2       2       7   AS1_DATA    
+     OutPtrR                                   38D1       2       2       4   AS1_DATA    
+     OutPtrW                                   38D3       2       2       4   AS1_DATA    
+     OutBuffer                                 38D5      80     128       6   AS1_DATA    
+     OnFreeTxBuf_semaphore                     3955       1       1       5   AS1_DATA    
 MODULE:                 -- PWM8.c.o --
 - PROCEDURES:
-     PWM8_Init                                 C895      20      32       1   PWM8_CODE   
+     PWM8_Init                                 CD0A      20      32       1   PWM8_CODE   
 - VARIABLES:
-     RatioStore                                383F       2       2       1   PWM8_DATA   
+     RatioStore                                3957       2       2       1   PWM8_DATA   
 MODULE:                 -- PWM9.c.o --
 - PROCEDURES:
-     PWM9_Init                                 C8B5      19      25       1   PWM9_CODE   
+     PWM9_Init                                 CD2A      19      25       1   PWM9_CODE   
 - VARIABLES:
-     RatioStore                                3841       2       2       1   PWM9_DATA   
+     RatioStore                                3959       2       2       1   PWM9_DATA   
 MODULE:                 -- PWM10.c.o --
 - PROCEDURES:
-     PWM10_Init                                C8CE      20      32       1   PWM10_CODE  
+     PWM10_Init                                CD43      20      32       1   PWM10_CODE  
 - VARIABLES:
-     RatioStore                                3843       2       2       1   PWM10_DATA  
+     RatioStore                                395B       2       2       1   PWM10_DATA  
 MODULE:                 -- PWM11.c.o --
 - PROCEDURES:
-     PWM11_Init                                C8EE      19      25       1   PWM11_CODE  
+     SetRatio                                  CD63      11      17       1   PWM11_CODE  
+     PWM11_SetRatio16                          CD74       7       7       1   PWM11_CODE  
+     PWM11_Init                                CD7B      19      25       1   PWM11_CODE  
 - VARIABLES:
-     RatioStore                                3845       2       2       1   PWM11_DATA  
+     RatioStore                                395D       2       2       3   PWM11_DATA  
+MODULE:                 -- comm.c.o --
+- PROCEDURES:
+     comm_getData                              C2F0      32      50       1   .text       
+     comm_init                                 C322       E      14       1   .text       
+     comm_initTransmissionCyclicMessages       C330      20      32       1   .text       
+     comm_cyclic                               C350       6       6       1   .text       
+     comm_cyclicReception                      C356       B      11       1   .text       
+     comm_cyclicTransmission                   C361      11      17       1   .text       
+     comm_transmitMessage                      C372      D7     215       1   .text       
+     comm_receiveMessagesFromBus               C449      CF     207       2   .text       
+     comm_checkMessageId                       C518      51      81       1   .text       
+     comm_readMessageFromBus                   C569       D      13       1   .text       
+     comm_writeMessageToBus                    C576       B      11       3   .text       
+- VARIABLES:
+     msgControl                                3800      16      22       1   .data       
+     msgW1                                     3816      16      22       1   .data       
+     transmitMessages                          382C       4       4       4   .data       
+     receiveMessages                           3830       4       4       3   .data       
+MODULE:                 -- crc.c.o --
+- PROCEDURES:
+     crc8                                      C581      32      50       2   .text       
+     checkCRC                                  C5B3      14      20       1   .text       
+- VARIABLES:
+MODULE:                 -- bus_interface.c.o --
+- PROCEDURES:
+     bus_init                                  C5C7      13      19       2   .text       
+     bus_writeMessageToBuffer                  C5DA      3F      63       1   .text       
+     bus_readMessageFromBuffer                 C619      8F     143       1   .text       
+     bus_clearDataAvailable                    C6A8       E      14       1   .text       
+     bus_getDataAvailable                      C6B6      2E      46       1   .text       
+     bus_checkMessageId                        C6E4      2F      47       1   .text       
+- VARIABLES:
+MODULE:                 -- can_interface.c.o --
+- PROCEDURES:
+     can_init                                  C713       3       3       1   .text       
+     can_writeToBuffer                         C716      22      34       1   .text       
+     can_readFromBuffer                        C738      2F      47       1   .text       
+     can_clearDataAvailable                    C767       7       7       1   .text       
+     can_getDataAvailable                      C76E       4       4       1   .text       
+- VARIABLES:
+     can_dataAvailable                         3834       2       2       2   .data       
+MODULE:                 -- uart_interface.c.o --
+- PROCEDURES:
+     uart_init                                 C772       4       4       2   .text       
+     uart_writeToBuffer                        C776      21      33       1   .text       
+     uart_readFromBuffer                       C797      21      33       2   .text       
+     uart_setDataAvailable                     C7B8       6       6       1   .text       
+     uart_clearDataAvailable                   C7BE       7       7       1   .text       
+     uart_getDataAvailable                     C7C5       4       4       1   .text       
+- VARIABLES:
+     uart_dataAvailable                        3836       2       2       3   .data       
 
 *********************************************************************************************
 MODULE STATISTIC
   Name                                      Data   Code  Const
 ---------------------------------------------------------------------------------------------
   Start12.c.o                                  0     49      0
-  rtshc12.c.o (ansisi.lib)                     0     17      0
+  STRING.C.o (ansisi.lib)                      0     36      0
+  rtshc12.c.o (ansisi.lib)                     0     88      0
   Cpu.c.o                                      1    189      0
-  EI2C1.c.o                                    1    719      0
+  EI2C1.c.o                                    1    310      0
   Inhr1.c.o                                    0     13      0
   Inhr2.c.o                                    0     13      0
   IO_Map.c.o                                 260      0      0
   Vectors.c.o                                  0      0    128
-  Events.c.o                                   1     27      0
-  Project_4.c.o                                1    222      0
-  CAN1.c.o                                     2    478      0
+  Events.c.o                                   1     16      0
+  Project_4.c.o                                1     94      0
+  CAN1.c.o                                     2    691      0
   AD1.c.o                                     11     60      4
-  AS1.c.o                                     46    400      0
+  AS1.c.o                                    270    528      0
   PWM8.c.o                                     2     32      0
   PWM9.c.o                                     2     25      0
   PWM10.c.o                                    2     32      0
-  PWM11.c.o                                    2     25      0
-  other                                      128     10      2
+  PWM11.c.o                                    2     49      0
+  comm.c.o                                    52    657      0
+  crc.c.o                                      0     70      0
+  bus_interface.c.o                            0    332      0
+  can_interface.c.o                            2     95      0
+  uart_interface.c.o                           2     87      0
+  other                                      128     10     62
 
 *********************************************************************************************
 SECTION USE IN OBJECT-ALLOCATION SECTION
 ---------------------------------------------------------------------------------------------
 SECTION: ".text"
-  Init _Startup PE_low_level_init EI2C1_OnRxChar EI2C1_OnTxChar EI2C1_OnNACK 
+  Init _Startup memcpy PE_low_level_init EI2C1_OnTxChar EI2C1_OnNACK 
   CAN1_OnFreeTxBuffer CAN1_OnFullRxBuffer CAN1_OnBusOff AD1_OnEnd AS1_OnError 
-  AS1_OnRxChar AS1_OnTxChar AS1_OnFullRxBuf AS1_OnFreeTxBuf main 
+  AS1_OnRxChar AS1_OnTxChar AS1_OnFullRxBuf AS1_OnFreeTxBuf main comm_getData 
+  comm_init comm_initTransmissionCyclicMessages comm_cyclic 
+  comm_cyclicReception comm_cyclicTransmission comm_transmitMessage 
+  comm_receiveMessagesFromBus comm_checkMessageId comm_readMessageFromBus 
+  comm_writeMessageToBus crc8 checkCRC bus_init bus_writeMessageToBuffer 
+  bus_readMessageFromBuffer bus_clearDataAvailable bus_getDataAvailable 
+  bus_checkMessageId can_init can_writeToBuffer can_readFromBuffer 
+  can_clearDataAvailable can_getDataAvailable uart_init uart_writeToBuffer 
+  uart_readFromBuffer uart_setDataAvailable uart_clearDataAvailable 
+  uart_getDataAvailable 
+SECTION: ".data"
+  msgControl msgW1 transmitMessages receiveMessages can_dataAvailable 
+  uart_dataAvailable 
 SECTION: ".bss"
   cont.1 error_code.1 
 SECTION: ".init"
@@ -697,12 +780,11 @@ SECTION: "NON_BANKED"
   Delay CAN1_InterruptTx CAN1_InterruptRx CAN1_InterruptError AD1_Interrupt 
   AS1_Interrupt 
 SECTION: "RUNTIME"
-  _LSHL 
+  _LSHL _LSHRU _COPY _CASE_CHECKED_BYTE _CASE_SEARCH_8_BYTE 
 SECTION: ".common"
   CCR_reg 
 SECTION: "EI2C1_CODE"
-  EI2C1_Init Write Read GetAck SetAck InternalStop EI2C1_SendChar 
-  EI2C1_SendBlock EI2C1_RecvBlock 
+  EI2C1_Init Write GetAck InternalStop EI2C1_SendBlock 
 SECTION: "Inhr1_CODE"
   Inhr1_SetDir 
 SECTION: "Inhr2_CODE"
@@ -710,7 +792,7 @@ SECTION: "Inhr2_CODE"
 SECTION: "CAN1_DATA"
   ErrFlag SerFlag 
 SECTION: "CAN1_CODE"
-  CAN1_SendFrameExt CAN1_Init 
+  CAN1_SendFrameExt CAN1_ReadFrame CAN1_Init 
 SECTION: "AD1_DATA"
   OutFlg SumChan ModeFlg AD1_OutV 
 SECTION: "AD1_CODE"
@@ -719,7 +801,7 @@ SECTION: "AS1_DATA"
   SerFlag AS1_InpLen InpPtrR InpPtrW InpBuffer AS1_OutLen OutPtrR OutPtrW 
   OutBuffer OnFreeTxBuf_semaphore 
 SECTION: "AS1_CODE"
-  AS1_RecvChar AS1_SendChar AS1_Init 
+  AS1_RecvChar AS1_RecvBlock AS1_SendBlock AS1_Init 
 SECTION: "PWM8_CODE"
   PWM8_Init 
 SECTION: "PWM9_CODE"
@@ -727,7 +809,7 @@ SECTION: "PWM9_CODE"
 SECTION: "PWM10_CODE"
   PWM10_Init 
 SECTION: "PWM11_CODE"
-  PWM11_Init 
+  SetRatio PWM11_SetRatio16 PWM11_Init 
 SECTION: "EI2C1_DATA"
   SlaveAddr 
 SECTION: ".abs_section_8"
@@ -1300,7 +1382,7 @@ OBJECT LIST SORTED BY ADDRESS
      _PWMPER45                                   F6       2       2       2   .abs_section_f6
      _PWMDTY01                                   F8       2       2       0   .abs_section_f8
      _PWMDTY23                                   FA       2       2       2   .abs_section_fa
-     _PWMDTY45                                   FC       2       2       2   .abs_section_fc
+     _PWMDTY45                                   FC       2       2       3   .abs_section_fc
      _PWMSDN                                     FE       1       1       4   .abs_section_fe
      _FCLKDIV                                   100       1       1       0   .abs_section_100
      _FSEC                                      101       1       1       0   .abs_section_101
@@ -1338,11 +1420,11 @@ OBJECT LIST SORTED BY ADDRESS
      _CANIDMR5                                  15D       1       1       1   .abs_section_15d
      _CANIDMR6                                  15E       1       1       1   .abs_section_15e
      _CANIDMR7                                  15F       1       1       1   .abs_section_15f
-     _CANRXIDR0                                 160       1       1       0   .abs_section_160
-     _CANRXIDR1                                 161       1       1       0   .abs_section_161
-     _CANRXIDR2                                 162       1       1       0   .abs_section_162
-     _CANRXIDR3                                 163       1       1       0   .abs_section_163
-     _CANRXDSR0                                 164       1       1       0   .abs_section_164
+     _CANRXIDR0                                 160       1       1       1   .abs_section_160
+     _CANRXIDR1                                 161       1       1       2   .abs_section_161
+     _CANRXIDR2                                 162       1       1       1   .abs_section_162
+     _CANRXIDR3                                 163       1       1       2   .abs_section_163
+     _CANRXDSR0                                 164       1       1       1   .abs_section_164
      _CANRXDSR1                                 165       1       1       0   .abs_section_165
      _CANRXDSR2                                 166       1       1       0   .abs_section_166
      _CANRXDSR3                                 167       1       1       0   .abs_section_167
@@ -1350,7 +1432,7 @@ OBJECT LIST SORTED BY ADDRESS
      _CANRXDSR5                                 169       1       1       0   .abs_section_169
      _CANRXDSR6                                 16A       1       1       0   .abs_section_16a
      _CANRXDSR7                                 16B       1       1       0   .abs_section_16b
-     _CANRXDLR                                  16C       1       1       0   .abs_section_16c
+     _CANRXDLR                                  16C       1       1       1   .abs_section_16c
      _CANRXTSR                                  16E       2       2       0   .abs_section_16e
      _CANTXIDR0                                 170       1       1       1   .abs_section_170
      _CANTXIDR1                                 171       1       1       0   .abs_section_171
@@ -1367,7 +1449,7 @@ OBJECT LIST SORTED BY ADDRESS
      _CANTXDLR                                  17C       1       1       1   .abs_section_17c
      _CANTXTBPR                                 17D       1       1       1   .abs_section_17d
      _CANTXTSR                                  17E       2       2       0   .abs_section_17e
-     _PTT                                       240       1       1      22   .abs_section_240
+     _PTT                                       240       1       1      11   .abs_section_240
      _PTIT                                      241       1       1       0   .abs_section_241
      _DDRT                                      242       1       1       6   .abs_section_242
      _RDRT                                      243       1       1       1   .abs_section_243
@@ -1410,34 +1492,40 @@ OBJECT LIST SORTED BY ADDRESS
      _RDRAD                                     273       1       1       1   .abs_section_273
      _PERAD                                     274       1       1       0   .abs_section_274
      _PPSAD                                     275       1       1       0   .abs_section_275
-     cont.1                                    3800       1       1       1   .bss        
-     error_code.1                              3801       1       1       7   .bss        
-     CCR_reg                                   3802       1       1       7   .common     
-     ErrFlag                                   3803       1       1       5   CAN1_DATA   
-     SerFlag                                   3804       1       1       4   CAN1_DATA   
-     OutFlg                                    3805       1       1       2   AD1_DATA    
-     SumChan                                   3806       1       1       3   AD1_DATA    
-     ModeFlg                                   3807       1       1       2   AD1_DATA    
-     AD1_OutV                                  3808       8       8       1   AD1_DATA    
-     SerFlag                                   3810       1       1       8   AS1_DATA    
-     AS1_InpLen                                3811       2       2       7   AS1_DATA    
-     InpPtrR                                   3813       2       2       5   AS1_DATA    
-     InpPtrW                                   3815       2       2       4   AS1_DATA    
-     InpBuffer                                 3817      10      16       6   AS1_DATA    
-     AS1_OutLen                                3827       2       2       6   AS1_DATA    
-     OutPtrR                                   3829       2       2       4   AS1_DATA    
-     OutPtrW                                   382B       2       2       4   AS1_DATA    
-     OutBuffer                                 382D      10      16       6   AS1_DATA    
-     OnFreeTxBuf_semaphore                     383D       1       1       2   AS1_DATA    
-     SlaveAddr                                 383E       1       1       4   EI2C1_DATA  
-     RatioStore                                383F       2       2       1   PWM8_DATA   
-     RatioStore                                3841       2       2       1   PWM9_DATA   
-     RatioStore                                3843       2       2       1   PWM10_DATA  
-     RatioStore                                3845       2       2       1   PWM11_DATA  
+     msgControl                                3800      16      22       1   .data       
+     msgW1                                     3816      16      22       1   .data       
+     transmitMessages                          382C       4       4       4   .data       
+     receiveMessages                           3830       4       4       3   .data       
+     can_dataAvailable                         3834       2       2       2   .data       
+     uart_dataAvailable                        3836       2       2       3   .data       
+     cont.1                                    3838       1       1       1   .bss        
+     error_code.1                              3839       1       1       2   .bss        
+     CCR_reg                                   383A       1       1       7   .common     
+     ErrFlag                                   383B       1       1       5   CAN1_DATA   
+     SerFlag                                   383C       1       1       8   CAN1_DATA   
+     OutFlg                                    383D       1       1       2   AD1_DATA    
+     SumChan                                   383E       1       1       3   AD1_DATA    
+     ModeFlg                                   383F       1       1       2   AD1_DATA    
+     AD1_OutV                                  3840       8       8       1   AD1_DATA    
+     SerFlag                                   3848       1       1       8   AS1_DATA    
+     AS1_InpLen                                3849       2       2       7   AS1_DATA    
+     InpPtrR                                   384B       2       2       5   AS1_DATA    
+     InpPtrW                                   384D       2       2       4   AS1_DATA    
+     InpBuffer                                 384F      80     128       6   AS1_DATA    
+     AS1_OutLen                                38CF       2       2       7   AS1_DATA    
+     OutPtrR                                   38D1       2       2       4   AS1_DATA    
+     OutPtrW                                   38D3       2       2       4   AS1_DATA    
+     OutBuffer                                 38D5      80     128       6   AS1_DATA    
+     OnFreeTxBuf_semaphore                     3955       1       1       5   AS1_DATA    
+     SlaveAddr                                 3956       1       1       2   EI2C1_DATA  
+     RatioStore                                3957       2       2       1   PWM8_DATA   
+     RatioStore                                3959       2       2       1   PWM9_DATA   
+     RatioStore                                395B       2       2       1   PWM10_DATA  
+     RatioStore                                395D       2       2       3   PWM11_DATA  
      Cpu_Interrupt                             C000       2       2      56   .init       
      Cpu_Delay100US                            C002       D      13       1   .init       
      _EntryPoint                               C00F      2A      42       3   .init       
-     Delay                                     C043       9       9      18   NON_BANKED  
+     Delay                                     C043       9       9       7   NON_BANKED  
      CAN1_InterruptTx                          C04C      1A      26       1   NON_BANKED  
      CAN1_InterruptRx                          C066      29      41       1   NON_BANKED  
      CAN1_InterruptError                       C08F      29      41       1   NON_BANKED  
@@ -1445,72 +1533,109 @@ OBJECT LIST SORTED BY ADDRESS
      AS1_Interrupt                             C0E3      C6     198       1   NON_BANKED  
      Init                                      C1A9      29      41       1   .text       
      _Startup                                  C1D2       8       8       1   .text       
-     PE_low_level_init                         C1DA      84     132       1   .text       
-     EI2C1_OnRxChar                            C25E       1       1       1   .text       
-     EI2C1_OnTxChar                            C25F       1       1       2   .text       
-     EI2C1_OnNACK                              C260       1       1       3   .text       
-     CAN1_OnFreeTxBuffer                       C261       4       4       1   .text       
-     CAN1_OnFullRxBuffer                       C265       1       1       1   .text       
-     CAN1_OnBusOff                             C266       1       1       1   .text       
-     AD1_OnEnd                                 C267       1       1       1   .text       
-     AS1_OnError                               C268       1       1       2   .text       
-     AS1_OnRxChar                              C269       D      13       1   .text       
-     AS1_OnTxChar                              C276       1       1       1   .text       
-     AS1_OnFullRxBuf                           C277       1       1       1   .text       
-     AS1_OnFreeTxBuf                           C278       1       1       1   .text       
-     main                                      C279      DE     222       2   .text       
-     _LSHL                                     C357      11      17       2   RUNTIME     
-     EI2C1_Init                                C368       6       6       1   EI2C1_CODE  
-     Write                                     C36E      51      81       5   EI2C1_CODE  
-     Read                                      C3BF      48      72       1   EI2C1_CODE  
-     GetAck                                    C407      28      40       5   EI2C1_CODE  
-     SetAck                                    C42F      41      65       1   EI2C1_CODE  
-     InternalStop                              C470      14      20       6   EI2C1_CODE  
-     EI2C1_SendChar                            C484      74     116       1   EI2C1_CODE  
-     EI2C1_SendBlock                           C4F8      9A     154       2   EI2C1_CODE  
-     EI2C1_RecvBlock                           C592      9C     156       1   EI2C1_CODE  
-     Inhr1_SetDir                              C62E       D      13      15   Inhr1_CODE  
-     Inhr2_SetDir                              C63B       D      13      16   Inhr2_CODE  
-     CAN1_SendFrameExt                         C648     112     274       2   CAN1_CODE   
-     CAN1_Init                                 C75A      60      96       1   CAN1_CODE   
-     AD1_Init                                  C7BA      11      17       1   AD1_CODE    
-     AS1_RecvChar                              C7CB      51      81       2   AS1_CODE    
-     AS1_SendChar                              C81C      41      65       2   AS1_CODE    
-     AS1_Init                                  C85D      38      56       1   AS1_CODE    
-     PWM8_Init                                 C895      20      32       1   PWM8_CODE   
-     PWM9_Init                                 C8B5      19      25       1   PWM9_CODE   
-     PWM10_Init                                C8CE      20      32       1   PWM10_CODE  
-     PWM11_Init                                C8EE      19      25       1   PWM11_CODE  
-     Channels                                  C907       4       4       1   AD1_CONST   
+     memcpy                                    C1DA      24      36       3   .text       
+     PE_low_level_init                         C1FE      84     132       1   .text       
+     EI2C1_OnTxChar                            C282       1       1       1   .text       
+     EI2C1_OnNACK                              C283       1       1       1   .text       
+     CAN1_OnFreeTxBuffer                       C284       4       4       1   .text       
+     CAN1_OnFullRxBuffer                       C288       1       1       1   .text       
+     CAN1_OnBusOff                             C289       1       1       1   .text       
+     AD1_OnEnd                                 C28A       1       1       1   .text       
+     AS1_OnError                               C28B       1       1       2   .text       
+     AS1_OnRxChar                              C28C       3       3       1   .text       
+     AS1_OnTxChar                              C28F       1       1       1   .text       
+     AS1_OnFullRxBuf                           C290       1       1       1   .text       
+     AS1_OnFreeTxBuf                           C291       1       1       1   .text       
+     main                                      C292      5E      94       1   .text       
+     comm_getData                              C2F0      32      50       1   .text       
+     comm_init                                 C322       E      14       1   .text       
+     comm_initTransmissionCyclicMessages       C330      20      32       1   .text       
+     comm_cyclic                               C350       6       6       1   .text       
+     comm_cyclicReception                      C356       B      11       1   .text       
+     comm_cyclicTransmission                   C361      11      17       1   .text       
+     comm_transmitMessage                      C372      D7     215       1   .text       
+     comm_receiveMessagesFromBus               C449      CF     207       2   .text       
+     comm_checkMessageId                       C518      51      81       1   .text       
+     comm_readMessageFromBus                   C569       D      13       1   .text       
+     comm_writeMessageToBus                    C576       B      11       3   .text       
+     crc8                                      C581      32      50       2   .text       
+     checkCRC                                  C5B3      14      20       1   .text       
+     bus_init                                  C5C7      13      19       2   .text       
+     bus_writeMessageToBuffer                  C5DA      3F      63       1   .text       
+     bus_readMessageFromBuffer                 C619      8F     143       1   .text       
+     bus_clearDataAvailable                    C6A8       E      14       1   .text       
+     bus_getDataAvailable                      C6B6      2E      46       1   .text       
+     bus_checkMessageId                        C6E4      2F      47       1   .text       
+     can_init                                  C713       3       3       1   .text       
+     can_writeToBuffer                         C716      22      34       1   .text       
+     can_readFromBuffer                        C738      2F      47       1   .text       
+     can_clearDataAvailable                    C767       7       7       1   .text       
+     can_getDataAvailable                      C76E       4       4       1   .text       
+     uart_init                                 C772       4       4       2   .text       
+     uart_writeToBuffer                        C776      21      33       1   .text       
+     uart_readFromBuffer                       C797      21      33       2   .text       
+     uart_setDataAvailable                     C7B8       6       6       1   .text       
+     uart_clearDataAvailable                   C7BE       7       7       1   .text       
+     uart_getDataAvailable                     C7C5       4       4       1   .text       
+     _LSHL                                     C7C9      11      17       2   RUNTIME     
+     _LSHRU                                    C7DA      11      17       2   RUNTIME     
+     _COPY                                     C7EB       8       8       2   RUNTIME     
+     _CASE_CHECKED_BYTE                        C7F3      14      20       1   RUNTIME     
+     _CASE_SEARCH_8_BYTE                       C807      1A      26       1   RUNTIME     
+     EI2C1_Init                                C821       6       6       1   EI2C1_CODE  
+     Write                                     C827      51      81       2   EI2C1_CODE  
+     GetAck                                    C878      28      40       2   EI2C1_CODE  
+     InternalStop                              C8A0      14      20       2   EI2C1_CODE  
+     EI2C1_SendBlock                           C8B4      9A     154       2   EI2C1_CODE  
+     Inhr1_SetDir                              C94E       D      13       7   Inhr1_CODE  
+     Inhr2_SetDir                              C95B       D      13       7   Inhr2_CODE  
+     CAN1_SendFrameExt                         C968     112     274       2   CAN1_CODE   
+     CAN1_ReadFrame                            CA7A      D6     214       2   CAN1_CODE   
+     CAN1_Init                                 CB50      5F      95       1   CAN1_CODE   
+     AD1_Init                                  CBAF      11      17       1   AD1_CODE    
+     AS1_RecvChar                              CBC0      51      81       1   AS1_CODE    
+     AS1_RecvBlock                             CC11      43      67       1   AS1_CODE    
+     AS1_SendBlock                             CC54      7E     126       1   AS1_CODE    
+     AS1_Init                                  CCD2      38      56       1   AS1_CODE    
+     PWM8_Init                                 CD0A      20      32       1   PWM8_CODE   
+     PWM9_Init                                 CD2A      19      25       1   PWM9_CODE   
+     PWM10_Init                                CD43      20      32       1   PWM10_CODE  
+     SetRatio                                  CD63      11      17       1   PWM11_CODE  
+     PWM11_SetRatio16                          CD74       7       7       1   PWM11_CODE  
+     PWM11_Init                                CD7B      19      25       1   PWM11_CODE  
+     Channels                                  CD94       4       4       1   AD1_CONST   
      _InterruptVectorTable                     FF80      80     128       0   .abs_section_ff80
 
 *********************************************************************************************
 UNUSED-OBJECTS SECTION
 ---------------------------------------------------------------------------------------------
 NOT USED PROCEDURES
+STRING.C.o (ansisi.lib):
+  strerror memchr memcmp memcpy2 _memcpy_8bitCount memmove memset 
+  _memset_clear_8bitCount strlen strset strcat strncat strcpy strncpy strcmp 
+  strncmp strchr strrchr strspn strcspn strpbrk strstr strtok strcoll strxfrm 
 rtshc12.c.o (ansisi.lib):
-  _BSHL _BSHRS _BSHRU _BDIVMODU _BDIVMODS _ISHL _ISHRU _ISHRS _LSHRU _LSHRS 
-  _LADD _LSUB _LAND _LOR _LXOR _LCMP _LCMP_P _LCMP_PP _LNEG _LCOM _LINC _LDEC 
-  _LMUL _LMULU16x32 _LMULS16x32 _lDivMod _LDIVU _NEG_P _LDIVS _LMODU _LMODS 
-  _ILSEXT _COPY _CASE_DIRECT _CASE_DIRECT_BYTE _CASE_CHECKED _CASE_CHECKED_BYTE 
-  _CASE_SEARCH _CASE_SEARCH_BYTE _CASE_SEARCH_8 _CASE_SEARCH_8_BYTE _FCALL 
-  _FPCMP 
+  _BSHL _BSHRS _BSHRU _BDIVMODU _BDIVMODS _ISHL _ISHRU _ISHRS _LSHRS _LADD 
+  _LSUB _LAND _LOR _LXOR _LCMP _LCMP_P _LCMP_PP _LNEG _LCOM _LINC _LDEC _LMUL 
+  _LMULU16x32 _LMULS16x32 _lDivMod _LDIVU _NEG_P _LDIVS _LMODU _LMODS _ILSEXT 
+  _CASE_DIRECT _CASE_DIRECT_BYTE _CASE_CHECKED _CASE_SEARCH _CASE_SEARCH_BYTE 
+  _CASE_SEARCH_8 _FCALL _FPCMP 
 EI2C1.c.o:
-  EI2C1_RecvChar EI2C1_SelectSlave EI2C1_GetSelected 
+  Read SetAck EI2C1_SendChar EI2C1_RecvChar EI2C1_RecvBlock EI2C1_SelectSlave 
+  EI2C1_GetSelected 
 Inhr1.c.o:
   Inhr1_PutVal 
 Inhr2.c.o:
   Inhr2_PutVal 
 Events.c.o:
-  TI2_OnInterrupt 
+  EI2C1_OnRxChar TI2_OnInterrupt 
 CAN1.c.o:
   CAN1_SetAcceptanceMode CAN1_GetStateRX CAN1_SetAcceptanceCode CAN1_GetError 
-  CAN1_SendFrame CAN1_ReadFrame CAN1_SetAcceptanceMask 
+  CAN1_SendFrame CAN1_SetAcceptanceMask 
 AD1.c.o:
   AD1_Measure AD1_GetValue16 
 AS1.c.o:
-  AS1_RecvBlock AS1_SendBlock AS1_ClearRxBuf AS1_ClearTxBuf AS1_InterruptRx 
-  AS1_InterruptTx 
+  AS1_SendChar AS1_ClearRxBuf AS1_ClearTxBuf AS1_InterruptRx AS1_InterruptTx 
 PWM8.c.o:
   SetRatio PWM8_SetRatio16 PWM8_SetDutyUS PWM8_SetDutyMS 
 PWM9.c.o:
@@ -1518,25 +1643,74 @@ PWM9.c.o:
 PWM10.c.o:
   SetRatio PWM10_SetRatio16 PWM10_SetDutyUS PWM10_SetDutyMS 
 PWM11.c.o:
-  SetRatio PWM11_SetRatio16 PWM11_SetDutyUS PWM11_SetDutyMS 
+  PWM11_SetDutyUS PWM11_SetDutyMS 
+comm.c.o:
+  comm_setData comm_end comm_checkCRC comm_kickoutMessage 
+bus_interface.c.o:
+  bus_end bus_setDataAvailable 
+can_interface.c.o:
+  can_end can_setDataAvailable 
+uart_interface.c.o:
+  uart_end 
 NOT USED VARIABLES
+STRING.C.o (ansisi.lib):
+  STRING..1 next.2 
 rtshc12.c.o (ansisi.lib):
   _PowOfTwo_8 _PowOfTwo_16 _PowOfTwo_32 errno 
 Events.c.o:
   Values i16CurrentADC i16SteeringADC i16Suspension1ADC i16Suspension2ADC 
   i16CurrentSetPoint i16SteeringSetPoint i16Suspension1SetPoint 
   i16Suspension2SetPoint 
+comm.c.o:
+  msgCurrent msgSuspension msgDirection 
 
 *********************************************************************************************
 COPYDOWN SECTION
 ---------------------------------------------------------------------------------------------
-------- ROM-ADDRESS: 0xC90B ---- SIZE       2 ---
+------- ROM-ADDRESS: 0xCD98 ---- SIZE       4 ---
+Filling bytes inserted
+ 00383800
+------- ROM-ADDRESS: 0xCD9C ---- RAM-ADDRESS: 0x3800 ---- SIZE      18 ---
+Name of initialized Object : msgControl
+ 10FFFFFFFF FFFFFFFFFF 00000A0300
+ 010001
+------- ROM-ADDRESS: 0xCDAE ---- SIZE       4 ---
+Filling bytes inserted
+ 00000000
+------- ROM-ADDRESS: 0xCDB2 ---- RAM-ADDRESS: 0x3816 ---- SIZE      22 ---
+Name of initialized Object : msgW1
+ 50F0DACEF0 DACEFFFFFF 00000A0300
+ 0100010000 0001
+------- ROM-ADDRESS: 0xCDC8 ---- RAM-ADDRESS: 0x382C ---- SIZE       2 ---
+Name of initialized Object : transmitMessages
+ 3816
+------- ROM-ADDRESS: 0xCDCA ---- SIZE       2 ---
+Filling bytes inserted
+ 0000
+------- ROM-ADDRESS: 0xCDCC ---- RAM-ADDRESS: 0x3830 ---- SIZE       1 ---
+Name of initialized Object : receiveMessages
+ 38
+------- ROM-ADDRESS: 0xCDCD ---- SIZE       4 ---
+Filling bytes inserted
+ 00000000
+------- ROM-ADDRESS: 0xCDD1 ---- RAM-ADDRESS: 0x3835 ---- SIZE       1 ---
+Name of initialized Object : can_dataAvailable:1
+ 01
+------- ROM-ADDRESS: 0xCDD2 ---- SIZE       1 ---
+Filling bytes inserted
+ 00
+------- ROM-ADDRESS: 0xCDD3 ---- RAM-ADDRESS: 0x3837 ---- SIZE       1 ---
+Name of initialized Object : uart_dataAvailable:1
+ 01
+------- ROM-ADDRESS: 0xCDD4 ---- SIZE       2 ---
 Filling bytes inserted
  0000
 
 *********************************************************************************************
 OBJECT-DEPENDENCIES SECTION
 ---------------------------------------------------------------------------------------------
+transmitMessages          USES msgW1 
+receiveMessages           USES msgControl 
 _EntryPoint               USES _INITRM _MISC _PEAR _CLKSEL _PLLCTL _SYNR 
                                 _REFDV _CRGFLG _Startup 
 CAN1_InterruptTx          USES _CANTFLG _CANTIER CAN1_OnFreeTxBuffer 
@@ -1557,29 +1731,54 @@ PE_low_level_init         USES _PTT _PPST _PERT _DDRT _ATDDIEN _PTS _DDRS
                                 AD1_Init AS1_Init PWM8_Init PWM9_Init PWM10_Init 
                                 PWM11_Init 
 CAN1_OnFreeTxBuffer       USES cont.1 
-AS1_OnRxChar              USES AS1_RecvChar AS1_SendChar 
+AS1_OnRxChar              USES uart_setDataAvailable 
 main                      USES PE_low_level_init EI2C1_SendBlock error_code.1 
-                                EI2C1_SendChar EI2C1_RecvBlock AS1_SendChar CAN1_SendFrameExt 
-                                AS1_RecvChar Cpu_Delay100US main 
+                                comm_init uart_init comm_cyclic comm_getData 
+                                PWM11_SetRatio16 Cpu_Delay100US 
+comm_getData              USES receiveMessages memcpy 
+comm_init                 USES comm_initTransmissionCyclicMessages bus_init 
+comm_initTransmissionCyclicMessages USES transmitMessages 
+comm_cyclic               USES comm_cyclicReception comm_cyclicTransmission 
+comm_cyclicReception      USES comm_receiveMessagesFromBus 
+comm_cyclicTransmission   USES transmitMessages comm_transmitMessage 
+comm_transmitMessage      USES _CASE_CHECKED_BYTE crc8 memcpy 
+                                comm_writeMessageToBus 
+comm_receiveMessagesFromBus USES bus_getDataAvailable _COPY 
+                                comm_checkMessageId transmitMessages receiveMessages checkCRC 
+                                comm_writeMessageToBus comm_readMessageFromBus bus_clearDataAvailable 
+comm_checkMessageId       USES receiveMessages transmitMessages 
+comm_readMessageFromBus   USES bus_readMessageFromBuffer 
+comm_writeMessageToBus    USES bus_writeMessageToBuffer 
+checkCRC                  USES crc8 
+bus_init                  USES uart_init can_init 
+bus_writeMessageToBuffer  USES uart_writeToBuffer can_writeToBuffer 
+bus_readMessageFromBuffer USES bus_checkMessageId uart_readFromBuffer memcpy 
+                                can_readFromBuffer 
+bus_clearDataAvailable    USES uart_clearDataAvailable can_clearDataAvailable 
+bus_getDataAvailable      USES uart_getDataAvailable can_getDataAvailable 
+bus_checkMessageId        USES _CASE_SEARCH_8_BYTE 
+can_writeToBuffer         USES CAN1_SendFrameExt 
+can_readFromBuffer        USES CAN1_ReadFrame 
+can_clearDataAvailable    USES can_dataAvailable 
+can_getDataAvailable      USES can_dataAvailable 
+uart_writeToBuffer        USES AS1_SendBlock 
+uart_readFromBuffer       USES AS1_RecvBlock 
+uart_setDataAvailable     USES uart_dataAvailable 
+uart_clearDataAvailable   USES uart_dataAvailable 
+uart_getDataAvailable     USES uart_dataAvailable 
 EI2C1_Init                USES SlaveAddr 
 Write                     USES Inhr1_SetDir _PTT Inhr2_SetDir Delay 
-Read                      USES Inhr1_SetDir Inhr2_SetDir Delay _PTT 
 GetAck                    USES Inhr1_SetDir Inhr2_SetDir Delay _PTT 
-SetAck                    USES Inhr1_SetDir _PTT Inhr2_SetDir Delay 
 InternalStop              USES Inhr1_SetDir _PTT Inhr2_SetDir Delay 
-EI2C1_SendChar            USES Inhr1_SetDir Inhr2_SetDir Delay _PTT SlaveAddr 
-                                Write GetAck EI2C1_OnNACK InternalStop 
-                                EI2C1_OnTxChar 
 EI2C1_SendBlock           USES Inhr1_SetDir Inhr2_SetDir Delay _PTT SlaveAddr 
                                 Write GetAck EI2C1_OnNACK InternalStop 
                                 EI2C1_OnTxChar 
-EI2C1_RecvBlock           USES Inhr1_SetDir Inhr2_SetDir Delay _PTT SlaveAddr 
-                                Write GetAck EI2C1_OnNACK InternalStop Read 
-                                EI2C1_OnRxChar SetAck 
 Inhr1_SetDir              USES _DDRT 
 Inhr2_SetDir              USES _DDRT 
 CAN1_SendFrameExt         USES CCR_reg _CANTFLG CAN1_SendFrameExt _CANTBSEL 
                                 _CANTXIDR0 _CANTIER _LSHL _CANTXDLR _CANTXTBPR 
+CAN1_ReadFrame            USES SerFlag CAN1_ReadFrame _CANRXIDR0 _CANRXIDR1 
+                                _CANRXIDR2 _CANRXIDR3 _LSHRU _CANRXDLR _CANRXDSR0 
 CAN1_Init                 USES _CANCTL1 _CANCTL0 _CANIDAC _CANIDAR0 _CANIDAR1 
                                 _CANIDAR2 _CANIDAR3 _CANIDAR4 _CANIDAR5 _CANIDAR6 
                                 _CANIDAR7 _CANIDMR0 _CANIDMR1 _CANIDMR2 _CANIDMR3 
@@ -1587,7 +1786,9 @@ CAN1_Init                 USES _CANCTL1 _CANCTL0 _CANIDAC _CANIDAR0 _CANIDAR1
                                 _CANBTR1 _CANRFLG _CANRIER 
 AD1_Init                  USES OutFlg ModeFlg _ATDCTL45 _ATDCTL23 
 AS1_RecvChar              USES AS1_InpLen CCR_reg InpPtrR InpBuffer SerFlag 
-AS1_SendChar              USES AS1_OutLen CCR_reg OutPtrW OutBuffer _SCICR2 
+AS1_RecvBlock             USES AS1_RecvChar 
+AS1_SendBlock             USES OnFreeTxBuf_semaphore CCR_reg AS1_OutLen 
+                                OutPtrW OutBuffer _SCICR2 
 AS1_Init                  USES SerFlag OnFreeTxBuf_semaphore _SCICR1 _SCISR2 
                                 _SCISR1 AS1_InpLen InpBuffer InpPtrR InpPtrW 
                                 AS1_OutLen OutBuffer OutPtrR OutPtrW _SCICR2 _SCIBD 
@@ -1597,6 +1798,8 @@ PWM9_Init                 USES _PWMCNT23 _PWMSDN RatioStore _PWMDTY23
                                 _PWMPER23 _PWMCLK _PWME 
 PWM10_Init                USES _PWMCNT45 _PWMSDN RatioStore _PWMDTY45 
                                 _PWMPER45 _PWMPRCLK _PWMSCLA _PWMCLK _PWME 
+SetRatio                  USES RatioStore _PWMDTY45 
+PWM11_SetRatio16          USES RatioStore SetRatio 
 PWM11_Init                USES _PWMCNT45 _PWMSDN RatioStore _PWMDTY45 
                                 _PWMPER45 _PWMCLK _PWME 
 _InterruptVectorTable     USES Cpu_Interrupt CAN1_InterruptTx CAN1_InterruptRx 
@@ -1663,66 +1866,100 @@ DEPENDENCY TREE
  |  |  |     
  |  |  +- EI2C1_OnTxChar      
  |  |       
- |  +- EI2C1_SendChar      
+ |  +- comm_init           
  |  |  | 
- |  |  +- Inhr1_SetDir         (see above)
- |  |  |  
- |  |  +- Inhr2_SetDir         (see above)
- |  |  |  
- |  |  +- Delay                (see above)
- |  |  |  
- |  |  +- Write                (see above)
- |  |  |  
- |  |  +- GetAck               (see above)
- |  |  |  
- |  |  +- EI2C1_OnNACK         (see above)
- |  |  |  
- |  |  +- InternalStop         (see above)
- |  |  |  
- |  |  +- EI2C1_OnTxChar       (see above)
- |  |     
- |  +- EI2C1_RecvBlock     
- |  |  | 
- |  |  +- Inhr1_SetDir         (see above)
- |  |  |  
- |  |  +- Inhr2_SetDir         (see above)
- |  |  |  
- |  |  +- Delay                (see above)
- |  |  |  
- |  |  +- Write                (see above)
- |  |  |  
- |  |  +- GetAck               (see above)
- |  |  |  
- |  |  +- EI2C1_OnNACK         (see above)
- |  |  |  
- |  |  +- InternalStop         (see above)
- |  |  |  
- |  |  +- Read                
- |  |  |  | 
- |  |  |  +- Inhr1_SetDir         (see above)
- |  |  |  |  
- |  |  |  +- Inhr2_SetDir         (see above)
- |  |  |  |  
- |  |  |  +- Delay                (see above)
- |  |  |     
- |  |  +- EI2C1_OnRxChar      
+ |  |  +- comm_initTransmissionCyclicMessages
  |  |  |    
- |  |  +- SetAck              
+ |  |  +- bus_init            
  |  |     | 
- |  |     +- Inhr1_SetDir         (see above)
- |  |     |  
- |  |     +- Inhr2_SetDir         (see above)
- |  |     |  
- |  |     +- Delay                (see above)
- |  |        
- |  +- AS1_SendChar        
- |  |    
- |  +- CAN1_SendFrameExt   
+ |  |     +- uart_init           
+ |  |     |    
+ |  |     +- can_init            
+ |  |          
+ |  +- uart_init            (see above)
+ |  |  
+ |  +- comm_cyclic         
  |  |  | 
- |  |  +- _LSHL               
+ |  |  +- comm_cyclicReception
+ |  |  |  | 
+ |  |  |  +- comm_receiveMessagesFromBus
+ |  |  |     | 
+ |  |  |     +- bus_getDataAvailable
+ |  |  |     |  | 
+ |  |  |     |  +- uart_getDataAvailable
+ |  |  |     |  |    
+ |  |  |     |  +- can_getDataAvailable
+ |  |  |     |       
+ |  |  |     +- _COPY               
+ |  |  |     |    
+ |  |  |     +- comm_checkMessageId 
+ |  |  |     |    
+ |  |  |     +- checkCRC            
+ |  |  |     |  | 
+ |  |  |     |  +- crc8                
+ |  |  |     |       
+ |  |  |     +- comm_writeMessageToBus
+ |  |  |     |  | 
+ |  |  |     |  +- bus_writeMessageToBuffer
+ |  |  |     |     | 
+ |  |  |     |     +- uart_writeToBuffer  
+ |  |  |     |     |  | 
+ |  |  |     |     |  +- AS1_SendBlock       
+ |  |  |     |     |       
+ |  |  |     |     +- can_writeToBuffer   
+ |  |  |     |        | 
+ |  |  |     |        +- CAN1_SendFrameExt   
+ |  |  |     |           | 
+ |  |  |     |           +- _LSHL               
+ |  |  |     |                
+ |  |  |     +- comm_readMessageFromBus
+ |  |  |     |  | 
+ |  |  |     |  +- bus_readMessageFromBuffer
+ |  |  |     |     | 
+ |  |  |     |     +- bus_checkMessageId  
+ |  |  |     |     |  | 
+ |  |  |     |     |  +- _CASE_SEARCH_8_BYTE 
+ |  |  |     |     |       
+ |  |  |     |     +- uart_readFromBuffer 
+ |  |  |     |     |  | 
+ |  |  |     |     |  +- AS1_RecvBlock       
+ |  |  |     |     |     | 
+ |  |  |     |     |     +- AS1_RecvChar        
+ |  |  |     |     |          
+ |  |  |     |     +- memcpy              
+ |  |  |     |     |    
+ |  |  |     |     +- can_readFromBuffer  
+ |  |  |     |        | 
+ |  |  |     |        +- CAN1_ReadFrame      
+ |  |  |     |           | 
+ |  |  |     |           +- _LSHRU              
+ |  |  |     |                
+ |  |  |     +- bus_clearDataAvailable
+ |  |  |        | 
+ |  |  |        +- uart_clearDataAvailable
+ |  |  |        |    
+ |  |  |        +- can_clearDataAvailable
+ |  |  |             
+ |  |  +- comm_cyclicTransmission
+ |  |     | 
+ |  |     +- comm_transmitMessage
+ |  |        | 
+ |  |        +- _CASE_CHECKED_BYTE  
+ |  |        |    
+ |  |        +- crc8                 (see above)
+ |  |        |  
+ |  |        +- memcpy               (see above)
+ |  |        |  
+ |  |        +- comm_writeMessageToBus (see above)
+ |  |           
+ |  +- comm_getData        
+ |  |  | 
+ |  |  +- memcpy               (see above)
+ |  |     
+ |  +- PWM11_SetRatio16    
+ |  |  | 
+ |  |  +- SetRatio            
  |  |       
- |  +- AS1_RecvChar        
- |  |    
  |  +- Cpu_Delay100US      
  |       
  +- _EntryPoint         
@@ -1759,10 +1996,8 @@ DEPENDENCY TREE
  |  |    
  |  +- AS1_OnRxChar        
  |  |  | 
- |  |  +- AS1_RecvChar         (see above)
- |  |  |  
- |  |  +- AS1_SendChar         (see above)
- |  |     
+ |  |  +- uart_setDataAvailable
+ |  |       
  |  +- AS1_OnFullRxBuf     
  |  |    
  |  +- AS1_OnTxChar        
@@ -1777,6 +2012,6 @@ STATISTIC SECTION
 
 ExeFile:
 --------
-Number of blocks to be downloaded: 15
-Total size of all blocks to be downloaded: 2445
+Number of blocks to be downloaded: 13
+Total size of all blocks to be downloaded: 3670
 

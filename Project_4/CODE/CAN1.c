@@ -6,7 +6,7 @@
 **     Component : FreescaleCAN
 **     Version   : Component 02.355, Driver 01.29, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 14.06.2015, 01:49
+**     Date/Time : 7/5/2015, 6:31 PM
 **     Abstract  :
 **         This component "FreescaleCAN" implements a CAN serial channel.
 **     Settings  :
@@ -19,7 +19,7 @@
 **             RSJ                     : 1
 **
 **             Recieve accept. code    : 0x00
-**             Recieve accept. mask    : 0x00
+**             Recieve accept. mask    : 0xFFFFFFFF
 **
 **         Input interrupt
 **             Vector name             : Vcanrx
@@ -587,17 +587,17 @@ void CAN1_Init(void)
   CANIDAR4 = 0x00U;                    /* Set the acceptance code, register CANIDAR4 */
   CANIDAR5 = 0x00U;                    /* Set the acceptance code, register CANIDAR5 */
   CANIDAR6 = 0x00U;                    /* Set the acceptance code, register CANIDAR6 */
-  CANIDAR7 = 0x0FU;                    /* Set the acceptance code, register CANIDAR7 */
-  CANIDMR0 = 0x00U;                    /* Set the acceptance mask, register CANIDMR0 */
-  CANIDMR1 = 0x00U;                    /* Set the acceptance mask, register CANIDMR1 */
-  CANIDMR2 = 0x00U;                    /* Set the acceptance mask, register CANIDMR2 */
-  CANIDMR3 = 0x00U;                    /* Set the acceptance mask, register CANIDMR3 */
-  CANIDMR4 = 0x00U;                    /* Set the acceptance mask, register CANIDMR4 */
-  CANIDMR5 = 0x00U;                    /* Set the acceptance mask, register CANIDMR5 */
-  CANIDMR6 = 0x00U;                    /* Set the acceptance mask, register CANIDMR6 */
-  CANIDMR7 = 0x0FU;                    /* Set the acceptance mask, register CANIDMR7 */
-  /* CANBTR0: SJW1=0,SJW0=1,BRP5=0,BRP4=0,BRP3=0,BRP2=0,BRP1=1,BRP0=1 */
-  CANBTR0 = 0x43U;                     /* Set the device timing register */
+  CANIDAR7 = 0x00U;                    /* Set the acceptance code, register CANIDAR7 */
+  CANIDMR0 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR0 */
+  CANIDMR1 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR1 */
+  CANIDMR2 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR2 */
+  CANIDMR3 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR3 */
+  CANIDMR4 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR4 */
+  CANIDMR5 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR5 */
+  CANIDMR6 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR6 */
+  CANIDMR7 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR7 */
+  /* CANBTR0: SJW1=0,SJW0=1,BRP5=0,BRP4=0,BRP3=0,BRP2=0,BRP1=1,BRP0=0 */
+  CANBTR0 = 0x42U;                     /* Set the device timing register */
   /* CANBTR1: SAMP=0,TSEG22=1,TSEG21=1,TSEG20=1,TSEG13=0,TSEG12=1,TSEG11=1,TSEG10=0 */
   CANBTR1 = 0x76U;                     /* Set the device timing register */
   CANCTL1_CLKSRC = 0x00U;              /* Select the clock source from crystal */

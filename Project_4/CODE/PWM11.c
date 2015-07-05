@@ -6,7 +6,7 @@
 **     Component : PWM
 **     Version   : Component 02.231, Driver 01.16, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 14.06.2015, 01:49
+**     Date/Time : 7/5/2015, 6:31 PM
 **     Abstract  :
 **         This component implements a pulse-width modulation generator
 **         that generates signal with variable duty and fixed cycle. 
@@ -48,7 +48,7 @@
 **             Prescaler               : divide-by-1
 **             Clock                   : 53333 Hz
 **           Initial value of            period        pulse width (ratio 0.392%)
-**             Xtal ticks              : 76500         300
+**             Xtal ticks              : 57375         225
 **             microseconds            : 4781          19
 **             milliseconds            : 5             0
 **             seconds (real)          : 0.00478125    0.00001875

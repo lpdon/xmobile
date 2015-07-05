@@ -2,31 +2,16 @@
 PE_DesktopFileVersion=1092
 
 [Desktop]
-StartupPrj=C:\Users\Marcelo\workspace\xmobile\Project_4\Project_4.pe
+StartupPrj=D:\Users\Leandro\workspace\xmobile\Project_4\Project_4.pe
 
 [PE_IDE_PlugIn]
 
 [CpuExpert]
 
 [AppPanel]
-Status=Visible
+Status=hiden
 WindowState=NORMAL
-Rect=[0|154|347|618]
-AllFocusedNode=AS1:AsynchroSerial
-ConfigurationsInAllExpanded=Yes
-CPUsInAllExpanded=Yes
-FPGAsInAllExpanded=No
-OperatingSystemInAllExpanded=Yes
-BeansInAllExpanded=Yes
-TasksInAllExpanded=No
-ProgramsInAllExpanded=Yes
-Gen_ProgramsInAllExpanded=Yes
-Gen_BeanModulesInAllExpanded=Yes
-ExternModulesInAllExpanded=No
-DocumentationInAllExpanded=Yes
-PESLInAllExpanded=No
-PESL_moduleInAllExpanded=No
-ViewEnabledItemsOnly=No
+Rect=[225|313|310|496]
 
 [CpuPanel]
 Status=Visible
@@ -46,7 +31,7 @@ WindowState=NORMAL
 Rect=[0|796|657|131]
 
 [BeanSelector]
-Status=Visible
+Status=hiden
 WindowState=NORMAL
 Rect=[885|401|396|457]
 BF_ForTgtCpuOnly=Yes
@@ -56,10 +41,10 @@ BF_BA_AllQuestions=Yes
 [ObjInspector]
 Status=Visible
 WindowState=NORMAL
-Rect=[0|88|869|860]
+Rect=[0|88|1147|860]
 ObjInspectorDockedWithPrphInit=No
-ColWidth01=283
-ColWidth02=567
+ColWidth01=376
+ColWidth02=752
 ColWidth11=248
 ColWidth12=497
 ColWidth21=248
