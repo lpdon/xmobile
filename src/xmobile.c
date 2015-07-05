@@ -38,7 +38,11 @@ int main(void) {
 
 	comm_init();
 //	uart_init();
-//	handshake_init();
+	handshake_init();
+
+	tMessageControlData ctrlData;
+	ctrlData.pwmTest[0] = 0xFF3F;
+	comm_setData(E_MSG_CONTROL_ID, &ctrlData);
 
 	while (1)
 	{

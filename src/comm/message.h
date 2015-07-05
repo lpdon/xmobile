@@ -77,6 +77,11 @@ typedef enum
 
 typedef struct
 {
+	uint16_t pwmTest[4];
+} tMessageControlData;
+
+typedef struct
+{
 	uint16_t current[4];
 } tMessageCurrentData;
 

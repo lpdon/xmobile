@@ -311,10 +311,19 @@ eHandshakeStatus handshake_getStatus(void)
 {
 	eHandshakeStatus loc_result = E_HANDSHAKE_STATUS_FAILED;
 
+#if NODE==CONTROL
 	if  (  (handshakeResponse.state == E_HANDSHAKE_STATE_END_SUCCESS)
 		&& (handshakeRqst.state == E_HANDSHAKE_STATE_END_SUCCESS)
 		)
+#else
+	if  (  (handshakeRqst.state == E_HANDSHAKE_STATE_END_SUCCESS)
+		)
+#endif
 	{
+		handshakeResponse.status = E_HANDSHAKE_MSG_STATUS_INACTIVE;
+		handshakeRqst.status = E_HANDSHAKE_MSG_STATUS_INACTIVE;
+		handshakeResponse.state = E_HANDSHAKE_STATE_END_SUCCESS;
+		handshakeRqst.state = E_HANDSHAKE_STATE_END_SUCCESS;
 		loc_result = E_HANDSHAKE_STATUS_OK;
 	}
 

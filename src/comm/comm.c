@@ -179,33 +179,27 @@ tMessage msgDirection =
 //	E_MSG_BUS_CAN
 //};
 
-#if NODE==CONTROL
+
 static tMessage * transmitMessages[] =
 {
+#if NODE==CONTROL
 	&msgControl,
+#else
+#endif
 	NULL
 };
 
 static tMessage * receiveMessages[] =
 {
-	&msgCurrent,
+#if NODE==CONTROL
+#else
+	&msgControl,
+#endif
+//	&msgCurrent,
 //	&msgSuspension,
 //	&msgDirection,
 	NULL
 };
-#else
-static tMessage * transmitMessages[] =
-{
-	&msgCurrent,
-	NULL
-};
-
-static tMessage * receiveMessages[] =
-{
-	&msgControl,
-	NULL
-};
-#endif
 
 void comm_setData(eMessageId arg_id, const void * const arg_data)
 {
@@ -217,6 +211,21 @@ void comm_setData(eMessageId arg_id, const void * const arg_data)
 		if (loc_id == arg_id)
 		{
 			memcpy((*pMessage)->body.data.rawData, arg_data, MSG_DATASIZE);
+			break;
+		}
+	}
+}
+
+void comm_getData(eMessageId arg_id, void * const arg_data)
+{
+	tMessage ** pMessage = receiveMessages;
+	const eMessageId loc_id = (*pMessage)->body.messageId;
+
+	while (*pMessage != NULL)
+	{
+		if (loc_id == arg_id)
+		{
+			memcpy((void *)arg_data, (*pMessage)->body.data.rawData, MSG_DATASIZE);
 			break;
 		}
 	}
