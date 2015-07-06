@@ -135,57 +135,57 @@ tMessage msgW1 =
 	E_MSG_BUS_CAN,
 	E_MSG_CRC_INACTIVE
 };
-//
-//tMessage msgW2 =
-//{
-//	{
-//		E_MSG_W2_ID,
-//		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
-//		0xFFU
-//	},
-//	E_MSG_STATE_INIT,
-//	COMM_TIMEOUT,
-//	COMM_MAXRETRANSMISSIONS,
-//	E_MSG_STATUS_INACTIVE,
-//	E_COMM_STATUS_FAILED,
-//	E_MSG_TYPE_CYCLIC,
-//	E_MSG_BUS_CAN,
-//	E_MSG_CRC_INACTIVE
-//};
-//
-//tMessage msgW3 =
-//{
-//	{
-//		E_MSG_W3_ID,
-//		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
-//		0xFFU
-//	},
-//	E_MSG_STATE_INIT,
-//	COMM_TIMEOUT,
-//	COMM_MAXRETRANSMISSIONS,
-//	E_MSG_STATUS_INACTIVE,
-//	E_COMM_STATUS_FAILED,
-//	E_MSG_TYPE_CYCLIC,
-//	E_MSG_BUS_CAN,
-//	E_MSG_CRC_INACTIVE
-//};
-//
-//tMessage msgW4 =
-//{
-//	{
-//		E_MSG_W4_ID,
-//		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
-//		0xFFU
-//	},
-//	E_MSG_STATE_INIT,
-//	COMM_TIMEOUT,
-//	COMM_MAXRETRANSMISSIONS,
-//	E_MSG_STATUS_INACTIVE,
-//	E_COMM_STATUS_FAILED,
-//	E_MSG_TYPE_CYCLIC,
-//	E_MSG_BUS_CAN,
-//	E_MSG_CRC_INACTIVE
-//};
+
+tMessage msgW2 =
+{
+	{
+		E_MSG_W2_ID,
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN,
+	E_MSG_CRC_INACTIVE
+};
+
+tMessage msgW3 =
+{
+	{
+		E_MSG_W3_ID,
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN,
+	E_MSG_CRC_INACTIVE
+};
+
+tMessage msgW4 =
+{
+	{
+		E_MSG_W4_ID,
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN,
+	E_MSG_CRC_INACTIVE
+};
 
 
 static tMessage * transmitMessages[] =
@@ -325,7 +325,6 @@ void comm_transmitMessage(tMessage * const arg_message)
 		}
 		case E_MSG_STATE_TX_READY:
 		{
-			/*If the UART buffer is available, start transmission*/
 //#if defined(WIN32)
 			loc_state = E_MSG_STATE_TRANSMIT;
 //#endif
