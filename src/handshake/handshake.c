@@ -70,8 +70,8 @@ tHandshakeMessage handshakeResponse =
 	},
 	E_HANDSHAKE_STATE_INIT,
 	{
-		1U,
-		1U
+		HANDSHAKE_CYCLETIME,
+		HANDSHAKE_CYCLETIME
 	},
 	HANDSHAKE_RETRANSMISSIONS,
 	E_HANDSHAKE_MSG_STATUS_INACTIVE,
@@ -95,8 +95,11 @@ void handshake_init(void)
 
 void handshake_cyclic(void)
 {
-	handshake_cyclicReception();
-	handshake_cyclicTransmission();
+	if (handshake_getStatus() != E_HANDSHAKE_STATUS_OK)
+	{
+		handshake_cyclicReception();
+		handshake_cyclicTransmission();
+	}
 }
 
 void handshake_cyclicReception(void)
@@ -158,18 +161,18 @@ void handshake_transmitMessage(tHandshakeMessage * const arg_message)
 			/*Write message to UART buffer*/
 			handshake_writeMessageToBuffer(&loc_message);
 
-			loc_state = E_HANDSHAKE_STATE_WAITFORACKORRESPONSE;
+			loc_state = E_HANDSHAKE_STATE_WAITFORACK;
 			break;
 		}
-		case E_HANDSHAKE_STATE_WAITFORACKORRESPONSE:
+		case E_HANDSHAKE_STATE_WAITFORACK:
 		{
-			if (loc_ack == E_HANDSHAKE_STATUS_OK || handshakeResponse.state == E_HANDSHAKE_STATE_END_SUCCESS)
+			if (loc_ack == E_HANDSHAKE_STATUS_OK)
 			{
 				loc_state = E_HANDSHAKE_STATE_END_SUCCESS;
 			}
 			else
 			{
-				loc_state = (loc_cycleTime > 0) ? E_HANDSHAKE_STATE_WAITFORACKORRESPONSE : E_HANDSHAKE_STATE_TRANSMIT;
+				loc_state = (loc_cycleTime > 0) ? E_HANDSHAKE_STATE_WAITFORACK : E_HANDSHAKE_STATE_TRANSMIT;
 				loc_cycleTime--;
 			}
 			break;
@@ -220,38 +223,32 @@ void handshake_receiveMessages(void)
 
 					if (loc_checkCRC == E_CRC_STATUS_OK)
 					{
-						/* Send ack. Content of the message is not important */
-						tHandshakeMessage loc_message;
-						loc_message.body.messageId = (loc_receivedMessageId | HANDSHAKE_ACK);
-						handshake_writeMessageToBuffer(&loc_message);
-
 						/* If the message received was a handshake request, activate the response */
 						if (loc_receivedMessageId == E_HANDSHAKE_RQST_ID)
 						{
+							tHandshakeMessage loc_message;
 							handshakeRqst.state = E_HANDSHAKE_STATE_END_SUCCESS;
 							handshakeResponse.status = E_HANDSHAKE_MSG_STATUS_ACTIVE;
+							loc_message.body.messageId = (loc_receivedMessageId | HANDSHAKE_ACK);
+							handshake_writeMessageToBuffer(&loc_message);
 						}
 
-						/* If the message received was a handshake response, set the handshake to success */
+						/* If the message received was a handshake response, set an ACK */
 						if (loc_receivedMessageId == E_HANDSHAKE_RESPONSE_ID)
 						{
+							tHandshakeMessage loc_message;
+							loc_message.body.messageId = (loc_receivedMessageId | HANDSHAKE_ACK);
+							handshake_writeMessageToBuffer(&loc_message);
 							handshakeResponse.state = E_HANDSHAKE_STATE_END_SUCCESS;
 						}
-					}
-					else
-					{
-						/* Send nack. Content of the message is not important */
-						tHandshakeMessage loc_message;
-						loc_message.body.messageId = (loc_receivedMessageId | HANDSHAKE_NACK);
-						handshake_writeMessageToBuffer(&loc_message);
 					}
 				}
 			}
 		}
-	}
 #if !defined(WIN32)
-	uart_clearDataAvailable();
+		uart_clearDataAvailable();
 #endif
+	}
 }
 
 const eHandshakeStatus handshake_readMessageFromBuffer(tHandshakeMessage * arg_message)
@@ -311,19 +308,10 @@ eHandshakeStatus handshake_getStatus(void)
 {
 	eHandshakeStatus loc_result = E_HANDSHAKE_STATUS_FAILED;
 
-#if NODE==CONTROL
 	if  (  (handshakeResponse.state == E_HANDSHAKE_STATE_END_SUCCESS)
 		&& (handshakeRqst.state == E_HANDSHAKE_STATE_END_SUCCESS)
 		)
-#else
-	if  (  (handshakeRqst.state == E_HANDSHAKE_STATE_END_SUCCESS)
-		)
-#endif
 	{
-		handshakeResponse.status = E_HANDSHAKE_MSG_STATUS_INACTIVE;
-		handshakeRqst.status = E_HANDSHAKE_MSG_STATUS_INACTIVE;
-		handshakeResponse.state = E_HANDSHAKE_STATE_END_SUCCESS;
-		handshakeRqst.state = E_HANDSHAKE_STATE_END_SUCCESS;
 		loc_result = E_HANDSHAKE_STATUS_OK;
 	}
 

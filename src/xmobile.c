@@ -41,12 +41,12 @@ int main(void) {
 	handshake_init();
 
 	tMessageControlData ctrlData;
-	ctrlData.pwmTest[0] = 0xFF3F;
+	ctrlData.pwmTest[0] = 0xFF1F;
 	comm_setData(E_MSG_CONTROL_ID, &ctrlData);
 
 	while (1)
 	{
-//		handshake_cyclic();
+		handshake_cyclic();
 		comm_cyclic();
 		delay(10);
 	}

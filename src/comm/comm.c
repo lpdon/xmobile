@@ -64,7 +64,8 @@ tMessage msgControl =
 	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_UART
+	E_MSG_BUS_UART,
+	E_MSG_CRC_ACTIVE
 };
 
 tMessage msgCurrent =
@@ -80,7 +81,8 @@ tMessage msgCurrent =
 	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_UART
+	E_MSG_BUS_UART,
+	E_MSG_CRC_ACTIVE
 };
 
 tMessage msgSuspension =
@@ -96,7 +98,8 @@ tMessage msgSuspension =
 	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_UART
+	E_MSG_BUS_UART,
+	E_MSG_CRC_ACTIVE
 };
 
 tMessage msgDirection =
@@ -112,7 +115,8 @@ tMessage msgDirection =
 	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_UART
+	E_MSG_BUS_UART,
+	E_MSG_CRC_ACTIVE
 };
 
 tMessage msgW1 =
@@ -128,7 +132,8 @@ tMessage msgW1 =
 	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_CAN
+	E_MSG_BUS_CAN,
+	E_MSG_CRC_INACTIVE
 };
 //
 //tMessage msgW2 =
@@ -144,7 +149,8 @@ tMessage msgW1 =
 //	E_MSG_STATUS_INACTIVE,
 //	E_COMM_STATUS_FAILED,
 //	E_MSG_TYPE_CYCLIC,
-//	E_MSG_BUS_CAN
+//	E_MSG_BUS_CAN,
+//	E_MSG_CRC_INACTIVE
 //};
 //
 //tMessage msgW3 =
@@ -160,7 +166,8 @@ tMessage msgW1 =
 //	E_MSG_STATUS_INACTIVE,
 //	E_COMM_STATUS_FAILED,
 //	E_MSG_TYPE_CYCLIC,
-//	E_MSG_BUS_CAN
+//	E_MSG_BUS_CAN,
+//	E_MSG_CRC_INACTIVE
 //};
 //
 //tMessage msgW4 =
@@ -176,7 +183,8 @@ tMessage msgW1 =
 //	E_MSG_STATUS_INACTIVE,
 //	E_COMM_STATUS_FAILED,
 //	E_MSG_TYPE_CYCLIC,
-//	E_MSG_BUS_CAN
+//	E_MSG_BUS_CAN,
+//	E_MSG_CRC_INACTIVE
 //};
 
 
@@ -194,7 +202,7 @@ static tMessage * receiveMessages[] =
 {
 #if NODE==CONTROL
 #else
-	//&msgControl,
+	&msgControl,
 	//&msgW1,
 #endif
 //	&msgCurrent,
@@ -262,7 +270,7 @@ void comm_initTransmissionCyclicMessages(void)
 
 void comm_cyclic(void)
 {
-//	if (handshake_getStatus() == E_HANDSHAKE_STATUS_OK)
+	if (handshake_getStatus() == E_HANDSHAKE_STATUS_OK)
 	{
 		comm_cyclicReception();
 		comm_cyclicTransmission();
@@ -372,7 +380,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 			/*Timeout expired*/
 			else
 			{
-				loc_state = (loc_retransmissions > 0U) ? E_MSG_STATE_TRANSMIT : E_MSG_STATE_END;
+				loc_state = (loc_retransmissions >= 0U) ? E_MSG_STATE_TRANSMIT : E_MSG_STATE_END;
 				loc_retransmissions--;
 			}
 			break;
@@ -438,7 +446,7 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 					{
 						if ((*pMessage)->body.messageId == loc_receivedMessageId)
 						{
-							if (arg_busType == E_MSG_BUS_UART)
+							if (loc_receivedMessage.crcCheck == E_MSG_CRC_ACTIVE)
 							{
 								const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
 																		 sizeof(uMessageData),
@@ -464,7 +472,6 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 							}
 							else
 							{
-								/* Ignore CRC for CAN bus */
 								tMessage loc_message;
 								loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
 								comm_writeMessageToBus(&loc_message);
@@ -480,8 +487,8 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 				}
 			}
 		}
+		bus_clearDataAvailable(arg_busType);
 	}
-	bus_clearDataAvailable(arg_busType);
 }
 
 eCommStatus comm_checkCRC(const tMessageBody * const arg_messageBody)

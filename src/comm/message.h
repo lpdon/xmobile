@@ -75,6 +75,12 @@ typedef enum
 	E_MSG_BUS_CAN
 } eMessageBus;
 
+typedef enum
+{
+	E_MSG_CRC_ACTIVE,
+	E_MSG_CRC_INACTIVE
+} eMessageCRC;
+
 typedef struct
 {
 	uint16_t pwmTest[4];
@@ -98,9 +104,6 @@ typedef struct
 typedef union
 {
 	uint8_t rawData[MSG_DATASIZE];
-//	tCommCurrentData currentData;
-//	tCommSuspensionData suspensionData;
-//	tCommDirectionData directionData;
 } uMessageData;
 
 typedef struct
@@ -120,6 +123,7 @@ typedef struct
 	eMessageAck ack;
 	eMessageType type;
 	eMessageBus bus;
+	eMessageCRC crcCheck;
 } tMessage;
 
 #endif
