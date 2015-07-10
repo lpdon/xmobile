@@ -62,8 +62,8 @@ void pid_initInst(tPid * const arg_pid)
 int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error)
 {
 	const uint16_t loc_iFactor = arg_pid->iFactor;
-	const int16_t loc_error = (arg_error + arg_pid->iError);
-	int16_t loc_value;
+	const volatile int16_t loc_error = (arg_error + arg_pid->iError);
+	volatile int16_t loc_value;
 
 	loc_value = loc_iFactor * loc_error;
 
@@ -79,7 +79,7 @@ int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error)
 		arg_pid->iError = -PID_IMAXERROR;
 	}
 
-	return loc_value;
+	return loc_value >> 3;
 }
 
 int16_t pid_calcD(tPid * const arg_pid, int16_t arg_error)
@@ -105,11 +105,6 @@ void pid_updateValues(tPid * const arg_pid)
 	int16_t loc_value;
 
 	loc_value = arg_pid->pFactor * (loc_error + loc_iTerm + loc_dTerm);
-
-	if (loc_value < 0)
-	{
-		loc_value = PID_MAX + loc_value;
-	}
 
 	/*Limit output*/
 	if (loc_value > PID_MAX)

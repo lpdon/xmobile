@@ -38,14 +38,11 @@ typedef enum
 
 typedef enum
 {
-	E_MSG_CONTROL_ID =        0x10U,
-	E_MSG_CURRENT_ID =        0x20U,
-	E_MSG_SUSP_ID    =        0x30U,
-	E_MSG_DIR_ID     =        0x40U,
-	E_MSG_W1_ID      =        0x50U,
-	E_MSG_W2_ID      =        0x60U,
-	E_MSG_W3_ID      =        0x70U,
-	E_MSG_W4_ID      =        0x80U
+	E_MSG_CONTROL_ID   =        0x10U,
+	E_MSG_CURRENT_ID   =        0x20U,
+	E_MSG_SUSP_ID      =        0x30U,
+	E_MSG_STEERING_ID  =        0x40U,
+	E_MSG_WHEEL_ID     =        0x50U
 } eMessageId;
 
 typedef enum
@@ -93,13 +90,18 @@ typedef struct
 
 typedef struct
 {
-	uint8_t suspension[8];
+	int16_t suspension[4];
 } tMessageSuspensionData;
 
 typedef struct
 {
-	uint8_t direction[8];
-} tMessageDirectionData;
+	int16_t steering[4];
+} tMessageSteeringData;
+
+typedef struct
+{
+	int16_t wheel[4];
+} tMessageWheelData;
 
 typedef union
 {

@@ -1,22 +1,25 @@
 #ifndef NUNCHUK_H
 #define NUNCHUK_H
 
-#if !defined(WIN32)
+#if defined(WIN32)
+	#include <stdint.h>
+#else
+	#include "PE_Types.h"
+#endif
 
-#include "PE_Types.h"
-
-typedef struct st_status{
+typedef struct
+{
 	int8_t 	joystickX;
 	int8_t 	joystickY;
 	uint8_t buttons;
 } joystick;
 
-//updates the data from the nunchuk
-uint8_t updateJoystickInput();
+extern joystick nunchuk;
 
 //starts the operation of the nunchuk
-uint8_t initJoystick();
+uint8_t nunchuk_init();
 
-#endif
+//updates the data from the nunchuk
+uint8_t nunchuk_cyclic();
 
 #endif

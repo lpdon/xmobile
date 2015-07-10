@@ -25,12 +25,21 @@ SOFTWARE.*/
 
 #if defined(WIN32)
 	#include <stdint.h>
+#else
+	#include "PE_Types.h"
 #endif
 
 #define PID_NUMINST     3
-#define PID_MIN         0
-#define PID_MAX       100
-#define PID_IMAXERROR (PID_MAX >> 3)
+#define PID_MIN         -250
+#define PID_MAX         250
+#define PID_IMAXERROR (PID_MAX >> 1)
+
+typedef enum
+{
+	E_PID_MOTOR_WHEEL,
+	E_PID_MOTOR_STEERING,
+	E_PID_MOTOR_SUSPENSION
+} ePIDMotor;
 
 typedef struct
 {

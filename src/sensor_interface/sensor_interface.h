@@ -1,0 +1,47 @@
+/*The MIT License (MIT)
+
+Copyright (c) 2015 Marcelo Chimentao, Leandro Piekarski do Nascimento
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.*/
+
+#ifndef SENSOR_INTERFACE_H
+#define SENSOR_INTERFACE_H
+
+#if defined(WIN32)
+	#include <stdint.h>
+#else
+	#include "PE_Types.h"
+#endif
+
+#define SENSOR_NUMINST   4
+
+typedef enum
+{
+	E_SENSOR_CURRENT           = 0,
+	E_SENSOR_STEERING          = 1,
+	E_SENSOR_SUSPENSION_SPRING = 2,
+	E_SENSOR_SUSPENSION_JOINT  = 3,
+} eSensor;
+
+extern uint16_t sensor[SENSOR_NUMINST];
+
+void sensor_init(void);
+void sensor_cyclic(void);
+
+#endif

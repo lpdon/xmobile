@@ -247,12 +247,9 @@ const eBusStatus bus_checkMessageId(const uint8_t arg_messageId)
 	{
 		case E_MSG_CONTROL_ID:
 		case E_MSG_CURRENT_ID:
-		case E_MSG_DIR_ID:
+		case E_MSG_STEERING_ID:
 		case E_MSG_SUSP_ID:
-		case E_MSG_W1_ID:
-		case E_MSG_W2_ID:
-		case E_MSG_W3_ID:
-		case E_MSG_W4_ID:
+		case E_MSG_WHEEL_ID:
 		{
 			loc_result = E_BUS_STATUS_OK;
 			break;
