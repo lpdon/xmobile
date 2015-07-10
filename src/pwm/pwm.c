@@ -74,25 +74,25 @@ void pwm_setSignal(ePWMMotor arg_motor, int32_t arg_pwm)
 
 	switch (arg_motor)
 	{
-		case E_MOTOR_STEERING:
+		case E_PWM_MOTOR_STEERING:
 		{
 			//PT4 PP5
-			PWM_STEERING_LEFT.setRatio16(~loc_pwm1);
-			PWM_STEERING_RIGHT.setRatio16(~loc_pwm2);
+			PWM_STEERING_LEFT_SetRatio16(~loc_pwm1);
+			PWM_STEERING_RIGHT_SetRatio16(~loc_pwm2);
 			break;
 		}
-		case E_MOTOR_SUSPENSION:
+		case E_PWM_MOTOR_SUSPENSION:
 		{
 			//PT2 PT3
-			PWM_SUSPENSION_UP.setRatio16(~loc_pwm1);
-			PWM_SUSPENSION_DOWN.setRatio16(~loc_pwm2);
+			PWM_SUSPENSION_UP_SetRatio16(~loc_pwm1);
+			PWM_SUSPENSION_DOWN_SetRatio16(~loc_pwm2);
 			break;
 		}
-		case E_MOTOR_WHEEL:
+		case E_PWM_MOTOR_WHEEL:
 		{
 			//PT0 PT1
-			PWM_WHEEL_FORWARDS.setRatio16(~loc_pwm1);
-			PWM_WHEEL_BACKWARDS.setRatio16(~loc_pwm2);
+			PWM_WHEEL_FORWARDS_SetRatio16(~loc_pwm1);
+			PWM_WHEEL_BACKWARDS_SetRatio16(~loc_pwm2);
 			break;
 		}
 		default:

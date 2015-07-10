@@ -48,6 +48,10 @@ SOFTWARE.*/
 	#include "../nunchuk/nunchuk.h"
 #endif
 
+#ifndef ID_H
+	#include "../id/id.h"
+#endif
+
 void program_init(void)
 {
 	id_init();
