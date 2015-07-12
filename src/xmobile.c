@@ -41,7 +41,8 @@ int main(void) {
 	handshake_init();
 
 	tMessageControlData ctrlData;
-	ctrlData.pwmTest[0] = 0xFF1F;
+//	ctrlData.pwmTest[0] = 0xFF1F;
+	ctrlData.joystickData.buttons = 0U;
 	comm_setData(E_MSG_CONTROL_ID, &ctrlData);
 
 	while (1)

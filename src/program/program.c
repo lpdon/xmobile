@@ -62,12 +62,14 @@ void program_init(void)
 	pid_init();
 	drive_init();
 	nunchuk_init();
+	sensor_init();
 }
 
 void program_cyclic(void)
 {
 	handshake_cyclic();
 	comm_cyclic();
-	pid_cyclic();
+	sensor_cyclic();
 	drive_cyclic();
+	pid_cyclic();
 }

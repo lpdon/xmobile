@@ -28,6 +28,11 @@ SOFTWARE.*/
 	#include <stdint.h>
 #else
 	#include "PE_Types.h"
+
+#ifndef BOARD_ID_H_
+	#include "BOARD_ID.h"
+#endif
+
 #endif
 
 static eId id = E_ID_UNKNOWN;
@@ -35,8 +40,8 @@ static eId id = E_ID_UNKNOWN;
 void id_init(void)
 {
 	int16_t loc_id = -1;
-#if !defined(_WIN32)
-	loc_id = ID_GetBit(0) | ID_GetBit(1)<<1 | ID_GetBit(2)<<2 - 1;
+#if !defined(_WIN32) && NODE!=CONTROL
+	loc_id = BOARD_ID_GetBit(0) | BOARD_ID_GetBit(1)<<1 | BOARD_ID_GetBit(2)<<2 - 1;
 #endif
 
 	switch (loc_id)

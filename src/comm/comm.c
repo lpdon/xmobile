@@ -81,8 +81,8 @@ tMessage msgCurrent =
 	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_UART,
-	E_MSG_CRC_ACTIVE
+	E_MSG_BUS_CAN,
+	E_MSG_CRC_INACTIVE
 };
 
 tMessage msgSuspension =
@@ -98,8 +98,8 @@ tMessage msgSuspension =
 	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_UART,
-	E_MSG_CRC_ACTIVE
+	E_MSG_BUS_CAN,
+	E_MSG_CRC_INACTIVE
 };
 
 tMessage msgSteering =
@@ -115,30 +115,33 @@ tMessage msgSteering =
 	E_MSG_STATUS_INACTIVE,
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_UART,
-	E_MSG_CRC_ACTIVE
+	E_MSG_BUS_CAN,
+	E_MSG_CRC_INACTIVE
 };
 
 static tMessage * transmitMessages[] =
 {
 #if NODE==CONTROL
 	&msgControl,
-#else
-	&msgW1,
+#elif NODE==MASTER
+	&msgCurrent,
+	&msgSuspension,
+	&msgSteering,
 #endif
 	NULL
 };
 
 static tMessage * receiveMessages[] =
 {
-#if NODE==CONTROL
-#else
+#if NODE!=CONTROL
+#if NODE==MASTER
 	&msgControl,
-	//&msgW1,
+#else //NODE==SLAVE1...4
+	&msgCurrent,
+	&msgSuspension,
+	&msgSteering,
 #endif
-//	&msgCurrent,
-//	&msgSuspension,
-//	&msgDirection,
+#endif
 	NULL
 };
 
@@ -177,14 +180,11 @@ void comm_getData(eMessageId arg_id, void * const arg_data)
 void comm_init(void)
 {
 	comm_initTransmissionCyclicMessages();
-	bus_init(E_BUS_TYPE_UART);
-	bus_init(E_BUS_TYPE_CAN);
 }
 
 void comm_end(void)
 {
-	bus_end(E_BUS_TYPE_UART);
-	bus_end(E_BUS_TYPE_CAN);
+
 }
 
 void comm_initTransmissionCyclicMessages(void)
@@ -201,7 +201,9 @@ void comm_initTransmissionCyclicMessages(void)
 
 void comm_cyclic(void)
 {
+#if HANDSHAKE==ACTIVE
 	if (handshake_getStatus() == E_HANDSHAKE_STATUS_OK)
+#endif
 	{
 		comm_cyclicReception();
 		comm_cyclicTransmission();
@@ -279,7 +281,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 			/*Set bus type of the message*/
 			loc_message.bus = loc_bus;
 
-			/*Write message to UART buffer*/
+			/*Write message to bus*/
 			comm_writeMessageToBus(&loc_message);
 
 			loc_state = E_MSG_STATE_WAITFORACK;
@@ -376,7 +378,7 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 					{
 						if ((*pMessage)->body.messageId == loc_receivedMessageId)
 						{
-							if (loc_receivedMessage.crcCheck == E_MSG_CRC_ACTIVE)
+							if ((*pMessage)->crcCheck == E_MSG_CRC_ACTIVE)
 							{
 								const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
 																		 sizeof(uMessageData),
@@ -386,7 +388,9 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 								{
 									/* Send ack. Content of the message is not important */
 									tMessage loc_message;
+									memcpy(&loc_message.body, &loc_receivedMessageBody, sizeof(tMessageBody));
 									loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
+									loc_message.bus = (*pMessage)->bus;
 									comm_writeMessageToBus(&loc_message);
 
 									/* Write valid values */
@@ -396,7 +400,9 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 								{
 									/* Send nack. Content of the message is not important */
 									tMessage loc_message;
+									memcpy(&loc_message.body, &loc_receivedMessageBody, sizeof(tMessageBody));
 									loc_message.body.messageId = (loc_receivedMessageId | MSG_NACK);
+									loc_message.bus = (*pMessage)->bus;
 									comm_writeMessageToBus(&loc_message);
 								}
 							}
@@ -404,6 +410,7 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 							{
 								tMessage loc_message;
 								loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
+								loc_message.bus = (*pMessage)->bus;
 								comm_writeMessageToBus(&loc_message);
 
 								/* Write valid values */

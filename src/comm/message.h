@@ -23,6 +23,10 @@ SOFTWARE.*/
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#ifndef NUNCHUK_H
+	#include "../nunchuk/nunchuk.h"
+#endif
+
 #define MSG_DATASIZE                 8U
 
 #define MSG_ACK                   0x01U
@@ -80,7 +84,7 @@ typedef enum
 
 typedef struct
 {
-	uint16_t pwmTest[4];
+	joystick joystickData;
 } tMessageControlData;
 
 typedef struct

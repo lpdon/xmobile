@@ -34,14 +34,14 @@ uint16_t sensor[SENSOR_NUMINST];
 
 void sensor_init(void)
 {
-#if !defined(_WIN32)
+#if NODE!=CONTROL && NODE!=MASTER
 	AD1_Measure(0);
 #endif
 }
 
 void sensor_cyclic(void)
 {
-#if !defined(_WIN32)
+#if NODE!=CONTROL && NODE!=MASTER
 	AD1_GetChanValue16(E_SENSOR_CURRENT, &sensor[E_SENSOR_CURRENT]);
 	AD1_GetChanValue16(E_SENSOR_STEERING, &sensor[E_SENSOR_STEERING]);
 	AD1_GetChanValue16(E_SENSOR_SUSPENSION_SPRING, &sensor[E_SENSOR_SUSPENSION_SPRING]);

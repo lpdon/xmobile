@@ -81,7 +81,7 @@ tHandshakeMessage handshakeResponse =
 #if NODE==CONTROL
 tHandshakeMessage * transmitMessage = &handshakeRqst;
 tHandshakeMessage * receiveMessage = &handshakeResponse;
-#else
+#elif NODE==MASTER
 tHandshakeMessage * transmitMessage = &handshakeResponse;
 tHandshakeMessage * receiveMessage = &handshakeRqst;
 #endif
@@ -95,11 +95,15 @@ void handshake_init(void)
 
 void handshake_cyclic(void)
 {
+#if HANDSHAKE==ACTIVE
+#if NODE==CONTROL && NODE==MASTER
 	if (handshake_getStatus() != E_HANDSHAKE_STATUS_OK)
+#endif
 	{
 		handshake_cyclicReception();
 		handshake_cyclicTransmission();
 	}
+#endif
 }
 
 void handshake_cyclicReception(void)
