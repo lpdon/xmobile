@@ -10,6 +10,10 @@ uint8_t nunchuk_init()
 	uint8_t init_block[4] = {0xf0, 0x55, 0xfb, 0x00};
 	uint16_t length = 0U;
 	uint8_t error_code = 0U;
+
+	nunchuk.joystickX = 0;
+	nunchuk.joystickY = 0;
+
 #if !defined(WIN32)
 	error_code = EI2C1_SendBlock(init_block, 2, &length);
 	error_code = EI2C1_SendBlock(init_block+2, 2, &length);

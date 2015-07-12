@@ -84,6 +84,9 @@ tHandshakeMessage * receiveMessage = &handshakeResponse;
 #elif NODE==MASTER
 tHandshakeMessage * transmitMessage = &handshakeResponse;
 tHandshakeMessage * receiveMessage = &handshakeRqst;
+#else
+tHandshakeMessage * transmitMessage = NULL;
+tHandshakeMessage * receiveMessage = NULL;
 #endif
 
 void handshake_init(void)

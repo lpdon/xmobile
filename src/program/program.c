@@ -67,6 +67,7 @@ void program_init(void)
 
 void program_cyclic(void)
 {
+//	nunchuk_cyclic();
 	handshake_cyclic();
 	comm_cyclic();
 	sensor_cyclic();

@@ -42,11 +42,11 @@ typedef enum
 
 typedef enum
 {
-	E_MSG_CONTROL_ID   =        0x10U,
-	E_MSG_CURRENT_ID   =        0x20U,
-	E_MSG_SUSP_ID      =        0x30U,
-	E_MSG_STEERING_ID  =        0x40U,
-	E_MSG_WHEEL_ID     =        0x50U
+	E_MSG_ID_CONTROL   =        0x10U,
+	E_MSG_ID_CURRENT   =        0x20U,
+	E_MSG_ID_SUSP      =        0x30U,
+	E_MSG_ID_STEERING  =        0x40U,
+	E_MSG_ID_WHEEL     =        0x50U
 } eMessageId;
 
 typedef enum

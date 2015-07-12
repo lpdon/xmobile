@@ -54,7 +54,7 @@ static const eCommStatus comm_checkMessageId(const uint8_t arg_messageId);
 tMessage msgControl =
 {
 	{
-		E_MSG_CONTROL_ID,
+		E_MSG_ID_CONTROL,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
@@ -71,7 +71,7 @@ tMessage msgControl =
 tMessage msgCurrent =
 {
 	{
-		E_MSG_CURRENT_ID,
+		E_MSG_ID_CURRENT,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
@@ -88,7 +88,7 @@ tMessage msgCurrent =
 tMessage msgSuspension =
 {
 	{
-		E_MSG_SUSP_ID,
+		E_MSG_ID_SUSP,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
@@ -105,7 +105,7 @@ tMessage msgSuspension =
 tMessage msgSteering =
 {
 	{
-		E_MSG_STEERING_ID,
+		E_MSG_ID_STEERING,
 		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
 		0xFFU
 	},
@@ -127,6 +127,7 @@ static tMessage * transmitMessages[] =
 	&msgCurrent,
 	&msgSuspension,
 	&msgSteering,
+#elif NODE==SLAVE1
 #endif
 	NULL
 };
@@ -145,32 +146,32 @@ static tMessage * receiveMessages[] =
 	NULL
 };
 
-void comm_setData(eMessageId arg_id, const void * const arg_data)
+void comm_setData(eMessageId arg_id, const void * const arg_data, const uint8_t arg_size)
 {
 	tMessage ** pMessage = transmitMessages;
-	const eMessageId loc_id = (*pMessage)->body.messageId;
 
 	while (*pMessage != NULL)
 	{
+		const eMessageId loc_id = (*pMessage)->body.messageId;
 		if (loc_id == arg_id)
 		{
-			memcpy((*pMessage)->body.data.rawData, arg_data, MSG_DATASIZE);
+			memcpy((*pMessage)->body.data.rawData, arg_data, arg_size);
 			break;
 		}
 		pMessage++;
 	}
 }
 
-void comm_getData(eMessageId arg_id, void * const arg_data)
+void comm_getData(eMessageId arg_id, void * const arg_data, const uint8_t arg_size)
 {
 	tMessage ** pMessage = receiveMessages;
-	const eMessageId loc_id = (*pMessage)->body.messageId;
 
 	while (*pMessage != NULL)
 	{
+		const eMessageId loc_id = (*pMessage)->body.messageId;
 		if (loc_id == arg_id)
 		{
-			memcpy((void *)arg_data, (*pMessage)->body.data.rawData, MSG_DATASIZE);
+			memcpy((void *)arg_data, (*pMessage)->body.data.rawData, arg_size);
 			break;
 		}
 		pMessage++;
@@ -388,7 +389,6 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 								{
 									/* Send ack. Content of the message is not important */
 									tMessage loc_message;
-									memcpy(&loc_message.body, &loc_receivedMessageBody, sizeof(tMessageBody));
 									loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
 									loc_message.bus = (*pMessage)->bus;
 									comm_writeMessageToBus(&loc_message);
@@ -400,7 +400,6 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 								{
 									/* Send nack. Content of the message is not important */
 									tMessage loc_message;
-									memcpy(&loc_message.body, &loc_receivedMessageBody, sizeof(tMessageBody));
 									loc_message.body.messageId = (loc_receivedMessageId | MSG_NACK);
 									loc_message.bus = (*pMessage)->bus;
 									comm_writeMessageToBus(&loc_message);

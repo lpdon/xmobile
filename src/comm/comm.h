@@ -50,8 +50,8 @@ extern tMessage msgW2;
 extern tMessage msgW3;
 extern tMessage msgW4;
 
-void comm_setData(eMessageId arg_id, const void * const arg_data);
-void comm_getData(eMessageId arg_id, void * const arg_data);
+void comm_setData(eMessageId arg_id, const void * const arg_data, const uint8_t arg_size);
+void comm_getData(eMessageId arg_id, void * const arg_data, const uint8_t arg_size);
 
 void comm_init(void);
 void comm_end(void);

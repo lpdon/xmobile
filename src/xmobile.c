@@ -43,7 +43,7 @@ int main(void) {
 	tMessageControlData ctrlData;
 //	ctrlData.pwmTest[0] = 0xFF1F;
 	ctrlData.joystickData.buttons = 0U;
-	comm_setData(E_MSG_CONTROL_ID, &ctrlData);
+//	comm_setData(E_MSG_ID_CONTROL, &ctrlData);
 
 	while (1)
 	{

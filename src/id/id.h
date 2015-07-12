@@ -25,11 +25,11 @@ SOFTWARE.*/
 
 typedef enum
 {
-	E_ID_BRAIN   = 4,
-	E_ID_L1      = 0,
-	E_ID_L2      = 1,
-	E_ID_L3      = 2,
-	E_ID_L4      = 3,
+	E_ID_MASTER   = 4,
+	E_ID_S1      = 0,
+	E_ID_S2      = 1,
+	E_ID_S3      = 2,
+	E_ID_S4      = 3,
 	E_ID_UNKNOWN = -1
 } eId;
 

@@ -48,27 +48,27 @@ void id_init(void)
 	{
 		case 0:
 		{
-			id = E_ID_BRAIN;
+			id = E_ID_MASTER;
 			break;
 		}
 		case 1:
 		{
-			id = E_ID_L1;
+			id = E_ID_S1;
 			break;
 		}
 		case 2:
 		{
-			id = E_ID_L2;
+			id = E_ID_S2;
 			break;
 		}
 		case 3:
 		{
-			id = E_ID_L3;
+			id = E_ID_S3;
 			break;
 		}
 		case 4:
 		{
-			id = E_ID_L4;
+			id = E_ID_S4;
 			break;
 		}
 		default:

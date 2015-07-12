@@ -245,11 +245,11 @@ const eBusStatus bus_checkMessageId(const uint8_t arg_messageId)
 
 	switch ((eMessageId)loc_maskedMessageId)
 	{
-		case E_MSG_CONTROL_ID:
-		case E_MSG_CURRENT_ID:
-		case E_MSG_STEERING_ID:
-		case E_MSG_SUSP_ID:
-		case E_MSG_WHEEL_ID:
+		case E_MSG_ID_CONTROL:
+		case E_MSG_ID_CURRENT:
+		case E_MSG_ID_STEERING:
+		case E_MSG_ID_SUSP:
+		case E_MSG_ID_WHEEL:
 		{
 			loc_result = E_BUS_STATUS_OK;
 			break;
