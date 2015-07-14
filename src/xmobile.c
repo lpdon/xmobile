@@ -23,7 +23,7 @@ void delay(int milliseconds);
 int main(void) {
 	puts("Hallo Welt"); /* prints Hallo Welt */
 
-	uint8_t test_crc[] = {1, 2, 3, 4, 5, 6, 7, 8};
+	uint8_t test_crc[] = {1, 2, 8, 4, 5, 6, 7, 6};
 
 	uint8_t crc = crc8(test_crc, sizeof(test_crc));
 
@@ -36,24 +36,24 @@ int main(void) {
 //		printf("out: %i \n", (int)(pid(88, 90)));
 //	}
 
-	comm_init();
-//	uart_init();
-	handshake_init();
-
-	tMessageControlData ctrlData;
-//	ctrlData.pwmTest[0] = 0xFF1F;
-	ctrlData.joystickData.buttons = 0U;
-//	comm_setData(E_MSG_ID_CONTROL, &ctrlData);
-
-	while (1)
-	{
-		handshake_cyclic();
-		comm_cyclic();
-		delay(10);
-	}
-
-
-	comm_end();
+//	comm_init();
+////	uart_init();
+//	handshake_init();
+//
+//	tMessageControlData ctrlData;
+////	ctrlData.pwmTest[0] = 0xFF1F;
+//	ctrlData.joystickData.buttons = 0U;
+////	comm_setData(E_MSG_ID_CONTROL, &ctrlData);
+//
+//	while (1)
+//	{
+//		handshake_cyclic();
+//		comm_cyclic();
+//		delay(10);
+//	}
+//
+//
+//	comm_end();
 
 
 	return EXIT_SUCCESS;

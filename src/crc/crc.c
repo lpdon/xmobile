@@ -31,7 +31,8 @@ uint8_t crc8 (const uint8_t * const arg_data, const uint8_t arg_length)
 
 	for (i = 0U; i < arg_length; i++)
 	{
-		if ((loc_crc ^ 0x01U) != arg_data[i])
+		loc_crc = loc_crc ^ arg_data[i];
+		if (loc_crc & 0x01U)
 		{
 			loc_crc = (loc_crc >> 1) ^ CRC_MASK_REV;
 		}
@@ -41,7 +42,7 @@ uint8_t crc8 (const uint8_t * const arg_data, const uint8_t arg_length)
 		}
 	}
 
-	loc_crc = loc_crc & 0xFF;
+	loc_crc = loc_crc ^ 0xFF;
 
 	return loc_crc;
 }

@@ -147,4 +147,8 @@ void drive_slave(const eId arg_id)
 	pwm_setSignal(E_PWM_MOTOR_STEERING, loc_pwmSteering);
 	pwm_setSignal(E_PWM_MOTOR_SUSPENSION, loc_pwmSuspension);
 	pwm_setSignal(E_PWM_MOTOR_WHEEL, loc_pwmWheel);
+
+	pid[E_PID_MOTOR_STEERING].pFactor = 35;
+	pid[E_PID_MOTOR_STEERING].iFactor = 0;
+	pid[E_PID_MOTOR_STEERING].dFactor = 0;
 }

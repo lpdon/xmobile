@@ -54,6 +54,9 @@ SOFTWARE.*/
 
 void program_init(void)
 {
+#if NODE==CONTROL
+	nunchuk_init();
+#endif
 	id_init();
 	bus_init(E_BUS_TYPE_CAN);
 	bus_init(E_BUS_TYPE_UART);
@@ -61,13 +64,14 @@ void program_init(void)
 	comm_init();
 	pid_init();
 	drive_init();
-	nunchuk_init();
 	sensor_init();
 }
 
 void program_cyclic(void)
 {
-//	nunchuk_cyclic();
+#if NODE==CONTROL
+	nunchuk_cyclic();
+#endif
 	handshake_cyclic();
 	comm_cyclic();
 	sensor_cyclic();
