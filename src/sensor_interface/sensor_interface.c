@@ -37,17 +37,17 @@ void sensor_init(void)
 #if NODE!=CONTROL && NODE!=MASTER
 	AD1_Measure(0);
 	//AD1_Enable();
-	//AD1_Start();
+//	AD1_Start();
 #endif
 }
 
 void sensor_cyclic(void)
 {
 #if NODE!=CONTROL && NODE!=MASTER
+	AD1_Measure(1);
 	AD1_GetChanValue8(E_SENSOR_CURRENT, &sensor[E_SENSOR_CURRENT]);
 	AD1_GetChanValue8(E_SENSOR_STEERING, &sensor[E_SENSOR_STEERING]);
 	AD1_GetChanValue8(E_SENSOR_SUSPENSION_SPRING, &sensor[E_SENSOR_SUSPENSION_SPRING]);
 	AD1_GetChanValue8(E_SENSOR_SUSPENSION_JOINT, &sensor[E_SENSOR_SUSPENSION_JOINT]);
-	AD1_Measure(1);
 #endif
 }

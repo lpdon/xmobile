@@ -33,7 +33,7 @@ SOFTWARE.*/
 	#include "message.h"
 #endif
 
-#define COMM_TIMEOUT                 10U
+#define COMM_TIMEOUT                  1U
 #define COMM_MAXRETRANSMISSIONS       3U
 
 typedef enum
@@ -42,6 +42,7 @@ typedef enum
 	E_COMM_STATUS_FAILED
 } eCommStatus;
 
+extern tMessage msgControl;
 extern tMessage msgCurrent;
 extern tMessage msgSuspension;
 extern tMessage msgSteering;

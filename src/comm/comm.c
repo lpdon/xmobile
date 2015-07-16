@@ -47,7 +47,7 @@ static void comm_cyclicReception(void);
 static void comm_cyclicTransmission(void);
 static void comm_receiveMessagesFromBus(const eMessageBus arg_busType);
 static const eCommStatus comm_readMessageFromBus(const eMessageBus arg_busType, tMessage * const arg_message);
-static void comm_writeMessageToBus(const tMessage * const arg_message);
+static const eCommStatus comm_writeMessageToBus(const tMessage * const arg_message);
 static void comm_transmitMessage(tMessage * const arg_message);
 static const eCommStatus comm_checkMessageId(const uint8_t arg_messageId);
 
@@ -238,7 +238,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 	uint8_t loc_timeout = arg_message->timeout;
 	uint8_t loc_retransmissions = arg_message->retransmissions;
 	eMessageStatus loc_messageStatus = arg_message->status;
-	eCommStatus loc_ack = arg_message->ack;
+	eMessageAck loc_ack = arg_message->ack;
 
 	tMessage loc_message;
 	uint8_t loc_crc;
@@ -266,11 +266,13 @@ void comm_transmitMessage(tMessage * const arg_message)
 		}
 		case E_MSG_STATE_TRANSMIT:
 		{
+			eCommStatus loc_sts_comm = E_COMM_STATUS_FAILED;
+
 			/*Reset timeout*/
 			loc_timeout = COMM_TIMEOUT;
 
 			/*Reset ack flag*/
-			loc_ack = E_COMM_STATUS_FAILED;
+			loc_ack = E_MSG_ACK_FAILED;
 
 			/*Calculate crc*/
 			loc_crc = crc8(arg_message->body.data.rawData, sizeof(arg_message->body.data.rawData));
@@ -282,10 +284,10 @@ void comm_transmitMessage(tMessage * const arg_message)
 			/*Set bus type of the message*/
 			loc_message.bus = loc_bus;
 
-			/*Write message to bus*/
-			comm_writeMessageToBus(&loc_message);
+			/*Try to Write message to bus*/
+			loc_sts_comm = comm_writeMessageToBus(&loc_message);
 
-			loc_state = E_MSG_STATE_WAITFORACK;
+			loc_state = (loc_sts_comm == E_COMM_STATUS_OK) ? E_MSG_STATE_WAITFORACK : E_MSG_STATE_TRANSMIT;
 			break;
 		}
 		case E_MSG_STATE_WAITFORACK:
@@ -293,7 +295,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 			if (loc_timeout > 0)
 			{
 				/*Verify if ACK was received*/
-				if (loc_ack == E_COMM_STATUS_OK)
+				if (loc_ack == E_MSG_ACK_OK)
 				{
 					/*If the message is cyclic it can be prepared to be transmitted once again*/
 					if (loc_type == E_MSG_TYPE_CYCLIC)
@@ -313,7 +315,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 			/*Timeout expired*/
 			else
 			{
-				loc_state = (loc_retransmissions >= 0U) ? E_MSG_STATE_TRANSMIT : E_MSG_STATE_END;
+				loc_state = (loc_retransmissions > 0U) ? E_MSG_STATE_TRANSMIT : E_MSG_STATE_END;
 				loc_retransmissions--;
 			}
 			break;
@@ -364,7 +366,12 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 						{
 							if (loc_receivedMessageId & MSG_ACK)
 							{
-								(*pMessage)->ack = E_COMM_STATUS_OK;
+								(*pMessage)->ack = E_MSG_ACK_OK;
+							}
+							else if (loc_receivedMessageId & MSG_NACK)
+							{
+								(*pMessage)->ack = E_MSG_ACK_FAILED;
+								(*pMessage)->timeout = 0U;
 							}
 							break;
 						}
@@ -478,11 +485,16 @@ const eCommStatus comm_checkMessageId(const uint8_t arg_messageId)
 
 const eCommStatus comm_readMessageFromBus(const eMessageBus arg_busType, tMessage * arg_message)
 {
-	eBusStatus loc_result = bus_readMessageFromBuffer(arg_busType, &arg_message->body);
-	return loc_result;
+	const eBusStatus loc_sts_bus = bus_readMessageFromBuffer(arg_busType, &arg_message->body);
+	const eCommStatus loc_sts_comm = (loc_sts_bus == E_BUS_STATUS_OK) ? E_COMM_STATUS_OK : E_COMM_STATUS_FAILED;
+
+	return loc_sts_comm;
 }
 
-void comm_writeMessageToBus(const tMessage * const arg_message)
+const eCommStatus comm_writeMessageToBus(const tMessage * const arg_message)
 {
-	bus_writeMessageToBuffer(arg_message->bus, &arg_message->body);
+	const eBusStatus loc_sts_bus = bus_writeMessageToBuffer(arg_message->bus, &arg_message->body);
+	const eCommStatus loc_sts_comm = (loc_sts_bus == E_BUS_STATUS_OK) ? E_COMM_STATUS_OK : E_COMM_STATUS_FAILED;
+
+	return loc_sts_comm;
 }

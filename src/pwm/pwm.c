@@ -91,8 +91,8 @@ void pwm_setSignal(ePWMMotor arg_motor, int32_t arg_pwm)
 		case E_PWM_MOTOR_WHEEL:
 		{
 			//PT0 PT1
-			PWM_WHEEL_FORWARDS_SetRatio16(~loc_pwm1);
-			PWM_WHEEL_BACKWARDS_SetRatio16(~loc_pwm2);
+			PWM_WHEEL_FORWARDS_SetRatio16(loc_pwm1);
+			PWM_WHEEL_BACKWARDS_SetRatio16(loc_pwm2);
 			break;
 		}
 		default:

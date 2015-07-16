@@ -64,7 +64,7 @@ eCanStatus can_writeToBuffer(const uint8_t arg_messageId, const uint8_t * const 
 	CAN1_SendFrameExt((dword)arg_messageId, DATA_FRAME, arg_length, arg_buffer);
 #endif
 
-	loc_result = (loc_totalBytesSent == arg_length) ? E_CAN_STATUS_OK : E_CAN_STATUS_FAILED;
+	loc_result = (arg_length == arg_length) ? E_CAN_STATUS_OK : E_CAN_STATUS_FAILED;
 	return loc_result;
 }
 

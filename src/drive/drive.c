@@ -90,9 +90,11 @@ void drive_master(void)
 {
 	tMessageControlData loc_controlData;
 	tMessageSteeringData loc_steeringData;
+	tMessageWheelData loc_wheelData;
 	int8_t loc_x;
 	int8_t loc_y;
 	uint8_t loc_steering;
+	uint8_t loc_wheel;
 
 	/* Read and decode data sent by control */
 	comm_getData(E_MSG_ID_CONTROL, &loc_controlData, sizeof(tMessageControlData));
@@ -100,10 +102,14 @@ void drive_master(void)
 	loc_y = loc_controlData.joystickData.joystickY;
 
 	loc_steering = (uint8_t)((int8_t)STEERING_CENTER + (int8_t)((loc_x * STEERING_RANGE) / 100));
-
 	loc_steeringData.steering[E_ID_S1] = loc_steering;
 	loc_steeringData.steering[E_ID_S2] = loc_steering;
 	comm_setData(E_MSG_ID_STEERING, &loc_steeringData, sizeof(tMessageSteeringData));
+
+	loc_wheel = (uint8_t)((int8_t)STEERING_CENTER + (int8_t)((loc_x * STEERING_RANGE) / 100));
+	loc_wheelData.wheel[E_ID_S1] = loc_wheel;
+	loc_wheelData.wheel[E_ID_S2] = loc_wheel;
+	comm_setData(E_MSG_ID_WHEEL, &loc_wheelData, sizeof(tMessageWheelData));
 }
 
 void drive_slave(const eId arg_id)
@@ -148,7 +154,7 @@ void drive_slave(const eId arg_id)
 	pwm_setSignal(E_PWM_MOTOR_SUSPENSION, loc_pwmSuspension);
 	pwm_setSignal(E_PWM_MOTOR_WHEEL, loc_pwmWheel);
 
-	pid[E_PID_MOTOR_STEERING].pFactor = 35;
+	pid[E_PID_MOTOR_STEERING].pFactor = 60;
 	pid[E_PID_MOTOR_STEERING].iFactor = 0;
 	pid[E_PID_MOTOR_STEERING].dFactor = 0;
 }
