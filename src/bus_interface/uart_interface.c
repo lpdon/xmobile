@@ -39,11 +39,21 @@ SOFTWARE.*/
 	#endif
 #endif
 
-#if !defined(_WIN32)
-static eUartStatus uart_dataAvailable = E_UART_STATUS_FAILED;
-#else
+//#if !defined(_WIN32)
+//static eUartStatus uart_dataAvailable = E_UART_STATUS_FAILED;
+//#else
+//static eUartStatus uart_dataAvailable = E_UART_STATUS_OK;
+//#endif
+
 static eUartStatus uart_dataAvailable = E_UART_STATUS_OK;
-#endif
+//static eUartStatus uart_dataAvailable = E_UART_STATUS_FAILED;
+
+tFIFO uart_fifo =
+{
+	{0xFF},
+	0U,
+	0U
+};
 
 eUartStatus uart_init(void)
 {
@@ -83,14 +93,27 @@ eUartStatus uart_readFromBuffer(uint8_t * const arg_buffer, const uint8_t arg_le
 {
 	eUartStatus loc_result = E_UART_STATUS_FAILED;
 	uint16_t loc_totalBytesRead = 0U;
+	uint8_t loc_length = arg_length;
+	uint8_t loc_buffer[20];
 
 #if defined(WIN32)
 	loc_totalBytesRead = RS232_PollComport(UART_PORT, (uint8_t*)arg_buffer, arg_length);
 #else
-	AS1_RecvBlock((uint8_t*)arg_buffer, arg_length, &loc_totalBytesRead);
+//	AS1_RecvBlock((uint8_t*)arg_buffer, arg_length, &loc_totalBytesRead);
 #endif
+	while (loc_length > 0)
+	{
+		eFIFOStatus loc_sts_fifo = fifo_out(&uart_fifo, &loc_buffer[loc_totalBytesRead]);
+		loc_totalBytesRead += (loc_sts_fifo == E_FIFO_STATUS_OK) ? 1U : 0U;
+		loc_length--;
+	}
 
-	loc_result = (loc_totalBytesRead == arg_length) ? E_UART_STATUS_OK : E_UART_STATUS_FAILED;
+	if (loc_totalBytesRead == arg_length)
+	{
+		memcpy(arg_buffer, loc_buffer, arg_length);
+		loc_result = E_UART_STATUS_OK;
+	}
+
 	return loc_result;
 }
 
@@ -101,7 +124,7 @@ void uart_setDataAvailable(void)
 
 void uart_clearDataAvailable(void)
 {
-	uart_dataAvailable = E_UART_STATUS_FAILED;
+//	uart_dataAvailable = E_UART_STATUS_FAILED;
 }
 
 eUartStatus uart_getDataAvailable(void)

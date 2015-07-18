@@ -52,10 +52,19 @@ SOFTWARE.*/
 	#include "../id/id.h"
 #endif
 
+#ifndef CONTROL_H
+	#include "../control/control.h"
+#endif
+
+#ifndef SENSOR_INTERFACE_H
+	#include "../sensor_interface/sensor_interface.h"
+#endif
+
 void program_init(void)
 {
 #if NODE==CONTROL
 	nunchuk_init();
+	control_init();
 #endif
 	id_init();
 	bus_init(E_BUS_TYPE_CAN);
@@ -71,6 +80,7 @@ void program_cyclic(void)
 {
 #if NODE==CONTROL
 	nunchuk_cyclic();
+	control_cyclic();
 #endif
 	handshake_cyclic();
 	comm_cyclic();

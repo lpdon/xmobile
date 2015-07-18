@@ -2,6 +2,7 @@
 	#include "nunchuk.h"
 #endif
 
+static uint8_t nunchukCycletime = NUNCHUK_CYCLETIME;
 joystick nunchuk;
 
 //don't forget to initialize the I2C before using this function
@@ -27,18 +28,27 @@ uint8_t nunchuk_cyclic()
 	uint16_t length = 0U;
 	uint16_t error_code = 0U;
 
-#if !defined(WIN32)
-	error_code = EI2C1_SendChar(0x00);
-	error_code = EI2C1_RecvBlock(received,6,&length);
-#endif
+	if (nunchukCycletime == 0U)
+	{
 
-	if(length>5){
-		nunchuk.joystickX = (received[0] - 0x1a)-100;
-		nunchuk.joystickY = (received[1] - 0x1d)-100;
-		nunchuk.buttons = ((received[5] & 0x02) ? 0 : 1)<<1;
-		nunchuk.buttons += (received[5] & 0x01) ? 0 : 1;
+#if !defined(WIN32)
+		__DI();
+		error_code = EI2C1_SendChar(0x00);
+		error_code = EI2C1_RecvBlock(received,6,&length);
+		__EI();
+#endif
+		if(length>5){
+			nunchuk.joystickX = (received[0] - 0x1a)-100;
+			nunchuk.joystickY = (received[1] - 0x1d)-100;
+			nunchuk.buttons = ((received[5] & 0x02) ? 0 : 1)<<1;
+			nunchuk.buttons += (received[5] & 0x01) ? 0 : 1;
+		}
+		nunchukCycletime = NUNCHUK_CYCLETIME;
+	}
+	else
+	{
+		nunchukCycletime--;
 	}
 
 	return error_code;
-
 }

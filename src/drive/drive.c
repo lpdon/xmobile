@@ -47,6 +47,8 @@ SOFTWARE.*/
 static const uint8_t STEERING_CENTER = 127U;
 static const uint8_t STEERING_RANGE = 20U;
 
+static const uint8_t WHEEL_RANGE = 255U;
+
 static void drive_master(void);
 static void drive_slave(const eId arg_id);
 
@@ -83,7 +85,6 @@ void drive_cyclic(void)
 			break;
 		}
 	}
-
 }
 
 void drive_master(void)
@@ -94,7 +95,7 @@ void drive_master(void)
 	int8_t loc_x;
 	int8_t loc_y;
 	uint8_t loc_steering;
-	uint8_t loc_wheel;
+	int8_t loc_wheel;
 
 	/* Read and decode data sent by control */
 	comm_getData(E_MSG_ID_CONTROL, &loc_controlData, sizeof(tMessageControlData));
@@ -104,11 +105,14 @@ void drive_master(void)
 	loc_steering = (uint8_t)((int8_t)STEERING_CENTER + (int8_t)((loc_x * STEERING_RANGE) / 100));
 	loc_steeringData.steering[E_ID_S1] = loc_steering;
 	loc_steeringData.steering[E_ID_S2] = loc_steering;
+	loc_steeringData.steering[E_ID_S3] = loc_steering;
 	comm_setData(E_MSG_ID_STEERING, &loc_steeringData, sizeof(tMessageSteeringData));
 
-	loc_wheel = (uint8_t)((int8_t)STEERING_CENTER + (int8_t)((loc_x * STEERING_RANGE) / 100));
+//	loc_wheel = (uint8_t)((int8_t)((loc_y * WHEEL_RANGE) / 100));
+	loc_wheel = loc_y;
 	loc_wheelData.wheel[E_ID_S1] = loc_wheel;
 	loc_wheelData.wheel[E_ID_S2] = loc_wheel;
+	loc_wheelData.wheel[E_ID_S3] = loc_wheel;
 	comm_setData(E_MSG_ID_WHEEL, &loc_wheelData, sizeof(tMessageWheelData));
 }
 
@@ -140,15 +144,16 @@ void drive_slave(const eId arg_id)
 
 	pid[E_PID_MOTOR_STEERING].input.setpoint = loc_steering;
 	pid[E_PID_MOTOR_SUSPENSION].input.setpoint = loc_suspension;
-	pid[E_PID_MOTOR_WHEEL].input.setpoint = loc_wheel;
+//	pid[E_PID_MOTOR_WHEEL].input.setpoint = loc_wheel;
 
 	pid[E_PID_MOTOR_STEERING].input.actualValue = (int16_t)loc_sensorSteering;
 	pid[E_PID_MOTOR_SUSPENSION].input.actualValue = (int16_t)loc_sensorSpring;
-	pid[E_PID_MOTOR_WHEEL].input.actualValue = (int16_t)loc_sensorCurrent;
+//	pid[E_PID_MOTOR_WHEEL].input.actualValue = (int16_t)loc_sensorCurrent;
 
 	loc_pwmSteering = pid[E_PID_MOTOR_STEERING].output;
 	loc_pwmSuspension = pid[E_PID_MOTOR_SUSPENSION].output;
-	loc_pwmWheel = pid[E_PID_MOTOR_WHEEL].output;
+//	loc_pwmWheel = pid[E_PID_MOTOR_WHEEL].output;
+	loc_pwmWheel = loc_wheel * 2;
 
 	pwm_setSignal(E_PWM_MOTOR_STEERING, loc_pwmSteering);
 	pwm_setSignal(E_PWM_MOTOR_SUSPENSION, loc_pwmSuspension);

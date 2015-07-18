@@ -29,11 +29,17 @@ SOFTWARE.*/
 	#include "PE_Types.h"
 #endif
 
+#ifndef FIFO_H
+	#include "../fifo/fifo.h"
+#endif
+
 typedef enum
 {
 	E_UART_STATUS_OK,
 	E_UART_STATUS_FAILED
 } eUartStatus;
+
+extern tFIFO uart_fifo;
 
 eUartStatus uart_init(void);
 void uart_end(void);

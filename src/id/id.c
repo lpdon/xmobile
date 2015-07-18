@@ -41,7 +41,7 @@ void id_init(void)
 {
 	int16_t loc_id = -1;
 #if !defined(_WIN32) && NODE!=CONTROL
-	loc_id = BOARD_ID_GetBit(2) | BOARD_ID_GetBit(1)<<1 | BOARD_ID_GetBit(0)<<2;
+	loc_id = BOARD_ID_GetBit(0) | BOARD_ID_GetBit(1)<<1 | BOARD_ID_GetBit(2)<<2;
 #endif
 
 	switch (loc_id)

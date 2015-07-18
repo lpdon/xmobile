@@ -119,6 +119,23 @@ tMessage msgSteering =
 	E_MSG_CRC_INACTIVE
 };
 
+tMessage msgWheel =
+{
+	{
+		E_MSG_ID_WHEEL,
+		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN,
+	E_MSG_CRC_INACTIVE
+};
+
 static tMessage * transmitMessages[] =
 {
 #if NODE==CONTROL
@@ -127,6 +144,7 @@ static tMessage * transmitMessages[] =
 	&msgCurrent,
 	&msgSuspension,
 	&msgSteering,
+	&msgWheel,
 #elif NODE==SLAVE1
 #endif
 	NULL
@@ -141,6 +159,7 @@ static tMessage * receiveMessages[] =
 	&msgCurrent,
 	&msgSuspension,
 	&msgSteering,
+	&msgWheel,
 #endif
 #endif
 	NULL
@@ -300,7 +319,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 					/*If the message is cyclic it can be prepared to be transmitted once again*/
 					if (loc_type == E_MSG_TYPE_CYCLIC)
 					{
-						loc_state = E_MSG_STATE_TX_READY;
+						loc_state = E_MSG_STATE_TRANSMIT;
 					}
 					/*Otherwise, the next transmission must be triggered*/
 					else

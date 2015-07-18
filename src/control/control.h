@@ -20,30 +20,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 
-#ifndef NUNCHUK_H
-#define NUNCHUK_H
+#ifndef CONTROL_H
+#define CONTROL_H
 
-#if defined(WIN32)
-	#include <stdint.h>
-#else
-	#include "PE_Types.h"
-#endif
-
-#define NUNCHUK_CYCLETIME 5U
-
-typedef struct
-{
-	int8_t 	joystickX;
-	int8_t 	joystickY;
-	uint8_t buttons;
-} joystick;
-
-extern joystick nunchuk;
-
-//starts the operation of the nunchuk
-uint8_t nunchuk_init();
-
-//updates the data from the nunchuk
-uint8_t nunchuk_cyclic();
+void control_init(void);
+void control_cyclic(void);
 
 #endif

@@ -20,30 +20,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 
+#ifndef CONTROL_H
+	#include "control.h"
+#endif
+
+#ifndef COMM_H
+	#include "../comm/comm.h"
+#endif
+
 #ifndef NUNCHUK_H
-#define NUNCHUK_H
-
-#if defined(WIN32)
-	#include <stdint.h>
-#else
-	#include "PE_Types.h"
+	#include "../nunchuk/nunchuk.h"
 #endif
 
-#define NUNCHUK_CYCLETIME 5U
+#ifndef MESSAGE_H
+	#include "../comm/message.h"
+#endif
 
-typedef struct
+void control_init(void)
 {
-	int8_t 	joystickX;
-	int8_t 	joystickY;
-	uint8_t buttons;
-} joystick;
 
-extern joystick nunchuk;
+}
 
-//starts the operation of the nunchuk
-uint8_t nunchuk_init();
+void control_cyclic(void)
+{
+	const int8_t loc_x = nunchuk.joystickX;
+	const int8_t loc_y = nunchuk.joystickY;
+	tMessageControlData loc_ctrlData;
 
-//updates the data from the nunchuk
-uint8_t nunchuk_cyclic();
-
-#endif
+	loc_ctrlData.joystickData.joystickX = loc_x;
+	loc_ctrlData.joystickData.joystickY = loc_y;
+	comm_setData(E_MSG_ID_CONTROL, &loc_ctrlData, sizeof(tMessageControlData));
+}

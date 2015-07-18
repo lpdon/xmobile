@@ -33,8 +33,8 @@ SOFTWARE.*/
 	#include "message.h"
 #endif
 
-#define COMM_TIMEOUT                  1U
-#define COMM_MAXRETRANSMISSIONS       3U
+#define COMM_TIMEOUT                   10U
+#define COMM_MAXRETRANSMISSIONS        3U
 
 typedef enum
 {
@@ -46,6 +46,7 @@ extern tMessage msgControl;
 extern tMessage msgCurrent;
 extern tMessage msgSuspension;
 extern tMessage msgSteering;
+extern tMessage msgWheel;
 extern tMessage msgW1;
 extern tMessage msgW2;
 extern tMessage msgW3;
