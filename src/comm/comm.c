@@ -259,7 +259,7 @@ void comm_cyclicTransmission(void)
 	{
 		comm_transmitMessage(*pMessage);
 #if !defined(WIN32)
-		Cpu_Delay100US(20);
+//		Cpu_Delay100US(20);
 #endif
 		pMessage++;
 	}

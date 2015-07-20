@@ -158,43 +158,42 @@ void CAN1_OnFullRxBuffer(void)
 	
 	LED_PutVal(1);
 	
-	//for (i = 0U; i < loc_numMsgs; i++) 
-	{
-	  CAN1_ReadFrame(&loc_messageId, &loc_frameType, &loc_frameFormat, &loc_totalBytesRead, loc_buffer);
-    
-    if (loc_totalBytesRead == 8U) 
-    {
-      uint8_t j;
-      fifo_in(&can_fifo, (uint8_t)loc_messageId);
-      
-      for (j = 0U; j < loc_totalBytesRead; j++) 
-      {
-        fifo_in(&can_fifo, loc_buffer[j]);
-      }
-      
-      //if (loc_messageId == E_MSG_ID_STEERING) loc_counterSteering++;
-      //if (loc_messageId == E_MSG_ID_WHEEL) loc_counterWheel++;
-      //if (loc_messageId == E_MSG_ID_SUSP) loc_counterSuspension++;
-      
-      if (loc_messageId == E_MSG_ID_STEERING) 
-      {
-        //loc_messageReceivedBody[0] = loc_buffer[0];
-        //memcpy(&loc_messageReceivedBody, loc_buffer, 9);
-        loc_steeringData.steering[0] = (int16_t)loc_buffer[1];
-        loc_steeringData.steering[1] = (int16_t)loc_buffer[3];
-        loc_steeringData.steering[2] = (int16_t)loc_buffer[5];
-        loc_steeringData.steering[3] = (int16_t)loc_buffer[7];
-        
-        //msgSteering
-        
-        //memcpy(&loc_steeringData, loc_messageReceivedBody.data.rawData, sizeof(tMessageSteeringData));
-        memcpy(msgSteering.body.data.rawData, &loc_steeringData, sizeof(tMessageSteeringData));
-        //comm_setData(E_MSG_ID_STEERING, &loc_steeringData);
-      }
+	
+  CAN1_ReadFrame(&loc_messageId, &loc_frameType, &loc_frameFormat, &loc_totalBytesRead, loc_buffer);
   
-      can_setDataAvailable();
-    }  
-	}
+  if (loc_totalBytesRead == 8U) 
+  {
+    uint8_t j;
+    fifo_in(&can_fifo, (uint8_t)loc_messageId);
+    
+    for (j = 0U; j < loc_totalBytesRead; j++) 
+    {
+      fifo_in(&can_fifo, loc_buffer[j]);
+    }
+    
+    //if (loc_messageId == E_MSG_ID_STEERING) loc_counterSteering++;
+    //if (loc_messageId == E_MSG_ID_WHEEL) loc_counterWheel++;
+    //if (loc_messageId == E_MSG_ID_SUSP) loc_counterSuspension++;
+    
+    //if (loc_messageId == E_MSG_ID_STEERING) 
+    //{
+      //loc_messageReceivedBody[0] = loc_buffer[0];
+      //memcpy(&loc_messageReceivedBody, loc_buffer, 9);
+      //loc_steeringData.steering[0] = (int16_t)loc_buffer[1];
+      //loc_steeringData.steering[1] = (int16_t)loc_buffer[3];
+      //loc_steeringData.steering[2] = (int16_t)loc_buffer[5];
+      //loc_steeringData.steering[3] = (int16_t)loc_buffer[7];
+      
+      //msgSteering
+      
+      //memcpy(&loc_steeringData, loc_messageReceivedBody.data.rawData, sizeof(tMessageSteeringData));
+    //  memcpy(msgSteering.body.data.rawData, &loc_steeringData, sizeof(tMessageSteeringData));
+      //comm_setData(E_MSG_ID_STEERING, &loc_steeringData);
+    //}
+
+    can_setDataAvailable();
+  }  
+  
   LED_PutVal(0);
 }
 

@@ -167,7 +167,7 @@ eBusStatus bus_readMessageFromBuffer(const eBusType arg_busType, tMessageBody * 
 
 			/*Read 1 byte to check if it is really the beginning of a message*/
 			loc_sts_can = can_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
-			while(loc_sts_can == E_CAN_STATUS_OK)
+			if (loc_sts_can == E_CAN_STATUS_OK)
 			{
 				loc_totalBytesRead = 0U;
 				loc_validId = bus_checkMessageId(loc_messageBody.messageId);
@@ -177,17 +177,18 @@ eBusStatus bus_readMessageFromBuffer(const eBusType arg_busType, tMessageBody * 
 					loc_totalBytesRead++;
 					loc_sts_can = can_readFromBuffer(loc_messageBody.data.rawData, sizeof(uMessageData));
 					loc_totalBytesRead += (loc_sts_can == E_CAN_STATUS_OK) ? sizeof(uMessageData) : 0U;
-					loc_sts_can = can_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
-					loc_totalBytesRead += (loc_sts_can == E_CAN_STATUS_OK) ? sizeof(uint8_t) : 0U;
+//					loc_sts_can = can_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
+//					loc_totalBytesRead += (loc_sts_can == E_CAN_STATUS_OK) ? sizeof(uint8_t) : 0U;
 
-					if (loc_totalBytesRead == sizeof(tMessageBody))
+					/*CAN messages don't have CRC byte*/
+					if (loc_totalBytesRead == sizeof(tMessageBody) - 1)
 					{
-						memcpy(arg_messageBody, &loc_messageBody, sizeof(tMessageBody));
+						memcpy(arg_messageBody, &loc_messageBody, sizeof(tMessageBody) - 1);
 						loc_result = E_BUS_STATUS_OK;
 					}
 				}
 
-				loc_sts_can = can_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
+//				loc_sts_can = can_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
 			}
 			break;
 		}

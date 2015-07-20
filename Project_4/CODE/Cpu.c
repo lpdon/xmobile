@@ -7,7 +7,7 @@
 **     Version   : Component 02.001, Driver 02.06, CPU db: 2.87.410
 **     Datasheet : MC9S12C128 Rev 01.23 05/2007
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 7/5/2015, 6:31 PM
+**     Date/Time : 7/20/2015, 10:56 PM
 **     Abstract  :
 **         This component "MC9S12C32_80" implements properties, methods,
 **         and events of the CPU.
@@ -34,14 +34,18 @@
 #include "CAN1.h"
 #include "AD1.h"
 #include "AS1.h"
-#include "PWM8.h"
-#include "PWM9.h"
-#include "PWM10.h"
-#include "PWM11.h"
+#include "PWM_SUSPENSION_UP.h"
+#include "PWM_SUSPENSION_DOWN.h"
+#include "PWM_STEERING_LEFT.h"
+#include "PWM_STEERING_RIGHT.h"
+#include "PWM_WHEEL_FORWARDS.h"
+#include "PWM_WHEEL_BACKWARDS.h"
+#include "BOARD_ID.h"
+#include "LED.h"
 #include "Events.h"
 #include "Cpu.h"
 
-#define CGM_DELAY  0x03FFU
+#define CGM_DELAY  0x05FFU
 
 #pragma DATA_SEG DEFAULT               /* Select data segment "DEFAULT" */
 #pragma CODE_SEG DEFAULT
@@ -49,6 +53,10 @@
 
 /* Global variables */
 volatile byte CCR_reg;                 /* Current CCR reegister */
+
+/*Definition of global shadow variables*/
+byte Shadow_AD0;
+
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 
 
@@ -107,16 +115,17 @@ void Cpu_Delay100US(word us100)
     /* 100 us delay block begin */
     /*
      * Delay
-     *   - requested                  : 100 us @ 8MHz,
-     *   - possible                   : 800 c, 100000 ns
-     *   - without removable overhead : 797 c, 99625 ns
+     *   - requested                  : 100 us @ 12MHz,
+     *   - possible                   : 1200 c, 100000 ns
+     *   - without removable overhead : 1197 c, 99750 ns
      */
-    pshd                               /* (2 c: 250 ns) backup D */
-    ldd #$0107                         /* (2 c: 250 ns) number of iterations */
+    pshd                               /* (2 c: 166.67 ns) backup D */
+    ldd #$018C                         /* (2 c: 166.67 ns) number of iterations */
     label0:
-    dbne d, label0                     /* (3 c: 375 ns) repeat 263x */
-    puld                               /* (3 c: 375 ns) restore D */
-    nop                                /* (1 c: 125 ns) wait for 1 c */
+    dbne d, label0                     /* (3 c: 250 ns) repeat 396x */
+    puld                               /* (3 c: 250 ns) restore D */
+    nop                                /* (1 c: 83.33 ns) wait for 1 c */
+    nop                                /* (1 c: 83.33 ns) wait for 1 c */
     /* 100 us delay block end */
     dbne d, loop                       /* us100 parameter is passed via D register */
     rts                                /* return from subroutine */
@@ -233,10 +242,10 @@ void _EntryPoint(void)
   setReg8(CLKSEL, 0x00U);              /* Select clock source from XTAL and set bits in CLKSEL reg. */ 
   /* PLLCTL: CME=1,PLLON=0,AUTO=1,ACQ=1,??=0,PRE=0,PCE=0,SCME=1 */
   setReg8(PLLCTL, 0xB1U);              /* Disable the PLL */ 
-  /* SYNR: ??=0,??=0,SYN5=0,SYN4=0,SYN3=0,SYN2=0,SYN1=0,SYN0=1 */
-  setReg8(SYNR, 0x01U);                /* Set the multiplier register */ 
-  /* REFDV: ??=0,??=0,??=0,??=0,REFDV3=0,REFDV2=0,REFDV1=1,REFDV0=0 */
-  setReg8(REFDV, 0x02U);               /* Set the divider register */ 
+  /* SYNR: ??=0,??=0,SYN5=0,SYN4=0,SYN3=0,SYN2=0,SYN1=1,SYN0=0 */
+  setReg8(SYNR, 0x02U);                /* Set the multiplier register */ 
+  /* REFDV: ??=0,??=0,??=0,??=0,REFDV3=0,REFDV2=0,REFDV1=1,REFDV0=1 */
+  setReg8(REFDV, 0x03U);               /* Set the divider register */ 
   /* PLLCTL: CME=1,PLLON=1,AUTO=1,ACQ=1,??=0,PRE=0,PCE=0,SCME=1 */
   setReg8(PLLCTL, 0xF1U);               
   while(CRGFLG_LOCK == 0U) {           /* Wait until the PLL is within the desired tolerance of the target frequency */
@@ -264,34 +273,46 @@ void _EntryPoint(void)
 void PE_low_level_init(void)
 {
   /* Common initialization of the CPU registers */
-  /* PTT: PTT4=0,PTT3=0,PTT2=0,PTT1=1,PTT0=1 */
-  clrSetReg8Bits(PTT, 0x1CU, 0x03U);    
-  /* PPST: PPST1=0,PPST0=0 */
-  clrReg8Bits(PPST, 0x03U);             
-  /* PERT: PERT1=1,PERT0=1 */
-  setReg8Bits(PERT, 0x03U);             
-  /* DDRT: DDRT4=1,DDRT3=1,DDRT2=1,DDRT1=1,DDRT0=0 */
-  clrSetReg8Bits(DDRT, 0x01U, 0x1EU);   
-  /* ATDDIEN: IEN3=0,IEN2=0,IEN1=0,IEN0=0 */
-  clrReg8Bits(ATDDIEN, 0x0FU);          
+  /* PTT: PTT7=1,PTT6=1,PTT4=0,PTT3=0,PTT2=0,PTT1=0,PTT0=0 */
+  clrSetReg8Bits(PTT, 0x1FU, 0xC0U);    
+  /* PPST: PPST7=0,PPST6=0 */
+  clrReg8Bits(PPST, 0xC0U);             
+  /* PERT: PERT7=1,PERT6=1 */
+  setReg8Bits(PERT, 0xC0U);             
+  /* DDRT: DDRT7=1,DDRT6=1,DDRT4=1,DDRT3=1,DDRT2=1,DDRT1=1,DDRT0=1 */
+  setReg8Bits(DDRT, 0xDFU);             
+  /* ATDDIEN: IEN7=1,IEN6=1,IEN5=1,IEN3=0,IEN2=0,IEN1=0,IEN0=0 */
+  clrSetReg8Bits(ATDDIEN, 0x0FU, 0xE0U); 
   /* PTS: PTS1=1 */
   setReg8Bits(PTS, 0x02U);              
   /* DDRS: DDRS1=1,DDRS0=0 */
   clrSetReg8Bits(DDRS, 0x01U, 0x02U);   
   /* PWME: ??=0,??=0,PWME5=0,PWME4=0,PWME3=0,PWME2=0,PWME1=0,PWME0=0 */
   setReg8(PWME, 0x00U);                 
-  /* MODRR: MODRR4=1,MODRR3=1,MODRR2=1 */
-  setReg8Bits(MODRR, 0x1CU);            
-  /* PWMCTL: CON45=0,CON23=0,PSWAI=0,PFRZ=0 */
-  clrReg8Bits(PWMCTL, 0x6CU);           
-  /* PWMCAE: CAE5=0,CAE4=0,CAE3=0,CAE2=0 */
-  clrReg8Bits(PWMCAE, 0x3CU);           
-  /* PWMPOL: PPOL5=0,PPOL4=0,PPOL3=0,PPOL2=0 */
-  clrReg8Bits(PWMPOL, 0x3CU);           
+  /* MODRR: MODRR4=1,MODRR3=1,MODRR2=1,MODRR1=1,MODRR0=1 */
+  setReg8Bits(MODRR, 0x1FU);            
+  /* PWMCTL: CON45=0,CON23=0,CON01=0,PSWAI=0,PFRZ=0 */
+  clrReg8Bits(PWMCTL, 0x7CU);           
+  /* PWMCAE: CAE5=0,CAE4=0,CAE3=0,CAE2=0,CAE1=0,CAE0=0 */
+  clrReg8Bits(PWMCAE, 0x3FU);           
+  /* PWMPOL: PPOL5=0,PPOL4=0,PPOL3=0,PPOL2=0,PPOL1=0,PPOL0=0 */
+  clrReg8Bits(PWMPOL, 0x3FU);           
   /* PTP: PTP5=0 */
   clrReg8Bits(PTP, 0x20U);              
   /* DDRP: DDRP5=1 */
   setReg8Bits(DDRP, 0x20U);             
+  /* PTAD: PTAD7=0,PTAD6=0,PTAD5=0 */
+  clrReg8Bits(PTAD, 0xE0U);             
+  /* PERAD: PERAD7=0,PERAD6=0,PERAD5=0 */
+  clrReg8Bits(PERAD, 0xE0U);            
+  /* DDRAD: DDRAD7=0,DDRAD6=0,DDRAD5=0 */
+  clrReg8Bits(DDRAD, 0xE0U);            
+  /* PORTA: BIT0=0 */
+  clrReg8Bits(PORTA, 0x01U);            
+  /* PUCR: PUPAE=0 */
+  clrReg8Bits(PUCR, 0x01U);             
+  /* DDRA: BIT0=1 */
+  setReg8Bits(DDRA, 0x01U);             
   /* CRGINT: LOCKIE=0,SCMIE=0 */
   clrReg8Bits(CRGINT, 0x12U);           
   /* VREGCTRL: LVIE=0 */
@@ -325,14 +346,21 @@ void PE_low_level_init(void)
   AD1_Init();
   /* ### Asynchro serial "AS1" init code ... */
   AS1_Init();
-  /* ### Programable pulse generation "PWM8" init code ... */
-  PWM8_Init();
-  /* ### Programable pulse generation "PWM9" init code ... */
-  PWM9_Init();
-  /* ### Programable pulse generation "PWM10" init code ... */
-  PWM10_Init();
-  /* ### Programable pulse generation "PWM11" init code ... */
-  PWM11_Init();
+  /* ### Programable pulse generation "PWM_SUSPENSION_UP" init code ... */
+  PWM_SUSPENSION_UP_Init();
+  /* ### Programable pulse generation "PWM_SUSPENSION_DOWN" init code ... */
+  PWM_SUSPENSION_DOWN_Init();
+  /* ### Programable pulse generation "PWM_STEERING_LEFT" init code ... */
+  PWM_STEERING_LEFT_Init();
+  /* ### Programable pulse generation "PWM_STEERING_RIGHT" init code ... */
+  PWM_STEERING_RIGHT_Init();
+  /* ### Programable pulse generation "PWM_WHEEL_FORWARDS" init code ... */
+  PWM_WHEEL_FORWARDS_Init();
+  /* ### Programable pulse generation "PWM_WHEEL_BACKWARDS" init code ... */
+  PWM_WHEEL_BACKWARDS_Init();
+  /* ### BitsIO "BOARD_ID" init code ... */
+  Shadow_AD0 &= 0x1FU;                 /* Initialize port shadow variable */
+  /* ### BitIO "LED" init code ... */
   __EI();                              /* Enable interrupts */
 }
 

@@ -6,7 +6,7 @@
 **     Component : PE_Timer
 **     Version   : Driver 01.04
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 13.06.2015, 19:53
+**     Date/Time : 7/18/2015, 7:49 PM
 **     Abstract  :
 **         This module "PE_Timer" implements internal methods and definitions
 **         used by components working with timers.

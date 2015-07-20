@@ -6,7 +6,7 @@
 **     Component : FreescaleCAN
 **     Version   : Component 02.355, Driver 01.29, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 7/5/2015, 6:31 PM
+**     Date/Time : 7/20/2015, 9:48 PM
 **     Abstract  :
 **         This component "FreescaleCAN" implements a CAN serial channel.
 **     Settings  :
@@ -14,9 +14,9 @@
 **
 **         Protocol
 **             Interrupt priority      : 1
-**             Time segment 1          : 6
+**             Time segment 1          : 14
 **             Time segment 2          : 7
-**             RSJ                     : 1
+**             RSJ                     : 2
 **
 **             Recieve accept. code    : 0x00
 **             Recieve accept. mask    : 0xFFFFFFFF

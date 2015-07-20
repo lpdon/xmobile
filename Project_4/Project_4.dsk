@@ -11,7 +11,7 @@ StartupPrj=D:\Users\Leandro\workspace\xmobile\Project_4\Project_4.pe
 [AppPanel]
 Status=hiden
 WindowState=NORMAL
-Rect=[225|313|310|496]
+Rect=[100|188|310|496]
 
 [CpuPanel]
 Status=Visible
@@ -44,7 +44,7 @@ WindowState=NORMAL
 Rect=[0|88|1147|860]
 ObjInspectorDockedWithPrphInit=No
 ColWidth01=376
-ColWidth02=752
+ColWidth02=753
 ColWidth11=248
 ColWidth12=497
 ColWidth21=248

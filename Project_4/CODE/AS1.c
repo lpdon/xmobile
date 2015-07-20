@@ -6,7 +6,7 @@
 **     Component : AsynchroSerial
 **     Version   : Component 02.483, Driver 01.22, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 6/21/2015, 2:14 AM
+**     Date/Time : 7/20/2015, 9:48 PM
 **     Abstract  :
 **         This component "AsynchroSerial" implements an asynchronous serial
 **         communication. The component supports different settings of
@@ -18,13 +18,13 @@
 **         Serial channel              : SCI
 **
 **         Protocol
-**             Init baud rate          : 9600baud
+**             Init baud rate          : 122baud
 **             Width                   : 8 bits
 **             Stop bits               : 1
 **             Parity                  : none
 **             Breaks                  : Disabled
-**             Input buffer size       : 128
-**             Output buffer size      : 128
+**             Input buffer size       : 64
+**             Output buffer size      : 64
 **
 **         Registers
 **             Input buffer            : SCIDRL    [$00CF]
@@ -79,10 +79,14 @@
 #include "Inhr2.h"
 #include "CAN1.h"
 #include "AD1.h"
-#include "PWM8.h"
-#include "PWM9.h"
-#include "PWM10.h"
-#include "PWM11.h"
+#include "PWM_SUSPENSION_UP.h"
+#include "PWM_SUSPENSION_DOWN.h"
+#include "PWM_STEERING_LEFT.h"
+#include "PWM_STEERING_RIGHT.h"
+#include "PWM_WHEEL_FORWARDS.h"
+#include "PWM_WHEEL_BACKWARDS.h"
+#include "BOARD_ID.h"
+#include "LED.h"
 #include "Events.h"
 
 #pragma DATA_SEG AS1_DATA              /* Select data segment "AS1_DATA" */
@@ -570,7 +574,7 @@ void AS1_Init(void)
   OutPtrW = OutBuffer;                 /* Set write pointer on the first item in the transmit buffer */
   /* SCICR2: SCTIE=0,TCIE=0,RIE=0,ILIE=0,TE=0,RE=0,RWU=0,SBK=0 */
   SCICR2 = 0U;                         /* Disable error interrupts */
-  SCIBD = 0x34U;                       /* Set prescaler bits */
+  SCIBD = 0x1804U;                     /* Set prescaler bits */
   SCICR2 |= (SCICR2_TE_MASK | SCICR2_RE_MASK | SCICR2_RIE_MASK); /* Enable transmitter, Enable receiver, Enable receiver interrupt */
 }
 

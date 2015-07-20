@@ -150,12 +150,6 @@ void drive_slave(const eId arg_id)
 	loc_suspension = loc_suspensionData.suspension[(uint8_t)loc_id];
 	loc_wheel = loc_wheelData.wheel[(uint8_t)loc_id];
 
-	if (loc_steering != 127)
-	{
-//		loc_steering = 127;
-		comm_getData(E_MSG_ID_STEERING, &loc_steeringData, sizeof(tMessageSteeringData));
-	}
-
 	pid[E_PID_MOTOR_STEERING].input.setpoint = loc_steering;
 	pid[E_PID_MOTOR_SUSPENSION].input.setpoint = loc_suspension;
 //	pid[E_PID_MOTOR_WHEEL].input.setpoint = loc_wheel;
@@ -173,7 +167,7 @@ void drive_slave(const eId arg_id)
 	pwm_setSignal(E_PWM_MOTOR_SUSPENSION, loc_pwmSuspension);
 	pwm_setSignal(E_PWM_MOTOR_WHEEL, loc_pwmWheel);
 
-	pid[E_PID_MOTOR_STEERING].pFactor = 40;
-	pid[E_PID_MOTOR_STEERING].iFactor = 0;
-	pid[E_PID_MOTOR_STEERING].dFactor = 0;
+	pid[E_PID_MOTOR_STEERING].pFactor = 60;
+	pid[E_PID_MOTOR_STEERING].iFactor = 1;
+	pid[E_PID_MOTOR_STEERING].dFactor = 3;
 }

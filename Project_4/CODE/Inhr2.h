@@ -6,7 +6,7 @@
 **     Component : BitIO
 **     Version   : Component 02.075, Driver 03.15, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 08.05.2015, 08:42
+**     Date/Time : 7/18/2015, 8:09 PM
 **     Abstract  :
 **         This component "BitIO" implements an one-bit input/output.
 **         It uses one bit/pin of a port.
@@ -18,15 +18,15 @@
 **             ----------------------------------------------------
 **                Number (on package)  |    Name
 **             ----------------------------------------------------
-**                       5             |  PT0_PWM0_IOC0
+**                       14            |  PT7_IOC7
 **             ----------------------------------------------------
 **
 **         Port name                   : T
 **
-**         Bit number (in port)        : 0
-**         Bit mask of the port        : $0001
+**         Bit number (in port)        : 7
+**         Bit mask of the port        : $0080
 **
-**         Initial direction           : Input (direction can be changed)
+**         Initial direction           : Output (direction can be changed)
 **         Safe mode                   : no
 **         Initial output value        : 1
 **         Initial pull option         : up
@@ -80,7 +80,7 @@
 ** ===================================================================
 */
 #define Inhr2_GetVal() ( \
-    (bool)((getReg8(PTT) & 0x01U))     /* Return port data */ \
+    (bool)((getReg8(PTT) & 0x80U))     /* Return port data */ \
   )
 
 /*
@@ -114,7 +114,7 @@ void Inhr2_PutVal(bool Val);
 ** ===================================================================
 */
 #define Inhr2_ClrVal() ( \
-    (void)clrReg8Bits(PTT, 0x01U)      /* PTT0=0x00U */ \
+    (void)clrReg8Bits(PTT, 0x80U)      /* PTT7=0x00U */ \
   )
 
 /*
@@ -130,7 +130,7 @@ void Inhr2_PutVal(bool Val);
 ** ===================================================================
 */
 #define Inhr2_SetVal() ( \
-    (void)setReg8Bits(PTT, 0x01U)      /* PTT0=0x01U */ \
+    (void)setReg8Bits(PTT, 0x80U)      /* PTT7=0x01U */ \
   )
 
 /*
@@ -146,7 +146,7 @@ void Inhr2_PutVal(bool Val);
 ** ===================================================================
 */
 #define Inhr2_NegVal() ( \
-    (void)invertReg8Bits(PTT, 0x01U)   /* PTT0=invert */ \
+    (void)invertReg8Bits(PTT, 0x80U)   /* PTT7=invert */ \
   )
 
 /*

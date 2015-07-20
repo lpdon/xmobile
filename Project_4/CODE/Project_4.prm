@@ -5,7 +5,7 @@
 **     Project   : Project_4
 **     Processor : MC9S12C32CFU16
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 08.05.2015, 08:42
+**     Date/Time : 7/20/2015, 4:15 PM
 **     Abstract  :
 **        This file is used by the linker. It describes files to be linked,
 **        memory ranges, stack size, etc. For detailed description of the PRM file
@@ -45,4 +45,4 @@ END
 
 INIT _EntryPoint                       /* The entry point of the application. This function is generated into the CPU module. */
 
-STACKSIZE 0x0080                       /* Size of the system stack. Value can be changed on the "Build options" tab */
+STACKSIZE 0x0100                       /* Size of the system stack. Value can be changed on the "Build options" tab */

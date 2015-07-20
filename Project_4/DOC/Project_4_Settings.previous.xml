@@ -12,7 +12,7 @@
         <group name="Clock settings">
           <group name="Input clock">
             <Clock_type v="External clock source"/>
-            <Clock_frequency__MHz_ v="16"/>
+            <Clock_frequency__MHz_ v="12"/>
             <group name="Clock input pin">
               <Pin v="EXTAL"/>
               <Pin_signal v=""/>
@@ -149,11 +149,11 @@
       <list name="Shared speed modes settings" v="1">
         <group name="Enabled speed modes">
           <boolgroup name="High speed mode" v="Enabled">
-            <Internal_bus_clock v="8"/>
+            <Internal_bus_clock v="12"/>
             <boolgroup name="PLL clock" v="Enabled">
               <Reference_divider v="Auto select"/>
               <PLL_multiplication_factor v="Auto select"/>
-              <PLL_clock_frequency v="16"/>
+              <PLL_clock_frequency v="24"/>
               <PLL_bandwidth_control v="Automatic Bandwidth Control"/>
               <PLL_mode v="Acquisition mode"/>
             </boolgroup>
@@ -219,7 +219,7 @@ asm(BGND);
       <Memory_model v="Small"/>
       <boolgroup name="Generate PRM file" v="yes">
         <enumgroup name="Stack specification" v="size">
-          <Stack_size v="128"/>
+          <Stack_size v="256"/>
         </enumgroup>
         <group name="Memory segments">
           <Set_default_memory_segments v="Click to set default &gt;"/>
@@ -269,11 +269,11 @@ asm(BGND);
 
         <Properties>
           <Component_name v="Inhr1"/>
-          <Pin_for_I_O v="PT1_PWM1_IOC1"/>
+          <Pin_for_I_O v="PT6_IOC6"/>
           <Pin_signal v=""/>
-          <Pull_resistor sel_value="pull up" v="pull up or no pull"/>
+          <Pull_resistor v="pull up"/>
           <Open_drain v="push-pull"/>
-          <Reduced_drive_for_PT1 v="no"/>
+          <Reduced_drive_for_PT6 v="no"/>
           <Direction v="Input/Output"/>
           <group name="Initialization">
             <Init__direction v="Output"/>
@@ -306,14 +306,14 @@ asm(BGND);
 
         <Properties>
           <Component_name v="Inhr2"/>
-          <Pin_for_I_O v="PT0_PWM0_IOC0"/>
+          <Pin_for_I_O v="PT7_IOC7"/>
           <Pin_signal v=""/>
-          <Pull_resistor sel_value="pull up" v="pull up or no pull"/>
+          <Pull_resistor v="pull up"/>
           <Open_drain v="push-pull"/>
-          <Reduced_drive_for_PT0 v="no"/>
+          <Reduced_drive_for_PT7 v="no"/>
           <Direction v="Input/Output"/>
           <group name="Initialization">
-            <Init__direction v="Input"/>
+            <Init__direction v="Output"/>
             <Init__value v="1"/>
           </group>
           <Safe_mode v="no"/>
@@ -341,7 +341,7 @@ asm(BGND);
       <Clock_timeout v="16"/>
       <Output_buffer_size v="0"/>
       <I2C_bus_mode v="STANDARD MODE"/>
-      <Automatic_stop_condition v="yes"/>
+      <Automatic_stop_condition v="no"/>
       <Acknowledge_polling_trials v="2000"/>
       <group name="Initialization">
         <Slave_address_init v="82"/>
@@ -364,7 +364,7 @@ asm(BGND);
       <RecvChar v="generate code"/>
       <SendBlock v="generate code"/>
       <RecvBlock v="generate code"/>
-      <SendStop v="don&apos;t generate code"/>
+      <SendStop v="generate code"/>
       <CheckBus v="don&apos;t generate code"/>
       <ClearTxBuf v="don&apos;t generate code"/>
       <CharsInTxBuf v="don&apos;t generate code"/>
@@ -414,11 +414,11 @@ asm(BGND);
         <Acceptance_mode v="Two 32-bit acceptance filters"/>
         <group name="Acceptance codes">
           <Acceptance_code_1 v="0"/>
-          <Acceptance_code_2 v="15"/>
+          <Acceptance_code_2 v="0"/>
         </group>
         <group name="Acceptance masks">
-          <Acceptance_mask_1 v="0"/>
-          <Acceptance_mask_2 v="15"/>
+          <Acceptance_mask_1 v="4294967295"/>
+          <Acceptance_mask_2 v="4294967295"/>
         </group>
         <Loop_mode v="no"/>
         <Listen_only_mode v="no"/>
@@ -427,11 +427,11 @@ asm(BGND);
       </group>
       <group name="Timing">
         <CAN_timing_wizard v="click to run timing wizard -&gt;"/>
-        <Time_segment_1 v="6"/>
+        <Time_segment_1 v="14"/>
         <Time_segment_2 v="7"/>
-        <RSJ v="1"/>
+        <RSJ v="2"/>
         <Samples_per_bit v="One sample"/>
-        <Time_quanta_per_bit v="16"/>
+        <Time_quanta_per_bit v="24"/>
         <Bit_rate v="250 kbit/s"/>
       </group>
       <group name="Initialization">
@@ -488,12 +488,24 @@ asm(BGND);
         <Priority v="same as interrupt"/>
       </event>
       <event name="OnTransmitterErrorPassive" v="don&apos;t generate code" />
-      <event name="OnReceiverErrorPassive" v="don&apos;t generate code" />
-      <event name="OnOverrun" v="don&apos;t generate code" />
+      <event name="OnReceiverErrorPassive" v="generate code">
+        <Event_procedure_name v="CAN1_OnReceiverErrorPassive"/>
+        <Priority v="same as interrupt"/>
+      </event>
+      <event name="OnOverrun" v="generate code">
+        <Event_procedure_name v="CAN1_OnOverrun"/>
+        <Priority v="same as interrupt"/>
+      </event>
       <event name="OnTransmitterWarning" v="don&apos;t generate code" />
-      <event name="OnReceiverWarning" v="don&apos;t generate code" />
+      <event name="OnReceiverWarning" v="generate code">
+        <Event_procedure_name v="CAN1_OnReceiverWarning"/>
+        <Priority v="same as interrupt"/>
+      </event>
       <event name="OnWakeup" v="don&apos;t generate code" />
-      <event name="OnError" v="don&apos;t generate code" />
+      <event name="OnError" v="generate code">
+        <Event_procedure_name v="CAN1_OnError"/>
+        <Priority v="same as interrupt"/>
+      </event>
     </Events>
   </Bean>
 
@@ -547,11 +559,11 @@ asm(BGND);
     </Properties>
 
     <Methods>
-      <Enable v="don&apos;t generate code"/>
+      <Enable v="generate code"/>
       <Disable v="don&apos;t generate code"/>
       <EnableEvent v="don&apos;t generate code"/>
       <DisableEvent v="don&apos;t generate code"/>
-      <Start v="don&apos;t generate code"/>
+      <Start v="generate code"/>
       <Stop v="don&apos;t generate code"/>
       <Measure v="generate code"/>
       <MeasureWait v="don&apos;t generate code"/>
@@ -563,10 +575,10 @@ asm(BGND);
       <EnableExtChanTrigger v="don&apos;t generate code"/>
       <GetValue v="don&apos;t generate code"/>
       <GetChanValue v="don&apos;t generate code"/>
-      <GetValue8 v="don&apos;t generate code"/>
-      <GetChanValue8 v="don&apos;t generate code"/>
+      <GetValue8 v="generate code"/>
+      <GetChanValue8 v="generate code"/>
       <GetValue16 v="generate code"/>
-      <GetChanValue16 v="don&apos;t generate code"/>
+      <GetChanValue16 v="generate code"/>
     </Methods>
 
     <Events>
@@ -647,8 +659,8 @@ asm(BGND);
         <Interrupt_TxD_priority v="medium priority"/>
         <Interrupt_Error v="Vsci"/>
         <Interrupt_Error_priority v="medium priority"/>
-        <Input_buffer_size v="128"/>
-        <Output_buffer_size v="128"/>
+        <Input_buffer_size v="64"/>
+        <Output_buffer_size v="64"/>
         <group name="Handshake">
           <boolgroup name="CTS" v="Disabled" />
           <boolgroup name="RTS" v="Disabled" />
@@ -668,7 +680,7 @@ asm(BGND);
           <TxD v="PS1_TxD"/>
           <TxD_pin_signal v=""/>
         </boolgroup>
-        <Baud_rate v="9600 baud"/>
+        <Baud_rate v="122 baud"/>
         <Break_signal v="Disabled"/>
         <Wakeup_condition v="Idle line wakeup"/>
         <Stop_in_wait_mode v="no"/>
@@ -748,11 +760,11 @@ asm(BGND);
     </Events>
   </Bean>
 
-  <Bean name="PWM8" type="PWM">
+  <Bean name="PWM_SUSPENSION_UP" type="PWM">
     <Enabled v="Y"/>
 
     <Properties>
-      <Component_name v="PWM8"/>
+      <Component_name v="PWM_SUSPENSION_UP"/>
       <PWM_or_PPG_device v="PWMPER2"/>
       <Duty_compare v="PWMDTY2"/>
       <Output_pin v="PT2_PWM2_IOC2"/>
@@ -809,11 +821,11 @@ asm(BGND);
     </Events>
   </Bean>
 
-  <Bean name="PWM9" type="PWM">
+  <Bean name="PWM_SUSPENSION_DOWN" type="PWM">
     <Enabled v="Y"/>
 
     <Properties>
-      <Component_name v="PWM9"/>
+      <Component_name v="PWM_SUSPENSION_DOWN"/>
       <PWM_or_PPG_device v="PWMPER3"/>
       <Duty_compare v="PWMDTY3"/>
       <Output_pin v="PT3_PWM3_IOC3"/>
@@ -870,11 +882,11 @@ asm(BGND);
     </Events>
   </Bean>
 
-  <Bean name="PWM10" type="PWM">
+  <Bean name="PWM_STEERING_LEFT" type="PWM">
     <Enabled v="Y"/>
 
     <Properties>
-      <Component_name v="PWM10"/>
+      <Component_name v="PWM_STEERING_LEFT"/>
       <PWM_or_PPG_device v="PWMPER4"/>
       <Duty_compare v="PWMDTY4"/>
       <Output_pin v="PT4_PWM4_IOC4"/>
@@ -907,7 +919,7 @@ asm(BGND);
       <Disable v="don&apos;t generate code"/>
       <EnableEvent v="don&apos;t generate code"/>
       <DisableEvent v="don&apos;t generate code"/>
-      <SetRatio8 v="don&apos;t generate code"/>
+      <SetRatio8 v="generate code"/>
       <SetRatio16 v="generate code"/>
       <SetDutyTicks16 v="don&apos;t generate code"/>
       <SetDutyTicks32 v="don&apos;t generate code"/>
@@ -931,11 +943,11 @@ asm(BGND);
     </Events>
   </Bean>
 
-  <Bean name="PWM11" type="PWM">
+  <Bean name="PWM_STEERING_RIGHT" type="PWM">
     <Enabled v="Y"/>
 
     <Properties>
-      <Component_name v="PWM11"/>
+      <Component_name v="PWM_STEERING_RIGHT"/>
       <PWM_or_PPG_device v="PWMPER5"/>
       <Duty_compare v="PWMDTY5"/>
       <Output_pin v="PP5_PWM5_KWP5"/>
@@ -968,7 +980,7 @@ asm(BGND);
       <Disable v="don&apos;t generate code"/>
       <EnableEvent v="don&apos;t generate code"/>
       <DisableEvent v="don&apos;t generate code"/>
-      <SetRatio8 v="don&apos;t generate code"/>
+      <SetRatio8 v="generate code"/>
       <SetRatio16 v="generate code"/>
       <SetDutyTicks16 v="don&apos;t generate code"/>
       <SetDutyTicks32 v="don&apos;t generate code"/>
@@ -1042,6 +1054,218 @@ asm(BGND);
         <Event_procedure_name v="TI2_OnInterrupt"/>
         <Priority v="same as interrupt"/>
       </event>
+    </Events>
+  </Bean>
+
+  <Bean name="PWM_WHEEL_FORWARDS" type="PWM">
+    <Enabled v="Y"/>
+
+    <Properties>
+      <Component_name v="PWM_WHEEL_FORWARDS"/>
+      <PWM_or_PPG_device v="PWMPER0"/>
+      <Duty_compare v="PWMDTY0"/>
+      <Output_pin v="PT0_PWM0_IOC0"/>
+      <Output_pin_signal v=""/>
+      <Counter v="PWM0"/>
+      <boolgroup name="Interrupt service/event" v="Disabled" />
+      <Stop_in_wait_mode v="no"/>
+      <Stop_in_freeze_mode v="no"/>
+      <Emergency_shutdown_feature v="Disabled"/>
+      <boolgroup name="Shutdown pin settings" v="Disabled" />
+      <Period v="5 ms"/>
+      <Starting_pulse_width v="18.750 &#181;s"/>
+      <Aligned v="Left"/>
+      <Initial_polarity v="low"/>
+      <Same_period_in_modes v="no"/>
+      <Component_uses_entire_timer v="no"/>
+      <group name="Initialization">
+        <Enabled_in_init__code v="yes"/>
+        <Events_enabled_in_init_ v="yes"/>
+      </group>
+      <group name="CPU clock/speed selection">
+        <High_speed_mode v="This component enabled"/>
+        <Low_speed_mode v="This component disabled"/>
+        <Slow_speed_mode v="This component disabled"/>
+      </group>
+    </Properties>
+
+    <Methods>
+      <Enable v="don&apos;t generate code"/>
+      <Disable v="don&apos;t generate code"/>
+      <EnableEvent v="don&apos;t generate code"/>
+      <DisableEvent v="don&apos;t generate code"/>
+      <SetRatio8 v="generate code"/>
+      <SetRatio16 v="generate code"/>
+      <SetDutyTicks16 v="don&apos;t generate code"/>
+      <SetDutyTicks32 v="don&apos;t generate code"/>
+      <SetDutyUS v="generate code"/>
+      <SetDutyMS v="generate code"/>
+      <SetDutySec v="don&apos;t generate code"/>
+      <SetDutyReal v="don&apos;t generate code"/>
+      <SetDutyMode v="don&apos;t generate code"/>
+      <SetValue v="don&apos;t generate code"/>
+      <ClrValue v="don&apos;t generate code"/>
+      <RestartPWM v="don&apos;t generate code"/>
+      <GetShutdownStatus v="don&apos;t generate code"/>
+    </Methods>
+
+    <Events>
+      <Event_module_name v="Events"/>
+      <event name="BeforeNewSpeed" v="don&apos;t generate code" />
+      <event name="AfterNewSpeed" v="don&apos;t generate code" />
+      <event name="OnEnd" v="don&apos;t generate code" />
+      <event name="OnShutdown" v="don&apos;t generate code" />
+    </Events>
+  </Bean>
+
+  <Bean name="PWM_WHEEL_BACKWARDS" type="PWM">
+    <Enabled v="Y"/>
+
+    <Properties>
+      <Component_name v="PWM_WHEEL_BACKWARDS"/>
+      <PWM_or_PPG_device v="PWMPER1"/>
+      <Duty_compare v="PWMDTY1"/>
+      <Output_pin v="PT1_PWM1_IOC1"/>
+      <Output_pin_signal v=""/>
+      <Counter v="PWM1"/>
+      <boolgroup name="Interrupt service/event" v="Disabled" />
+      <Stop_in_wait_mode v="no"/>
+      <Stop_in_freeze_mode v="no"/>
+      <Emergency_shutdown_feature v="Disabled"/>
+      <boolgroup name="Shutdown pin settings" v="Disabled" />
+      <Period v="5 ms"/>
+      <Starting_pulse_width v="18.750 &#181;s"/>
+      <Aligned v="Left"/>
+      <Initial_polarity v="low"/>
+      <Same_period_in_modes v="no"/>
+      <Component_uses_entire_timer v="no"/>
+      <group name="Initialization">
+        <Enabled_in_init__code v="yes"/>
+        <Events_enabled_in_init_ v="yes"/>
+      </group>
+      <group name="CPU clock/speed selection">
+        <High_speed_mode v="This component enabled"/>
+        <Low_speed_mode v="This component disabled"/>
+        <Slow_speed_mode v="This component disabled"/>
+      </group>
+    </Properties>
+
+    <Methods>
+      <Enable v="don&apos;t generate code"/>
+      <Disable v="don&apos;t generate code"/>
+      <EnableEvent v="don&apos;t generate code"/>
+      <DisableEvent v="don&apos;t generate code"/>
+      <SetRatio8 v="generate code"/>
+      <SetRatio16 v="generate code"/>
+      <SetDutyTicks16 v="don&apos;t generate code"/>
+      <SetDutyTicks32 v="don&apos;t generate code"/>
+      <SetDutyUS v="generate code"/>
+      <SetDutyMS v="generate code"/>
+      <SetDutySec v="don&apos;t generate code"/>
+      <SetDutyReal v="don&apos;t generate code"/>
+      <SetDutyMode v="don&apos;t generate code"/>
+      <SetValue v="don&apos;t generate code"/>
+      <ClrValue v="don&apos;t generate code"/>
+      <RestartPWM v="don&apos;t generate code"/>
+      <GetShutdownStatus v="don&apos;t generate code"/>
+    </Methods>
+
+    <Events>
+      <Event_module_name v="Events"/>
+      <event name="BeforeNewSpeed" v="don&apos;t generate code" />
+      <event name="AfterNewSpeed" v="don&apos;t generate code" />
+      <event name="OnEnd" v="don&apos;t generate code" />
+      <event name="OnShutdown" v="don&apos;t generate code" />
+    </Events>
+  </Bean>
+
+  <Bean name="BOARD_ID" type="BitsIO">
+    <Enabled v="Y"/>
+
+    <Properties>
+      <Component_name v="BOARD_ID"/>
+      <Port v="AD0"/>
+      <list name="Pins" v="3">
+        <group name="Pin0">
+          <Pin v="PAD05_AN05"/>
+          <Pin_signal v=""/>
+          <Reduced_drive_for_PAD05 v="no"/>
+        </group>
+        <group name="Pin1">
+          <Pin v="PAD06_AN06"/>
+          <Pin_signal v=""/>
+          <Reduced_drive_for_PAD06 v="no"/>
+        </group>
+        <group name="Pin2">
+          <Pin v="PAD07_AN07"/>
+          <Pin_signal v=""/>
+          <Reduced_drive_for_PAD07 v="no"/>
+        </group>
+      </list>
+      <Pull_resistor sel_value="no pull resistor" v="autoselected pull"/>
+      <Open_drain v="push-pull"/>
+      <Direction v="Input/Output"/>
+      <group name="Initialization">
+        <Init__direction v="Input"/>
+        <Init__value v="0"/>
+      </group>
+      <Safe_mode v="yes"/>
+      <Optimization_for v="speed"/>
+    </Properties>
+
+    <Methods>
+      <GetDir v="generate code"/>
+      <SetDir v="generate code"/>
+      <SetInput v="don&apos;t generate code"/>
+      <SetOutput v="don&apos;t generate code"/>
+      <GetVal v="generate code"/>
+      <PutVal v="generate code"/>
+      <GetBit v="generate code"/>
+      <PutBit v="generate code"/>
+      <SetBit v="generate code"/>
+      <ClrBit v="generate code"/>
+      <NegBit v="generate code"/>
+      <GetRawVal v="don&apos;t generate code"/>
+      <GetRawBit v="don&apos;t generate code"/>
+    </Methods>
+
+    <Events>
+    </Events>
+  </Bean>
+
+  <Bean name="LED" type="BitIO">
+    <Enabled v="Y"/>
+
+    <Properties>
+      <Component_name v="LED"/>
+      <Pin_for_I_O v="PA0_ADDR8_DATA8"/>
+      <Pin_signal v=""/>
+      <Pull_resistor sel_value="no pull resistor" v="autoselected pull"/>
+      <Open_drain v="push-pull"/>
+      <Reduced_drive_for_port_A v="no"/>
+      <Direction v="Output"/>
+      <group name="Initialization">
+        <Init__direction v="Output"/>
+        <Init__value v="0"/>
+      </group>
+      <Safe_mode v="yes"/>
+      <Optimization_for v="speed"/>
+    </Properties>
+
+    <Methods>
+      <GetDir v="don&apos;t generate code"/>
+      <SetDir v="don&apos;t generate code"/>
+      <SetInput v="don&apos;t generate code"/>
+      <SetOutput v="don&apos;t generate code"/>
+      <GetVal v="generate code"/>
+      <PutVal v="generate code"/>
+      <ClrVal v="generate code"/>
+      <SetVal v="generate code"/>
+      <NegVal v="don&apos;t generate code"/>
+      <GetRawVal v="don&apos;t generate code"/>
+    </Methods>
+
+    <Events>
     </Events>
   </Bean>
 

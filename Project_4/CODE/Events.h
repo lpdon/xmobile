@@ -32,10 +32,14 @@
 #include "CAN1.h"
 #include "AD1.h"
 #include "AS1.h"
-#include "PWM8.h"
-#include "PWM9.h"
-#include "PWM10.h"
-#include "PWM11.h"
+#include "PWM_SUSPENSION_UP.h"
+#include "PWM_SUSPENSION_DOWN.h"
+#include "PWM_STEERING_LEFT.h"
+#include "PWM_STEERING_RIGHT.h"
+#include "PWM_WHEEL_FORWARDS.h"
+#include "PWM_WHEEL_BACKWARDS.h"
+#include "BOARD_ID.h"
+#include "LED.h"
 
 #pragma CODE_SEG DEFAULT
 
@@ -242,6 +246,71 @@ void TI2_OnInterrupt(void);
 **         when the component is enabled - <Enable> and the events are
 **         enabled - <EnableEvent>). This event is enabled only if a
 **         <interrupt service/event> is enabled.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+
+void CAN1_OnError(void);
+/*
+** ===================================================================
+**     Event       :  CAN1_OnError (module Events)
+**
+**     Component   :  CAN1 [FreescaleCAN]
+**     Description :
+**         This event is called when a channel error (not the error
+**         returned by a given method) occurs. These errors can be
+**         read using <GetError> method. The event is available only
+**         if Interrupt service/event is enabled.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+
+void CAN1_OnReceiverErrorPassive(void);
+/*
+** ===================================================================
+**     Event       :  CAN1_OnReceiverErrorPassive (module Events)
+**
+**     Component   :  CAN1 [FreescaleCAN]
+**     Description :
+**         This event is called when the CAN controller goes into
+**         error passive status due to the receive error counter
+**         exceeding 127 and the BusOff status is not present. The
+**         event is available only if Interrupt service/event is
+**         enabled.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+
+void CAN1_OnOverrun(void);
+/*
+** ===================================================================
+**     Event       :  CAN1_OnOverrun (module Events)
+**
+**     Component   :  CAN1 [FreescaleCAN]
+**     Description :
+**         This event is called when receive buffer has overrun. The
+**         event is available only if Interrupt service/event is
+**         enabled.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+
+void CAN1_OnReceiverWarning(void);
+/*
+** ===================================================================
+**     Event       :  CAN1_OnReceiverWarning (module Events)
+**
+**     Component   :  CAN1 [FreescaleCAN]
+**     Description :
+**         This event is called when the CAN controller goes into a
+**         warning status due to the receive error counter exceeding
+**         96 and neither an error status nor a BusOff status are
+**         present. The event is available only if Interrupt
+**         service/event is enabled.
 **     Parameters  : None
 **     Returns     : Nothing
 ** ===================================================================

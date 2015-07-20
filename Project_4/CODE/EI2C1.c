@@ -6,7 +6,7 @@
 **     Component : SW_I2C
 **     Version   : Component 01.121, Driver 03.28, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 08.05.2015, 12:29
+**     Date/Time : 7/20/2015, 9:48 PM
 **     Abstract  :
 **         This device "SW_I2C" implements an external I2C
 **         communication interface. It uses two general-purpose
@@ -16,21 +16,21 @@
 **             ----------------------------------------------------
 **                Number (on package)  |    Name
 **             ----------------------------------------------------
-**                       5             |  PT0_PWM0_IOC0
+**                       14            |  PT7_IOC7
 **             ----------------------------------------------------
 **
 **         Serial Data (SDA) pin       :
 **             ----------------------------------------------------
 **                Number (on package)  |    Name
 **             ----------------------------------------------------
-**                       6             |  PT1_PWM1_IOC1
+**                       13            |  PT6_IOC6
 **             ----------------------------------------------------
 **
 **
 **         Mode                        : MASTER
 **         Communication Speed         : STANDARD MODE
 **         Output Buffer Size          : 0
-**         Auto Stop Condition         : yes
+**         Auto Stop Condition         : no
 **         Acknowledge Polling Trials  : 2000
 **
 **         Speed modes
@@ -49,6 +49,7 @@
 **         RecvChar    - byte EI2C1_RecvChar(byte *Chr);
 **         SendBlock   - byte EI2C1_SendBlock(void* Ptr, word Siz, word *Snt);
 **         RecvBlock   - byte EI2C1_RecvBlock(void* Ptr, word Siz, word *Rcv);
+**         SendStop    - byte EI2C1_SendStop(void);
 **         SelectSlave - byte EI2C1_SelectSlave(byte Slv);
 **         GetSelected - byte EI2C1_GetSelected(byte *Slv);
 **
@@ -100,15 +101,17 @@ static void Delay(void)
     /* jsr/bsr                            (4 c) jump/branch to subroutine */
     /*
      * Delay
-     *   - requested                  : 5000 ns @ 8MHz,
-     *   - possible                   : 40 c, 5000 ns
-     *   - without removable overhead : 31 c, 3875 ns
+     *   - requested                  : 5000 ns @ 12MHz,
+     *   - possible                   : 60 c, 5000 ns
+     *   - without removable overhead : 51 c, 4250 ns
      */
-    pshd                               /* (2 c: 250 ns) backup D */
-    ldd #$0008                         /* (2 c: 250 ns) number of iterations */
+    pshd                               /* (2 c: 166.67 ns) backup D */
+    ldd #$000E                         /* (2 c: 166.67 ns) number of iterations */
     label0:
-    dbne d, label0                     /* (3 c: 375 ns) repeat 8x */
-    puld                               /* (3 c: 375 ns) restore D */
+    dbne d, label0                     /* (3 c: 250 ns) repeat 14x */
+    puld                               /* (3 c: 250 ns) restore D */
+    nop                                /* (1 c: 83.33 ns) wait for 1 c */
+    nop                                /* (1 c: 83.33 ns) wait for 1 c */
     rts                                /* (5 c) return from subroutine */
   };
 }
@@ -358,7 +361,6 @@ byte EI2C1_SendChar(byte Chr)
     Inhr2_ClrVal();                /* CLOCK LOW PULSE */
     Delay();
   }
-  InternalStop();
   return ERR_OK;
 }
 
@@ -425,7 +427,6 @@ byte EI2C1_RecvChar(byte *Chr)
   *Chr = Read();
   EI2C1_OnRxChar();
   SetAck((bool)NOACK);
-  InternalStop();
   return ERR_OK;
 }
 
@@ -528,7 +529,6 @@ byte EI2C1_SendBlock(const void* Ptr,word Siz,word *Snt)
     }
     ++(*Snt);
   }
-  InternalStop();
   return ERR_OK;
 }
 
@@ -609,7 +609,37 @@ byte EI2C1_RecvBlock(void* Ptr,word Siz,word *Rcv)
     }
     ++(*Rcv);
   }
-  InternalStop();
+  return ERR_OK;
+}
+
+/*
+** ===================================================================
+**     Method      :  EI2C1_SendStop (component SW_I2C)
+**
+**     Description :
+**         When working as a MASTER, if the <Automatic stop condition>
+**         property value is 'no', this method sends a valid stop
+**         condition to the serial data line of the I2C bus to
+**         terminate the communication on the bus after using send
+**         methods. This method is enabled only if the component is in
+**         MASTER mode and <Automatic stop condition> property value is
+**         'no'
+**     Parameters  : None
+**     Returns     :
+**         ---             - Error code, possible codes:
+**                           ERR_OK - OK
+**                           ERR_SPEED - This device does not work in
+**                           the active speed mode
+**                           ERR_DISABLED - Device is disabled
+** ===================================================================
+*/
+byte EI2C1_SendStop(void)
+{
+  Inhr1_SetDir((bool)OUTPUT);
+  Inhr1_ClrVal();                  /* STOP SETUP */
+  Inhr2_SetDir((bool)INPUT);       /* HIGH CLOCK PULSE + STOP SETUP TIME */
+  Delay();
+  Inhr1_SetDir((bool)INPUT);       /* STOP CONDITION */
   return ERR_OK;
 }
 

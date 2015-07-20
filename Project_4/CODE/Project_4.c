@@ -88,7 +88,11 @@ void main(void)
       //PWM_STEERING_RIGHT_SetRatio16(~(ctrlData.pwmTest[0]));
       
       //nunchuk_cyclic();
-      Cpu_Delay100US(100);  
+      #if NODE==CONTROL
+      Cpu_Delay100US(5);  
+      #else
+      Cpu_Delay100US(100);        
+      #endif
   }
   /*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/
   for(;;){}

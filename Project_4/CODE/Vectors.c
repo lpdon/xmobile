@@ -5,7 +5,7 @@
 **     Processor : MC9S12C32CFU16
 **     Version   : Component 02.001, Driver 02.06, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 13.06.2015, 22:33
+**     Date/Time : 7/20/2015, 12:44 AM
 **     Abstract  :
 **         This component "MC9S12C32_80" implements properties, methods,
 **         and events of the CPU.
@@ -24,10 +24,14 @@
 #include "CAN1.h"
 #include "AD1.h"
 #include "AS1.h"
-#include "PWM8.h"
-#include "PWM9.h"
-#include "PWM10.h"
-#include "PWM11.h"
+#include "PWM_SUSPENSION_UP.h"
+#include "PWM_SUSPENSION_DOWN.h"
+#include "PWM_STEERING_LEFT.h"
+#include "PWM_STEERING_RIGHT.h"
+#include "PWM_WHEEL_FORWARDS.h"
+#include "PWM_WHEEL_BACKWARDS.h"
+#include "BOARD_ID.h"
+#include "LED.h"
 
 /* ISR prototype */
 typedef void (*near tIsrFunc)(void);

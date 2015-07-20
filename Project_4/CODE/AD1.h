@@ -6,7 +6,7 @@
 **     Component : ADC
 **     Version   : Component 01.593, Driver 01.18, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 13.06.2015, 18:49
+**     Date/Time : 7/20/2015, 9:48 PM
 **     Abstract  :
 **         This device "ADC" implements an A/D converter,
 **         its control methods and interrupt/event handling procedure.
@@ -58,10 +58,15 @@
 **              Conversion             : Enabled
 **              Event                  : Enabled
 **         High speed mode
-**             Prescaler               : divide-by-4
+**             Prescaler               : divide-by-6
 **     Contents  :
-**         Measure    - byte AD1_Measure(bool WaitForResult);
-**         GetValue16 - byte AD1_GetValue16(word *Values);
+**         Enable         - byte AD1_Enable(void);
+**         Start          - byte AD1_Start(void);
+**         Measure        - byte AD1_Measure(bool WaitForResult);
+**         GetValue8      - byte AD1_GetValue8(byte *Values);
+**         GetChanValue8  - byte AD1_GetChanValue8(byte Channel, byte *Value);
+**         GetValue16     - byte AD1_GetValue16(word *Values);
+**         GetChanValue16 - byte AD1_GetChanValue16(byte Channel, word *Value);
 **
 **     Copyright : 1997 - 2010 Freescale Semiconductor, Inc. All Rights Reserved.
 **     
@@ -118,6 +123,50 @@ __interrupt void AD1_Interrupt(void);
 */
 
 
+byte AD1_Enable(void);
+/*
+** ===================================================================
+**     Method      :  AD1_Enable (component ADC)
+**
+**     Description :
+**         Enables A/D converter component. <Events> may be generated
+**         (<DisableEvent>/<EnableEvent>). If possible, this method
+**         switches on A/D converter device, voltage reference, etc.
+**     Parameters  : None
+**     Returns     :
+**         ---             - Error code, possible codes:
+**                           ERR_OK - OK
+**                           ERR_SPEED - This device does not work in
+**                           the active speed mode
+** ===================================================================
+*/
+
+byte AD1_Start(void);
+/*
+** ===================================================================
+**     Method      :  AD1_Start (component ADC)
+**
+**     Description :
+**         This method starts continuous conversion on all channels
+**         that are set in the component inspector. When each
+**         measurement on all channels has finished the <OnEnd > event
+**         may be invoked. This method is not available if the
+**         <interrupt service> is disabled and the device doesn't
+**         support the continuous mode. Note: If time of measurement is
+**         too short and the instruction clock is too slow then the
+**         conversion complete interrupt and its handler may cause a
+**         system overflow.
+**     Parameters  : None
+**     Returns     :
+**         ---             - Error code, possible codes:
+**                           ERR_OK - OK
+**                           ERR_SPEED - This device does not work in
+**                           the active speed mode
+**                           ERR_DISABLED - Device is disabled
+**                           ERR_BUSY - A conversion is already running
+** ===================================================================
+*/
+
 byte AD1_Measure(bool WaitForResult);
 /*
 ** ===================================================================
@@ -153,6 +202,72 @@ byte AD1_Measure(bool WaitForResult);
 ** ===================================================================
 */
 
+byte AD1_GetValue8(byte *Values);
+/*
+** ===================================================================
+**     Method      :  AD1_GetValue8 (component ADC)
+**
+**     Description :
+**         This method returns the last measured values of all channels
+**         justified to the left. Compared with <GetValue> method this
+**         method returns more accurate result if the <number of
+**         conversions> is greater than 1 and <AD resolution> is less
+**         than 8 bits. In addition, the user code dependency on <AD
+**         resolution> is eliminated.
+**     Parameters  :
+**         NAME            - DESCRIPTION
+**       * Values          - Pointer to the array that contains
+**                           the measured data.
+**     Returns     :
+**         ---             - Error code, possible codes:
+**                           ERR_OK - OK
+**                           ERR_SPEED - This device does not work in
+**                           the active speed mode
+**                           ERR_NOTAVAIL - Requested value not
+**                           available
+**                           ERR_OVERRUN - External trigger overrun flag
+**                           was detected after the last value(s) was
+**                           obtained (for example by GetValue). This
+**                           error may not be supported on some CPUs
+**                           (see generated code).
+** ===================================================================
+*/
+
+byte AD1_GetChanValue8(byte Channel,byte *Value);
+/*
+** ===================================================================
+**     Method      :  AD1_GetChanValue8 (component ADC)
+**
+**     Description :
+**         This method returns the last measured value of required
+**         channel justified to the left. Compared with <GetChanValue>
+**         method this method returns more accurate result if the
+**         <number of conversions> is greater than 1 and <AD resolution>
+**         is less than 8 bits. In addition, the user code dependency
+**         on <AD resolution> is eliminated.
+**     Parameters  :
+**         NAME            - DESCRIPTION
+**         Channel         - Channel number. If only one
+**                           channel in the component is set then this
+**                           parameter is ignored.
+**       * Value           - Pointer to the measured value.
+**     Returns     :
+**         ---             - Error code, possible codes:
+**                           ERR_OK - OK
+**                           ERR_SPEED - This device does not work in
+**                           the active speed mode
+**                           ERR_NOTAVAIL - Requested value not
+**                           available
+**                           ERR_RANGE - Parameter "Channel" out of
+**                           range
+**                           ERR_OVERRUN - External trigger overrun flag
+**                           was detected after the last value(s) was
+**                           obtained (for example by GetValue). This
+**                           error may not be supported on some CPUs
+**                           (see generated code).
+** ===================================================================
+*/
+
 byte AD1_GetValue16(word *Values);
 /*
 ** ===================================================================
@@ -176,6 +291,41 @@ byte AD1_GetValue16(word *Values);
 **                           the active speed mode
 **                           ERR_NOTAVAIL - Requested value not
 **                           available
+**                           ERR_OVERRUN - External trigger overrun flag
+**                           was detected after the last value(s) was
+**                           obtained (for example by GetValue). This
+**                           error may not be supported on some CPUs
+**                           (see generated code).
+** ===================================================================
+*/
+
+byte AD1_GetChanValue16(byte Channel,word *Value);
+/*
+** ===================================================================
+**     Method      :  AD1_GetChanValue16 (component ADC)
+**
+**     Description :
+**         This method returns the last measured value of the required
+**         channel justified to the left. Compared with <GetChanValue>
+**         method this method returns more accurate result if the
+**         <number of conversions> is greater than 1 and <AD resolution>
+**         is less than 16 bits. In addition, the user code dependency
+**         on <AD resolution> is eliminated.
+**     Parameters  :
+**         NAME            - DESCRIPTION
+**         Channel         - Channel number. If only one
+**                           channel in the component is set then this
+**                           parameter is ignored.
+**       * Value           - Pointer to the measured value.
+**     Returns     :
+**         ---             - Error code, possible codes:
+**                           ERR_OK - OK
+**                           ERR_SPEED - This device does not work in
+**                           the active speed mode
+**                           ERR_NOTAVAIL - Requested value not
+**                           available
+**                           ERR_RANGE - Parameter "Channel" out of
+**                           range
 **                           ERR_OVERRUN - External trigger overrun flag
 **                           was detected after the last value(s) was
 **                           obtained (for example by GetValue). This

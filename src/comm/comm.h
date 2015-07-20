@@ -33,7 +33,7 @@ SOFTWARE.*/
 	#include "message.h"
 #endif
 
-#define COMM_TIMEOUT                   10U
+#define COMM_TIMEOUT                   5U
 #define COMM_MAXRETRANSMISSIONS        3U
 
 typedef enum

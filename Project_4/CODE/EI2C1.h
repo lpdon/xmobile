@@ -6,7 +6,7 @@
 **     Component : SW_I2C
 **     Version   : Component 01.121, Driver 03.28, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 08.05.2015, 12:29
+**     Date/Time : 7/20/2015, 3:51 PM
 **     Abstract  :
 **         This device "SW_I2C" implements an external I2C
 **         communication interface. It uses two general-purpose
@@ -16,21 +16,21 @@
 **             ----------------------------------------------------
 **                Number (on package)  |    Name
 **             ----------------------------------------------------
-**                       5             |  PT0_PWM0_IOC0
+**                       14            |  PT7_IOC7
 **             ----------------------------------------------------
 **
 **         Serial Data (SDA) pin       :
 **             ----------------------------------------------------
 **                Number (on package)  |    Name
 **             ----------------------------------------------------
-**                       6             |  PT1_PWM1_IOC1
+**                       13            |  PT6_IOC6
 **             ----------------------------------------------------
 **
 **
 **         Mode                        : MASTER
 **         Communication Speed         : STANDARD MODE
 **         Output Buffer Size          : 0
-**         Auto Stop Condition         : yes
+**         Auto Stop Condition         : no
 **         Acknowledge Polling Trials  : 2000
 **
 **         Speed modes
@@ -49,6 +49,7 @@
 **         RecvChar    - byte EI2C1_RecvChar(byte *Chr);
 **         SendBlock   - byte EI2C1_SendBlock(void* Ptr, word Siz, word *Snt);
 **         RecvBlock   - byte EI2C1_RecvBlock(void* Ptr, word Siz, word *Rcv);
+**         SendStop    - byte EI2C1_SendStop(void);
 **         SelectSlave - byte EI2C1_SelectSlave(byte Slv);
 **         GetSelected - byte EI2C1_GetSelected(byte *Slv);
 **
@@ -237,6 +238,29 @@ byte EI2C1_RecvBlock(void* Ptr,word Siz,word *Rcv);
 **                           ERR_DISABLED - Device is disabled
 **                           ERR_BUSOFF - Clock timeout elapsed (SLAVE
 **                           mode only)
+** ===================================================================
+*/
+
+byte EI2C1_SendStop(void);
+/*
+** ===================================================================
+**     Method      :  EI2C1_SendStop (component SW_I2C)
+**
+**     Description :
+**         When working as a MASTER, if the <Automatic stop condition>
+**         property value is 'no', this method sends a valid stop
+**         condition to the serial data line of the I2C bus to
+**         terminate the communication on the bus after using send
+**         methods. This method is enabled only if the component is in
+**         MASTER mode and <Automatic stop condition> property value is
+**         'no'
+**     Parameters  : None
+**     Returns     :
+**         ---             - Error code, possible codes:
+**                           ERR_OK - OK
+**                           ERR_SPEED - This device does not work in
+**                           the active speed mode
+**                           ERR_DISABLED - Device is disabled
 ** ===================================================================
 */
 

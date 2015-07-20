@@ -6,7 +6,7 @@
 **     Component : BitIO
 **     Version   : Component 02.075, Driver 03.15, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 08.05.2015, 11:38
+**     Date/Time : 7/18/2015, 8:09 PM
 **     Abstract  :
 **         This component "BitIO" implements an one-bit input/output.
 **         It uses one bit/pin of a port.
@@ -18,13 +18,13 @@
 **             ----------------------------------------------------
 **                Number (on package)  |    Name
 **             ----------------------------------------------------
-**                       6             |  PT1_PWM1_IOC1
+**                       13            |  PT6_IOC6
 **             ----------------------------------------------------
 **
 **         Port name                   : T
 **
-**         Bit number (in port)        : 1
-**         Bit mask of the port        : $0002
+**         Bit number (in port)        : 6
+**         Bit mask of the port        : $0040
 **
 **         Initial direction           : Output (direction can be changed)
 **         Safe mode                   : no
@@ -104,9 +104,9 @@ bool Inhr1_GetVal(void)
 void Inhr1_PutVal(bool Val)
 {
   if (Val) {
-    setReg8Bits(PTT, 0x02U);           /* PTT1=0x01U */
+    setReg8Bits(PTT, 0x40U);           /* PTT6=0x01U */
   } else { /* !Val */
-    clrReg8Bits(PTT, 0x02U);           /* PTT1=0x00U */
+    clrReg8Bits(PTT, 0x40U);           /* PTT6=0x00U */
   } /* !Val */
 }
 
@@ -180,9 +180,9 @@ void Inhr1_NegVal(void)
 void Inhr1_SetDir(bool Dir)
 {
   if (Dir) {
-    setReg8Bits(DDRT, 0x02U);          /* DDRT1=0x01U */
+    setReg8Bits(DDRT, 0x40U);          /* DDRT6=0x01U */
   } else { /* !Dir */
-    clrReg8Bits(DDRT, 0x02U);          /* DDRT1=0x00U */
+    clrReg8Bits(DDRT, 0x40U);          /* DDRT6=0x00U */
   } /* !Dir */
 }
 

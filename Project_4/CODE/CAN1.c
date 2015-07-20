@@ -6,7 +6,7 @@
 **     Component : FreescaleCAN
 **     Version   : Component 02.355, Driver 01.29, CPU db: 2.87.410
 **     Compiler  : CodeWarrior HC12 C Compiler
-**     Date/Time : 7/5/2015, 6:31 PM
+**     Date/Time : 7/20/2015, 10:56 PM
 **     Abstract  :
 **         This component "FreescaleCAN" implements a CAN serial channel.
 **     Settings  :
@@ -14,9 +14,9 @@
 **
 **         Protocol
 **             Interrupt priority      : 1
-**             Time segment 1          : 6
+**             Time segment 1          : 14
 **             Time segment 2          : 7
-**             RSJ                     : 1
+**             RSJ                     : 2
 **
 **             Recieve accept. code    : 0x00
 **             Recieve accept. mask    : 0xFFFFFFFF
@@ -55,10 +55,14 @@
 #include "Inhr2.h"
 #include "AD1.h"
 #include "AS1.h"
-#include "PWM8.h"
-#include "PWM9.h"
-#include "PWM10.h"
-#include "PWM11.h"
+#include "PWM_SUSPENSION_UP.h"
+#include "PWM_SUSPENSION_DOWN.h"
+#include "PWM_STEERING_LEFT.h"
+#include "PWM_STEERING_RIGHT.h"
+#include "PWM_WHEEL_FORWARDS.h"
+#include "PWM_WHEEL_BACKWARDS.h"
+#include "BOARD_ID.h"
+#include "LED.h"
 #include "Events.h"
 
 #define CAN_STANDARD_FRAME_MAX_ID    0x07FFU /* Max ID of the standard frame */
@@ -150,8 +154,8 @@ byte CAN1_SetAcceptanceMode(byte Mode)
   while(CANCTL1_INITAK){}              /* Wait for enable */
   /* CANRFLG: WUPIF=1,CSCIF=1,RSTAT1=1,RSTAT0=1,TSTAT1=1,TSTAT0=1,OVRIF=1 */
   CANRFLG |= 0xFEU;                    /* Reset error flags */
-  /* CANRIER: WUPIE=0,CSCIE=1,RSTATE1=1,RSTATE0=1,TSTATE1=1,TSTATE0=1,OVRIE=0,RXFIE=1 */
-  CANRIER = 0x7DU;                     /* Enable interrupts */
+  /* CANRIER: WUPIE=0,CSCIE=1,RSTATE1=1,RSTATE0=1,TSTATE1=1,TSTATE0=1,OVRIE=1,RXFIE=1 */
+  CANRIER = 0x7FU;                     /* Enable interrupts */
   ExitCritical();                      /* Exit critical section */
   return ERR_OK;                       /* OK */
 }
@@ -231,8 +235,8 @@ byte CAN1_SetAcceptanceCode(dword AccCode1, dword AccCode2)
   while(CANCTL1_INITAK){}              /* Wait for enable */
   /* CANRFLG: WUPIF=1,CSCIF=1,RSTAT1=1,RSTAT0=1,TSTAT1=1,TSTAT0=1,OVRIF=1 */
   CANRFLG |= 0xFEU;                    /* Reset error flags */
-  /* CANRIER: WUPIE=0,CSCIE=1,RSTATE1=1,RSTATE0=1,TSTATE1=1,TSTATE0=1,OVRIE=0,RXFIE=1 */
-  CANRIER = 0x7DU;                     /* Enable interrupts */
+  /* CANRIER: WUPIE=0,CSCIE=1,RSTATE1=1,RSTATE0=1,TSTATE1=1,TSTATE0=1,OVRIE=1,RXFIE=1 */
+  CANRIER = 0x7FU;                     /* Enable interrupts */
   ExitCritical();                      /* Exit critical section */
   return ERR_OK;                       /* OK */
 }
@@ -596,17 +600,17 @@ void CAN1_Init(void)
   CANIDMR5 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR5 */
   CANIDMR6 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR6 */
   CANIDMR7 = 0xFFU;                    /* Set the acceptance mask, register CANIDMR7 */
-  /* CANBTR0: SJW1=0,SJW0=1,BRP5=0,BRP4=0,BRP3=0,BRP2=0,BRP1=1,BRP0=0 */
-  CANBTR0 = 0x42U;                     /* Set the device timing register */
-  /* CANBTR1: SAMP=0,TSEG22=1,TSEG21=1,TSEG20=1,TSEG13=0,TSEG12=1,TSEG11=1,TSEG10=0 */
-  CANBTR1 = 0x76U;                     /* Set the device timing register */
-  CANCTL1_CLKSRC = 0x00U;              /* Select the clock source from crystal */
+  /* CANBTR0: SJW1=1,SJW0=0,BRP5=0,BRP4=0,BRP3=0,BRP2=0,BRP1=0,BRP0=1 */
+  CANBTR0 = 0x81U;                     /* Set the device timing register */
+  /* CANBTR1: SAMP=0,TSEG22=1,TSEG21=1,TSEG20=1,TSEG13=1,TSEG12=1,TSEG11=1,TSEG10=0 */
+  CANBTR1 = 0x7EU;                     /* Set the device timing register */
+  CANCTL1_CLKSRC = 0x01U;              /* Select the clock source from bus clock */
   CANCTL0_INITRQ = 0x00U;              /* Start device */
   while(CANCTL1_INITAK) {}             /* Wait for enable */
   /* CANRFLG: WUPIF=1,CSCIF=1,RSTAT1=1,RSTAT0=1,TSTAT1=1,TSTAT0=1,OVRIF=1 */
   CANRFLG |= 0xFEU;                    /* Reset error flags */
-  /* CANRIER: WUPIE=0,CSCIE=1,RSTATE1=1,RSTATE0=1,TSTATE1=1,TSTATE0=1,OVRIE=0,RXFIE=1 */
-  CANRIER = 0x7DU;                     /* Enable interrupts */
+  /* CANRIER: WUPIE=0,CSCIE=1,RSTATE1=1,RSTATE0=1,TSTATE1=1,TSTATE0=1,OVRIE=1,RXFIE=1 */
+  CANRIER = 0x7FU;                     /* Enable interrupts */
 }
 
 /*
@@ -682,8 +686,8 @@ byte CAN1_SetAcceptanceMask(dword AccMask1, dword AccMask2)
   while(CANCTL1_INITAK) {}             /* Wait for device initialization acknowledge */
   /* CANRFLG: WUPIF=1,CSCIF=1,OVRIF=1 */
   CANRFLG |= 0xC2U;                    /* Reset error flags */
-  /* CANRIER: WUPIE=0,CSCIE=1,RSTATE1=1,RSTATE0=1,TSTATE1=1,TSTATE0=1,OVRIE=0,RXFIE=1 */
-  CANRIER = 0x7DU;                     /* Enable interrupts */
+  /* CANRIER: WUPIE=0,CSCIE=1,RSTATE1=1,RSTATE0=1,TSTATE1=1,TSTATE0=1,OVRIE=1,RXFIE=1 */
+  CANRIER = 0x7FU;                     /* Enable interrupts */
   ExitCritical();                      /* Exit critical section */
   return ERR_OK;                       /* OK */
 }
@@ -724,14 +728,20 @@ ISR(CAN1_InterruptTx)
 #define ON_OVERRUN  1U
 ISR(CAN1_InterruptRx)
 {
+  byte OnFlags = 0x00U;
+                                       /* Temporary variable for flags */
   byte buffer;
 
   if (SerFlag & FULL_RX_BUF) {         /* Is any char already present in the receive buffer? */
     SerFlag |= CAN_STATUS_OVERRUN_MASK; /* If yes then set internal flag OVERRUN */
+    OnFlags |= ON_OVERRUN;             /* Set flag "OnError" */
   }
   SerFlag |= FULL_RX_BUF;              /* Set flag "full RX buffer" */
   buffer = SerFlag & 0x83U;
   ErrFlag |= buffer;                   /* Add new error flags into the ErrorFlag status variable */
+  if (OnFlags & ON_OVERRUN) {          /* Is any char already present in the receive buffer? */
+    CAN1_OnOverrun();                  /* If yes then invoke user event */
+  }
    __DI();                             /* Disable maskable interrupts */
   CAN1_OnFullRxBuffer();               /* If yes then invoke user event. Parameter is always 1 because the CAN module has only one RX message buffer */
   CANRFLG = CANRFLG_RXF_MASK;          /* Reset the reception complete flag and release the RX buffer */
@@ -764,7 +774,21 @@ ISR(CAN1_InterruptError)
   if ((Status & CAN_STATUS_BOFF_MASK) == CAN_STATUS_BOFF_MASK) { /* Is busoff error detected? */
     CAN1_OnBusOff();                   /* If yes then invoke user event */
   } else {
+    if ((Status & CANRFLG_OVRIF_MASK) == CANRFLG_OVRIF_MASK) { /* Is overrun error detected? */
+       __DI();                         /* Disable maskable interrupts */
+      CAN1_OnOverrun();                /* If yes then invoke user event */
+    }
+    if ((Status & CAN_STATUS_RX_PASS_MASK) == CAN_STATUS_RX_PASS_MASK) { /* Is receiver error detect? */
+       __DI();                         /* Disable maskable interrupts */
+      CAN1_OnReceiverErrorPassive();   /* If yes then invoke user event */
+    }
+    if ((Status & CAN_STATUS_RX_WARN_MASK) == CAN_STATUS_RX_WARN_MASK) { /* Is receiver warning detect? */
+       __DI();                         /* Disable maskable interrupts */
+      CAN1_OnReceiverWarning();        /* If yes then invoke user event */
+    }
   }
+   __DI();                             /* Disable maskable interrupts */
+  CAN1_OnError();                      /* Invoke user event */
 }
 
 #pragma CODE_SEG CAN1_CODE

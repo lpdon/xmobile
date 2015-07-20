@@ -29,6 +29,10 @@ Module "EI2C1"     (bean SW_I2C)
                 then reads the block of characters from the bus. The slave address must be specified before by the 
                 "SelectSlave" method or in component initialization section of <Slave address init> property. When working as a 
                 SLAVE, this method reads the block of characters from the bus.
+   - EI2C1_SendStop -When working as a MASTER, if the <Automatic stop condition> property value is 'no', this method sends a 
+                valid stop condition to the serial data line of the I2C bus to terminate the communication on the bus after 
+                using send methods. This method is enabled only if the component is in MASTER mode and <Automatic stop 
+                condition> property value is 'no'
    - EI2C1_SelectSlave -When working as a MASTER, this method selects a new slave for communication by its slave address value. 
                 Any send or receive method are directed to or from the selected device, until a new slave device is selected by 
                 this method. If the selected slave uses 10-bit slave addressing, as the parameter 7 bits must be passed, which 
@@ -59,11 +63,28 @@ Module "CAN1"      (bean FreescaleCAN)
                 cannot specify a transmit buffer.
 
 Module "AD1"       (bean ADC)
+   - AD1_Enable -Enables A/D converter component. <Events> may be generated (<DisableEvent>/<EnableEvent>). If possible, this 
+                method switches on A/D converter device, voltage reference, etc.
+   - AD1_Start -This method starts continuous conversion on all channels that are set in the component inspector. When each 
+                measurement on all channels has finished the <OnEnd > event may be invoked. This method is not available if the 
+                <interrupt service> is disabled and the device doesn't support the continuous mode. Note: If time of 
+                measurement is too short and the instruction clock is too slow then the conversion complete interrupt and its 
+                handler may cause a system overflow.
    - AD1_Measure -This method performs one measurement on all channels that are set in the component inspector. (Note: If the 
                 <number of conversions> is more than one the conversion of A/D channels is performed specified number of times.)
+   - AD1_GetValue8 -This method returns the last measured values of all channels justified to the left. Compared with 
+                <GetValue> method this method returns more accurate result if the <number of conversions> is greater than 1 and 
+                <AD resolution> is less than 8 bits. In addition, the user code dependency on <AD resolution> is eliminated.
+   - AD1_GetChanValue8 -This method returns the last measured value of required channel justified to the left. Compared with 
+                <GetChanValue> method this method returns more accurate result if the <number of conversions> is greater than 1 
+                and <AD resolution> is less than 8 bits. In addition, the user code dependency on <AD resolution> is eliminated.
    - AD1_GetValue16 -This method returns the last measured values of all channels justified to the left. Compared with 
                 <GetValue> method this method returns more accurate result if the <number of conversions> is greater than 1 and 
                 <AD resolution> is less than 16 bits. In addition, the user code dependency on <AD resolution> is eliminated.
+   - AD1_GetChanValue16 -This method returns the last measured value of the required channel justified to the left. Compared 
+                with <GetChanValue> method this method returns more accurate result if the <number of conversions> is greater 
+                than 1 and <AD resolution> is less than 16 bits. In addition, the user code dependency on <AD resolution> is 
+                eliminated.
 
 Module "AS1"       (bean AsynchroSerial)
    - AS1_RecvChar -If any data is received, this method returns one character, otherwise it returns an error code (it does not 
@@ -114,53 +135,130 @@ Module "AS1"       (bean AsynchroSerial)
                 If DMA controller is available on the selected CPU and the transmitter is configured to use DMA controller then 
                 this method returns the number of characters in the transmit buffer.
 
-Module "PWM8"      (bean PWM)
-   - PWM8_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer number. 0 - FFFF 
-                value is proportional to ratio 0 - 100%. The method is available only if it is not selected list of predefined 
-                values in <Starting pulse width> property.   Note: Calculated duty depends on the timer possibilities and on 
-                the selected period.
-   - PWM8_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in microseconds as a 
-                16-bit unsigned integer number. The method is available only if it is not selected list of predefined values in 
-                <Starting pulse width> property.
-   - PWM8_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in milliseconds as a 
-                16-bit unsigned integer number. The method is available only if it is not selected list of predefined values in 
-                <Starting pulse width> property.
-
-Module "PWM9"      (bean PWM)
-   - PWM9_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer number. 0 - FFFF 
-                value is proportional to ratio 0 - 100%. The method is available only if it is not selected list of predefined 
-                values in <Starting pulse width> property.   Note: Calculated duty depends on the timer possibilities and on 
-                the selected period.
-   - PWM9_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in microseconds as a 
-                16-bit unsigned integer number. The method is available only if it is not selected list of predefined values in 
-                <Starting pulse width> property.
-   - PWM9_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in milliseconds as a 
-                16-bit unsigned integer number. The method is available only if it is not selected list of predefined values in 
-                <Starting pulse width> property.
-
-Module "PWM10"     (bean PWM)
-   - PWM10_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer number. 0 - 
-                FFFF value is proportional to ratio 0 - 100%. The method is available only if it is not selected list of 
-                predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+Module "PWM_SUSPENSION_UP" (bean PWM)
+   - PWM_SUSPENSION_UP_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer 
+                number. 0 - FFFF value is proportional to ratio 0 - 100%. The method is available only if it is not selected 
+                list of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
                 possibilities and on the selected period.
-   - PWM10_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in microseconds as a 
-                16-bit unsigned integer number. The method is available only if it is not selected list of predefined values in 
-                <Starting pulse width> property.
-   - PWM10_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in milliseconds as a 
-                16-bit unsigned integer number. The method is available only if it is not selected list of predefined values in 
-                <Starting pulse width> property.
+   - PWM_SUSPENSION_UP_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in 
+                microseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+   - PWM_SUSPENSION_UP_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in 
+                milliseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
 
-Module "PWM11"     (bean PWM)
-   - PWM11_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer number. 0 - 
-                FFFF value is proportional to ratio 0 - 100%. The method is available only if it is not selected list of 
-                predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+Module "PWM_SUSPENSION_DOWN" (bean PWM)
+   - PWM_SUSPENSION_DOWN_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer 
+                number. 0 - FFFF value is proportional to ratio 0 - 100%. The method is available only if it is not selected 
+                list of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
                 possibilities and on the selected period.
-   - PWM11_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in microseconds as a 
-                16-bit unsigned integer number. The method is available only if it is not selected list of predefined values in 
-                <Starting pulse width> property.
-   - PWM11_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in milliseconds as a 
-                16-bit unsigned integer number. The method is available only if it is not selected list of predefined values in 
-                <Starting pulse width> property.
+   - PWM_SUSPENSION_DOWN_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in 
+                microseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+   - PWM_SUSPENSION_DOWN_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in 
+                milliseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+
+Module "PWM_STEERING_LEFT" (bean PWM)
+   - PWM_STEERING_LEFT_SetRatio8 -This method sets a new duty-cycle ratio. Ratio is expressed as an 8-bit unsigned integer 
+                number. 0 - FF value is proportional to ratio 0 - 100%. The method is available only if it is not selected list 
+                of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+                capabilities and on the selected period.
+   - PWM_STEERING_LEFT_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer 
+                number. 0 - FFFF value is proportional to ratio 0 - 100%. The method is available only if it is not selected 
+                list of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+                possibilities and on the selected period.
+   - PWM_STEERING_LEFT_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in 
+                microseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+   - PWM_STEERING_LEFT_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in 
+                milliseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+
+Module "PWM_STEERING_RIGHT" (bean PWM)
+   - PWM_STEERING_RIGHT_SetRatio8 -This method sets a new duty-cycle ratio. Ratio is expressed as an 8-bit unsigned integer 
+                number. 0 - FF value is proportional to ratio 0 - 100%. The method is available only if it is not selected list 
+                of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+                capabilities and on the selected period.
+   - PWM_STEERING_RIGHT_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer 
+                number. 0 - FFFF value is proportional to ratio 0 - 100%. The method is available only if it is not selected 
+                list of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+                possibilities and on the selected period.
+   - PWM_STEERING_RIGHT_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in 
+                microseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+   - PWM_STEERING_RIGHT_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in 
+                milliseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+
+Module "PWM_WHEEL_FORWARDS" (bean PWM)
+   - PWM_WHEEL_FORWARDS_SetRatio8 -This method sets a new duty-cycle ratio. Ratio is expressed as an 8-bit unsigned integer 
+                number. 0 - FF value is proportional to ratio 0 - 100%. The method is available only if it is not selected list 
+                of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+                capabilities and on the selected period.
+   - PWM_WHEEL_FORWARDS_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer 
+                number. 0 - FFFF value is proportional to ratio 0 - 100%. The method is available only if it is not selected 
+                list of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+                possibilities and on the selected period.
+   - PWM_WHEEL_FORWARDS_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in 
+                microseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+   - PWM_WHEEL_FORWARDS_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in 
+                milliseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+
+Module "PWM_WHEEL_BACKWARDS" (bean PWM)
+   - PWM_WHEEL_BACKWARDS_SetRatio8 -This method sets a new duty-cycle ratio. Ratio is expressed as an 8-bit unsigned integer 
+                number. 0 - FF value is proportional to ratio 0 - 100%. The method is available only if it is not selected list 
+                of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+                capabilities and on the selected period.
+   - PWM_WHEEL_BACKWARDS_SetRatio16 -This method sets a new duty-cycle ratio. Ratio is expressed as a 16-bit unsigned integer 
+                number. 0 - FFFF value is proportional to ratio 0 - 100%. The method is available only if it is not selected 
+                list of predefined values in <Starting pulse width> property.   Note: Calculated duty depends on the timer 
+                possibilities and on the selected period.
+   - PWM_WHEEL_BACKWARDS_SetDutyUS -This method sets the new duty value of the output signal. The duty is expressed in 
+                microseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+   - PWM_WHEEL_BACKWARDS_SetDutyMS -This method sets the new duty value of the output signal. The duty is expressed in 
+                milliseconds as a 16-bit unsigned integer number. The method is available only if it is not selected list of 
+                predefined values in <Starting pulse width> property.
+
+Module "BOARD_ID"  (bean BitsIO)
+   - BOARD_ID_GetDir -Return selected direction.
+   - BOARD_ID_SetDir -Sets a direction for the pins (available only if Direction = _[input/output]_).
+   - BOARD_ID_GetVal -Returns the value of the Input/Output component. If the direction is [input] then reads the input value 
+                of the pins and returns it. If the direction is [output] then returns the last written value (see <Safe mode> 
+                property for limitations).
+   - BOARD_ID_PutVal -Specified value is passed to the Input/Output component. If the direction is [input] saves the value to a 
+                memory or a register, this value will be written to the pins after switching to the output mode - using 
+                [SetDir(TRUE)] (see <Safe mode> property for limitations). If the direction is [output] it writes the value to 
+                the pins. (Method is available only if the Direction = _[output]_ or _[input/output]_).
+   - BOARD_ID_GetBit -Returns the value of the specified bit/pin of the Input/Output component. If the direction is [input] 
+                then it reads the input value of the pin and returns it. If the direction is [output] then it returns the last 
+                written value (see <Safe mode> property for limitations).
+   - BOARD_ID_PutBit -Specified value is passed to the specified bit/pin of the Input/Output component. If the direction is 
+                [input] it saves the value to a memory or register, this value will be written to the pin after switching to 
+                the output mode - using [SetDir(TRUE)] (see <Safe mode> property for limitations). If the direction is [output] 
+                it writes the value to the pin. (Method is available only if the Direction = _[output]_ or _[input/output]_).
+   - BOARD_ID_SetBit -Sets (to one) the specified bit of the Input/Output component. It is the same as [PutBit(Bit, TRUE)]. 
+                (Method is available only if the Direction = _[output]_ or _[input/output]_).
+   - BOARD_ID_ClrBit -Clears (sets to zero) the specified bit of the Input/Output component. It is the same as [PutBit(Bit, 
+                FALSE)]. (Method is available only if the Direction = _[output]_ or _[input/output]_).
+   - BOARD_ID_NegBit -Negates (inverts) the specified bit of the Input/Output component. It is the same as [PutBit(Bit,!
+                GetBit(Bit))]. (Method is available only if the Direction = _[output]_ or _[input/output]_).
+
+Module "LED"       (bean BitIO)
+   - LED_GetVal -Returns the input/output value. If the direction is [input] then the input value of the pin is read and 
+                returned. If the direction is [output] then the last written value is returned (see <Safe mode> property for 
+                limitations). This method cannot be disabled if direction is [input].
+   - LED_PutVal -The specified output value is set. If the direction is [input], the component saves the value to a memory or a 
+                register and this value will be written to the pin after switching to the output mode (using [SetDir(TRUE)]; 
+                see <Safe mode> property for limitations). If the direction is [output], it writes the value to the pin. 
+                (Method is available only if the direction = _[output]_ or _[input/output]_).
+   - LED_ClrVal -Clears (set to zero) the output value. It is equivalent to the [PutVal(FALSE)]. This method is available only 
+                if the direction = _[output]_ or _[input/output]_.
+   - LED_SetVal -Sets (to one) the output value. It is equivalent to the [PutVal(TRUE)]. This method is available only if the 
+                direction = _[output]_ or _[input/output]_.
 
 Module "Cpu"       (bean MC9S12C32_80)
    - Cpu_EnableInt -Enable maskable interrupts

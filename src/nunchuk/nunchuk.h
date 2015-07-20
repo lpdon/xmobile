@@ -29,7 +29,7 @@ SOFTWARE.*/
 	#include "PE_Types.h"
 #endif
 
-#define NUNCHUK_CYCLETIME 5U
+#define NUNCHUK_CYCLETIME 0U
 
 typedef struct
 {

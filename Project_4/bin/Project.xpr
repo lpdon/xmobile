@@ -1,0 +1,6 @@
+Data:1 < ADDXPR ONLY_ADD_IF_NEW "AD1.c::AD1_OutV[0]"
+Data:1 < ADDXPR ONLY_ADD_IF_NEW "AS1.c::InpBuffer"
+Data:1 < ADDXPR ONLY_ADD_IF_NEW "(*comm.c::transmitMessages[1]).timeout"
+Data:1 < ADDXPR ONLY_ADD_IF_NEW "comm.c::msgSteering.body.data.rawData[1]"
+Data:2 < ADDXPR ONLY_ADD_IF_NEW ":control_cyclic:loc_ctrlData.joystickData"
+Data:2 < ADDXPR ONLY_ADD_IF_NEW ":drive_slave:loc_steeringData"
