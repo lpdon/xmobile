@@ -78,13 +78,19 @@ typedef enum
 
 typedef enum
 {
+	E_MSG_ACK_ACTIVE,
+	E_MSG_ACK_INACTIVE
+} eMessageCheckACK;
+
+typedef enum
+{
 	E_MSG_CRC_ACTIVE,
 	E_MSG_CRC_INACTIVE
-} eMessageCRC;
+} eMessageCheckCRC;
 
 typedef struct
 {
-	joystick joystickData;
+	tNunchuk joystickData;
 } tMessageControlData;
 
 typedef struct
@@ -129,7 +135,8 @@ typedef struct
 	eMessageAck ack;
 	eMessageType type;
 	eMessageBus bus;
-	eMessageCRC crcCheck;
+	eMessageCheckACK ackCheck;
+	eMessageCheckCRC crcCheck;
 } tMessage;
 
 #endif

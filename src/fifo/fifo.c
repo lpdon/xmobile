@@ -35,6 +35,8 @@ uint8_t fifo_in(tFIFO* arg_fifo, uint8_t arg_byte){
 	if(arg_fifo->write_index >= FIFO_BUFFER_SIZE)
 		arg_fifo->write_index = 0;		
 	
+	arg_fifo->counter++;
+
 	return E_FIFO_STATUS_OK;
 };
 
@@ -45,7 +47,9 @@ uint8_t fifo_out(tFIFO* arg_fifo, uint8_t* arg_byte){
 	*arg_byte = arg_fifo->buffer[arg_fifo->read_index++];
 	
 	if(arg_fifo->read_index >= FIFO_BUFFER_SIZE)
-		arg_fifo->read_index = 0;	
+		arg_fifo->read_index = 0;
+
+	arg_fifo->counter--;
 
 	return E_FIFO_STATUS_OK;
 };

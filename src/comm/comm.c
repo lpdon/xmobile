@@ -40,7 +40,15 @@ SOFTWARE.*/
 	#include "../handshake/handshake.h"
 #endif
 
+#if !defined(WIN32)
+	#ifndef __Cpu
+		#include "Cpu.h"
+	#endif
+#endif
+
 #include <string.h>
+
+#include "../bus_interface/can_interface.h"
 
 static void comm_initTransmissionCyclicMessages(void);
 static void comm_cyclicReception(void);
@@ -50,6 +58,7 @@ static const eCommStatus comm_readMessageFromBus(const eMessageBus arg_busType, 
 static const eCommStatus comm_writeMessageToBus(const tMessage * const arg_message);
 static void comm_transmitMessage(tMessage * const arg_message);
 static const eCommStatus comm_checkMessageId(const uint8_t arg_messageId);
+static void comm_clearAcks(void);
 
 tMessage msgControl =
 {
@@ -65,6 +74,7 @@ tMessage msgControl =
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_UART,
+	E_MSG_ACK_ACTIVE,
 	E_MSG_CRC_ACTIVE
 };
 
@@ -82,6 +92,7 @@ tMessage msgCurrent =
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_CAN,
+	E_MSG_ACK_ACTIVE,
 	E_MSG_CRC_INACTIVE
 };
 
@@ -99,6 +110,7 @@ tMessage msgSuspension =
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_CAN,
+	E_MSG_ACK_INACTIVE,
 	E_MSG_CRC_INACTIVE
 };
 
@@ -116,6 +128,7 @@ tMessage msgSteering =
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_CAN,
+	E_MSG_ACK_INACTIVE,
 	E_MSG_CRC_INACTIVE
 };
 
@@ -133,6 +146,7 @@ tMessage msgWheel =
 	E_COMM_STATUS_FAILED,
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_CAN,
+	E_MSG_ACK_INACTIVE,
 	E_MSG_CRC_INACTIVE
 };
 
@@ -141,10 +155,10 @@ static tMessage * transmitMessages[] =
 #if NODE==CONTROL
 	&msgControl,
 #elif NODE==MASTER
-	&msgCurrent,
-	&msgSuspension,
-	&msgSteering,
 	&msgWheel,
+//	&msgCurrent,
+	&msgSteering,
+//	&msgSuspension,
 #elif NODE==SLAVE1
 #endif
 	NULL
@@ -156,10 +170,10 @@ static tMessage * receiveMessages[] =
 #if NODE==MASTER
 	&msgControl,
 #else //NODE==SLAVE1...4
-	&msgCurrent,
-	&msgSuspension,
 	&msgSteering,
 	&msgWheel,
+	&msgCurrent,
+	&msgSuspension,
 #endif
 #endif
 	NULL
@@ -232,6 +246,7 @@ void comm_cyclic(void)
 
 void comm_cyclicReception(void)
 {
+	comm_clearAcks();
 	comm_receiveMessagesFromBus(E_BUS_TYPE_UART);
 	comm_receiveMessagesFromBus(E_BUS_TYPE_CAN);
 }
@@ -243,6 +258,9 @@ void comm_cyclicTransmission(void)
 	while (*pMessage != NULL)
 	{
 		comm_transmitMessage(*pMessage);
+#if !defined(WIN32)
+		Cpu_Delay100US(20);
+#endif
 		pMessage++;
 	}
 }
@@ -278,9 +296,8 @@ void comm_transmitMessage(tMessage * const arg_message)
 		}
 		case E_MSG_STATE_TX_READY:
 		{
-//#if defined(WIN32)
+			loc_retransmissions = COMM_MAXRETRANSMISSIONS;
 			loc_state = E_MSG_STATE_TRANSMIT;
-//#endif
 			break;
 		}
 		case E_MSG_STATE_TRANSMIT:
@@ -303,7 +320,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 			/*Set bus type of the message*/
 			loc_message.bus = loc_bus;
 
-			/*Try to Write message to bus*/
+			/*Try to write message to bus*/
 			loc_sts_comm = comm_writeMessageToBus(&loc_message);
 
 			loc_state = (loc_sts_comm == E_COMM_STATUS_OK) ? E_MSG_STATE_WAITFORACK : E_MSG_STATE_TRANSMIT;
@@ -311,32 +328,40 @@ void comm_transmitMessage(tMessage * const arg_message)
 		}
 		case E_MSG_STATE_WAITFORACK:
 		{
-			if (loc_timeout > 0)
+			if (arg_message->ackCheck == E_MSG_ACK_ACTIVE)
 			{
-				/*Verify if ACK was received*/
-				if (loc_ack == E_MSG_ACK_OK)
+				if (loc_timeout > 0)
 				{
-					/*If the message is cyclic it can be prepared to be transmitted once again*/
-					if (loc_type == E_MSG_TYPE_CYCLIC)
+					/*Verify if ACK was received*/
+					if (loc_ack == E_MSG_ACK_OK)
 					{
-						loc_state = E_MSG_STATE_TRANSMIT;
+						/*If the message is cyclic it can be prepared to be transmitted once again*/
+						if (loc_type == E_MSG_TYPE_CYCLIC)
+						{
+							loc_state = E_MSG_STATE_TRANSMIT;
+						}
+						/*Otherwise, the next transmission must be triggered*/
+						else
+						{
+							loc_state = E_MSG_STATE_INIT;
+							loc_messageStatus = E_MSG_STATUS_INACTIVE;
+						}
 					}
-					/*Otherwise, the next transmission must be triggered*/
-					else
-					{
-						loc_state = E_MSG_STATE_INIT;
-						loc_messageStatus = E_MSG_STATUS_INACTIVE;
-					}
-				}
 
-				loc_timeout--;
+					loc_timeout--;
+				}
+				/*Timeout expired*/
+				else
+				{
+					loc_state = (loc_retransmissions > 0U) ? E_MSG_STATE_TX_READY : E_MSG_STATE_END;
+					loc_retransmissions--;
+				}
 			}
-			/*Timeout expired*/
 			else
 			{
-				loc_state = (loc_retransmissions > 0U) ? E_MSG_STATE_TRANSMIT : E_MSG_STATE_END;
-				loc_retransmissions--;
+				loc_state = E_MSG_STATE_TRANSMIT;
 			}
+
 			break;
 		}
 		default:
@@ -405,41 +430,51 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 					{
 						if ((*pMessage)->body.messageId == loc_receivedMessageId)
 						{
-							if ((*pMessage)->crcCheck == E_MSG_CRC_ACTIVE)
+							if((*pMessage)->ack == E_MSG_ACK_FAILED && (*pMessage)->ackCheck == E_MSG_ACK_ACTIVE)
 							{
-								const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
-																		 sizeof(uMessageData),
-																		 loc_receivedMessageBody.crc);
-
-								if (loc_checkCRC == E_CRC_STATUS_OK)
+								if ((*pMessage)->crcCheck == E_MSG_CRC_ACTIVE)
 								{
-									/* Send ack. Content of the message is not important */
-									tMessage loc_message;
-									loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
-									loc_message.bus = (*pMessage)->bus;
-									comm_writeMessageToBus(&loc_message);
+									const eCrcStatus loc_checkCRC = checkCRC(loc_receivedMessageBody.data.rawData,
+																			 sizeof(uMessageData),
+																			 loc_receivedMessageBody.crc);
 
-									/* Write valid values */
-									(*pMessage)->body = loc_receivedMessageBody;
+									if (loc_checkCRC == E_CRC_STATUS_OK)
+									{
+										/* Send ack. Content of the message is not important */
+										tMessage loc_message;
+										loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
+										loc_message.bus = (*pMessage)->bus;
+										comm_writeMessageToBus(&loc_message);
+
+										/* Write valid values */
+										(*pMessage)->body = loc_receivedMessageBody;
+										(*pMessage)->ack = E_MSG_ACK_OK;
+									}
+									else
+									{
+										/* Send nack. Content of the message is not important */
+										tMessage loc_message;
+										loc_message.body.messageId = (loc_receivedMessageId | MSG_NACK);
+										loc_message.bus = (*pMessage)->bus;
+										comm_writeMessageToBus(&loc_message);
+									}
 								}
 								else
 								{
-									/* Send nack. Content of the message is not important */
 									tMessage loc_message;
-									loc_message.body.messageId = (loc_receivedMessageId | MSG_NACK);
+									loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
 									loc_message.bus = (*pMessage)->bus;
-									comm_writeMessageToBus(&loc_message);
+
+									/* Write valid values */
+									(*pMessage)->body = loc_receivedMessageBody;
+									(*pMessage)->ack = E_MSG_ACK_OK;
 								}
 							}
 							else
 							{
-								tMessage loc_message;
-								loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
-								loc_message.bus = (*pMessage)->bus;
-								comm_writeMessageToBus(&loc_message);
-
 								/* Write valid values */
 								(*pMessage)->body = loc_receivedMessageBody;
+								(*pMessage)->ack = E_MSG_ACK_OK;
 							}
 
 							break;
@@ -516,4 +551,23 @@ const eCommStatus comm_writeMessageToBus(const tMessage * const arg_message)
 	const eCommStatus loc_sts_comm = (loc_sts_bus == E_BUS_STATUS_OK) ? E_COMM_STATUS_OK : E_COMM_STATUS_FAILED;
 
 	return loc_sts_comm;
+}
+
+void comm_clearAcks(void)
+{
+	tMessage ** pMessage = transmitMessages;
+
+	while (*pMessage != NULL)
+	{
+		(*pMessage)->ack = E_MSG_ACK_FAILED;
+		pMessage++;
+	}
+
+	pMessage = receiveMessages;
+
+	while (*pMessage != NULL)
+	{
+		(*pMessage)->ack = E_MSG_ACK_FAILED;
+		pMessage++;
+	}
 }

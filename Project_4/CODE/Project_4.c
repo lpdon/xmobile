@@ -24,10 +24,14 @@
 #include "CAN1.h"
 #include "AD1.h"
 #include "AS1.h"
-#include "PWM8.h"
-#include "PWM9.h"
-#include "PWM10.h"
-#include "PWM11.h"
+#include "PWM_SUSPENSION_UP.h"
+#include "PWM_SUSPENSION_DOWN.h"
+#include "PWM_STEERING_LEFT.h"
+#include "PWM_STEERING_RIGHT.h"
+#include "PWM_WHEEL_FORWARDS.h"
+#include "PWM_WHEEL_BACKWARDS.h"
+#include "BOARD_ID.h"
+#include "LED.h"
 /* Include shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"
@@ -35,56 +39,55 @@
 #include "IO_Map.h"
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
-#include "uart_interface.h"
-#include "comm.h"
-#include "handshake.h"   
+#include "program.h"
 #include "message.h"
+#include "CAN1.h"
+#include "sensor_interface.h"
+#include "AS1.h"
+#include "comm.h"
+#include "uart_interface.h"
 
-
-#define CURRENT_CONVERSION 2              
+#define CURRENT_CONVERSION 2       
+  
+  CAN1_TError err;       
 
 void main(void)
 {
-  /* Write your local variable definition here */  
-  unsigned char received[6];
-  int joystickX, joystickY;
-  bool buttonC, buttonZ;
-  
-  char init_block[4] = {0xf0, 0x55, 0xfb, 0x00};
-  unsigned char can_data[8];
-  unsigned int length;
-  static char error_code = 0x00;
-  char ler_rec;                                         
-
-  tMessageControlData ctrlData; 
+  /* Write your local variable definition here */    
 
   /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
   PE_low_level_init();
   /*** End of Processor Expert internal initialization.                    ***/
 
   /* Write your code here */
+  program_init();
   
-  /*Init Sequence Black Nunchuk*/
-  error_code = EI2C1_SendBlock(init_block, 2, &length);
-  error_code = EI2C1_SendBlock(init_block+2, 2, &length);
-  //if( error_code ) for(;;){}                                                   
-                  
-  //handshake_init();
-  comm_init();
-  uart_init();
-  
-  for(;;){   
+  for(;;){        
+      program_cyclic();      
+      //comm_cyclic();
+      //ctrlData.joystickData.joystickX = nunchuk.joystickX;
+      //ctrlData.joystickData.joystickY = nunchuk.joystickY;
+      //comm_setData(E_MSG_ID_CONTROL, &ctrlData, sizeof(tMessageControlData));
+      //uart_writeToBuffer(&msgControl.body.data.rawData, 10);
+      //comm_cyclic();
+      //CAN1_GetError(&err);
       //error_code = AS1_SendChar(can_data[0]);
+      
+      //AD1_Measure(1);
+      //AD1_GetChanValue16(E_SENSOR_STEERING, &hue);
       
       //error_code = AS1_RecvChar(&ler_rec);
       
       //handshake_cyclic();      
-      comm_cyclic();
-      
-      comm_getData(E_MSG_CONTROL_ID, &ctrlData);
+      //comm_cyclic();
+                               
+	    //ctrlData.pwmTest[0] = 0x0000;
+	    //comm_setData(E_MSG_W1_ID, &ctrlData);
+      //comm_getData(E_MSG_CONTROL_ID, &ctrlData);
       //ctrlData.pwmTest[0] = 0x7FFF;
-      PWM11_SetRatio16(~(ctrlData.pwmTest[0]));
+      //PWM_STEERING_RIGHT_SetRatio16(~(ctrlData.pwmTest[0]));
       
+      //nunchuk_cyclic();
       Cpu_Delay100US(100);  
   }
   /*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/

@@ -29,7 +29,7 @@ SOFTWARE.*/
 	#include "PE_Types.h"
 #endif
 
-#define FIFO_BUFFER_SIZE 128
+#define FIFO_BUFFER_SIZE 40
 
 typedef enum
 {
@@ -42,6 +42,7 @@ typedef struct
 	uint8_t buffer[FIFO_BUFFER_SIZE];
 	uint8_t read_index;
 	uint8_t write_index;
+	uint32_t counter;
 } tFIFO;
 
 uint8_t fifo_in(tFIFO* arg_fifo, uint8_t arg_byte);

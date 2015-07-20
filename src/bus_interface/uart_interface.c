@@ -50,7 +50,8 @@ static eUartStatus uart_dataAvailable = E_UART_STATUS_OK;
 
 tFIFO uart_fifo =
 {
-	{0xFF},
+	{0x00},
+	0U,
 	0U,
 	0U
 };
@@ -96,11 +97,6 @@ eUartStatus uart_readFromBuffer(uint8_t * const arg_buffer, const uint8_t arg_le
 	uint8_t loc_length = arg_length;
 	uint8_t loc_buffer[20];
 
-#if defined(WIN32)
-	loc_totalBytesRead = RS232_PollComport(UART_PORT, (uint8_t*)arg_buffer, arg_length);
-#else
-//	AS1_RecvBlock((uint8_t*)arg_buffer, arg_length, &loc_totalBytesRead);
-#endif
 	while (loc_length > 0)
 	{
 		eFIFOStatus loc_sts_fifo = fifo_out(&uart_fifo, &loc_buffer[loc_totalBytesRead]);

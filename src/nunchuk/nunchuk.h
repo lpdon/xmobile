@@ -36,9 +36,9 @@ typedef struct
 	int8_t 	joystickX;
 	int8_t 	joystickY;
 	uint8_t buttons;
-} joystick;
+} tNunchuk;
 
-extern joystick nunchuk;
+extern tNunchuk nunchuk;
 
 //starts the operation of the nunchuk
 uint8_t nunchuk_init();

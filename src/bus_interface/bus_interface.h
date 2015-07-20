@@ -33,6 +33,10 @@ SOFTWARE.*/
 	#include "../comm/message.h"
 #endif
 
+#ifndef FIFO_H
+	#include "../fifo/fifo.h"
+#endif
+
 typedef enum
 {
 	E_BUS_STATUS_OK,
@@ -44,6 +48,8 @@ typedef enum
 	E_BUS_TYPE_UART = E_MSG_BUS_UART,
 	E_BUS_TYPE_CAN = E_MSG_BUS_CAN
 } eBusType;
+
+//extern tFIFO bus_fifo;
 
 eBusStatus bus_init(eBusType arg_busType);
 void bus_end(eBusType arg_busType);

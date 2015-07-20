@@ -24,6 +24,11 @@
 
 /* User includes (#include below this line is not maintained by Processor Expert) */
 #include "uart_interface.h"
+#include "can_interface.h"
+#include "message.h"
+#include "sensor_interface.h"
+#include "fifo.h"
+#include "comm.h"
 
 int16_t Values[8];
 int16_t i16CurrentADC;
@@ -136,6 +141,61 @@ void CAN1_OnFreeTxBuffer(word BufferMask)
 void CAN1_OnFullRxBuffer(void)
 {
   /* Write your code here ... */
+  uint8_t loc_totalBytesRead = 0U;
+	uint32_t loc_messageId = 0U;
+	uint8_t loc_frameType = 0U;
+	uint8_t loc_frameFormat = 0U;  
+	uint8_t loc_buffer[8];  
+	uint8_t loc_numMsgs = 4U;
+	uint8_t i;
+	
+	static uint32_t loc_counterSteering = 0U;
+	static uint32_t loc_counterWheel = 0U;
+	static uint32_t loc_counterSuspension = 0U;
+	
+	tMessageBody loc_messageReceivedBody;
+	tMessageSteeringData loc_steeringData;
+	
+	LED_PutVal(1);
+	
+	//for (i = 0U; i < loc_numMsgs; i++) 
+	{
+	  CAN1_ReadFrame(&loc_messageId, &loc_frameType, &loc_frameFormat, &loc_totalBytesRead, loc_buffer);
+    
+    if (loc_totalBytesRead == 8U) 
+    {
+      uint8_t j;
+      fifo_in(&can_fifo, (uint8_t)loc_messageId);
+      
+      for (j = 0U; j < loc_totalBytesRead; j++) 
+      {
+        fifo_in(&can_fifo, loc_buffer[j]);
+      }
+      
+      //if (loc_messageId == E_MSG_ID_STEERING) loc_counterSteering++;
+      //if (loc_messageId == E_MSG_ID_WHEEL) loc_counterWheel++;
+      //if (loc_messageId == E_MSG_ID_SUSP) loc_counterSuspension++;
+      
+      if (loc_messageId == E_MSG_ID_STEERING) 
+      {
+        //loc_messageReceivedBody[0] = loc_buffer[0];
+        //memcpy(&loc_messageReceivedBody, loc_buffer, 9);
+        loc_steeringData.steering[0] = (int16_t)loc_buffer[1];
+        loc_steeringData.steering[1] = (int16_t)loc_buffer[3];
+        loc_steeringData.steering[2] = (int16_t)loc_buffer[5];
+        loc_steeringData.steering[3] = (int16_t)loc_buffer[7];
+        
+        //msgSteering
+        
+        //memcpy(&loc_steeringData, loc_messageReceivedBody.data.rawData, sizeof(tMessageSteeringData));
+        memcpy(msgSteering.body.data.rawData, &loc_steeringData, sizeof(tMessageSteeringData));
+        //comm_setData(E_MSG_ID_STEERING, &loc_steeringData);
+      }
+  
+      can_setDataAvailable();
+    }  
+	}
+  LED_PutVal(0);
 }
 
 /*
@@ -173,6 +233,10 @@ void CAN1_OnBusOff(void)
 void AD1_OnEnd(void)
 {
   /* Write your code here ... */
+  //AD1_GetChanValue8(E_SENSOR_CURRENT, &sensor[E_SENSOR_CURRENT]);
+	//AD1_GetChanValue8(E_SENSOR_STEERING, &sensor[E_SENSOR_STEERING]);
+	//AD1_GetChanValue8(E_SENSOR_SUSPENSION_SPRING, &sensor[E_SENSOR_SUSPENSION_SPRING]);
+	//AD1_GetChanValue8(E_SENSOR_SUSPENSION_JOINT, &sensor[E_SENSOR_SUSPENSION_JOINT]);
 }
 
 /*
@@ -213,10 +277,19 @@ void AS1_OnError(void)
 void AS1_OnRxChar(void)
 {
   /* Write your code here ... */
-  char received;
-  //AS1_RecvChar(&received);
-  //AS1_SendChar(received);
-  uart_setDataAvailable();
+  
+  uint8_t loc_char;
+  
+  //while (AS1_GetCharsInRxBuf() > 0) 
+  {    
+    AS1_RecvChar(&loc_char);  
+    fifo_in(&uart_fifo, loc_char);
+  }
+  
+  //if (AS1_GetCharsInRxBuf() >= 1*sizeof(tMessageBody)) 
+  //{
+     //uart_setDataAvailable();
+  //}  
 }
 
 /*
@@ -251,6 +324,7 @@ void AS1_OnTxChar(void)
 void AS1_OnFullRxBuf(void)
 {
   /* Write your code here ... */
+  //uart_setDataAvailable();
 }
 
 /*
@@ -289,7 +363,84 @@ void TI2_OnInterrupt(void)
   /* Write your code here ... */
   char message[] = "Fodasse ";
   uint8_t snd;
-  AS1_SendBlock(message, 8, &snd);
+  //AS1_SendBlock(message, 8, &snd);
+}
+
+/*
+** ===================================================================
+**     Event       :  CAN1_OnError (module Events)
+**
+**     Component   :  CAN1 [FreescaleCAN]
+**     Description :
+**         This event is called when a channel error (not the error
+**         returned by a given method) occurs. These errors can be
+**         read using <GetError> method. The event is available only
+**         if Interrupt service/event is enabled.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void CAN1_OnError(void)
+{
+  /* Write your code here ... */
+}
+
+/*
+** ===================================================================
+**     Event       :  CAN1_OnReceiverErrorPassive (module Events)
+**
+**     Component   :  CAN1 [FreescaleCAN]
+**     Description :
+**         This event is called when the CAN controller goes into
+**         error passive status due to the receive error counter
+**         exceeding 127 and the BusOff status is not present. The
+**         event is available only if Interrupt service/event is
+**         enabled.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void CAN1_OnReceiverErrorPassive(void)
+{
+  /* Write your code here ... */
+}
+
+/*
+** ===================================================================
+**     Event       :  CAN1_OnOverrun (module Events)
+**
+**     Component   :  CAN1 [FreescaleCAN]
+**     Description :
+**         This event is called when receive buffer has overrun. The
+**         event is available only if Interrupt service/event is
+**         enabled.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void CAN1_OnOverrun(void)
+{
+  /* Write your code here ... */
+}
+
+/*
+** ===================================================================
+**     Event       :  CAN1_OnReceiverWarning (module Events)
+**
+**     Component   :  CAN1 [FreescaleCAN]
+**     Description :
+**         This event is called when the CAN controller goes into a
+**         warning status due to the receive error counter exceeding
+**         96 and neither an error status nor a BusOff status are
+**         present. The event is available only if Interrupt
+**         service/event is enabled.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void CAN1_OnReceiverWarning(void)
+{
+  /* Write your code here ... */
 }
 
 /* END Events */

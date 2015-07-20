@@ -29,16 +29,23 @@ SOFTWARE.*/
 	#include "PE_Types.h"
 #endif
 
+#ifndef FIFO_H
+	#include "../fifo/fifo.h"
+#endif
+
 typedef enum
 {
 	E_CAN_STATUS_OK,
 	E_CAN_STATUS_FAILED
 } eCanStatus;
 
+extern tFIFO can_fifo;
+
 eCanStatus can_init(void);
 void can_end(void);
 eCanStatus can_writeToBuffer(const uint8_t arg_messageId, const uint8_t * const arg_buffer, const uint8_t arg_length);
-eCanStatus can_readFromBuffer(uint8_t * const arg_messageId, uint8_t * const arg_buffer, const uint8_t arg_length);
+//eCanStatus can_readFromBuffer(uint8_t * const arg_messageId, uint8_t * const arg_buffer, const uint8_t arg_length);
+eCanStatus can_readFromBuffer(uint8_t * const arg_buffer, const uint8_t arg_length);
 void can_setDataAvailable(void);
 void can_clearDataAvailable(void);
 eCanStatus can_getDataAvailable(void);
