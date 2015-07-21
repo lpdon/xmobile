@@ -20,10 +20,61 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 
-#ifndef DRIVE_H
-#define DRIVE_H
-
-void drive_init(void);
-void drive_cyclic(void);
-
+#ifndef UTILS_H
+	#include "utils.h"
 #endif
+
+int32_t utils_cos(int32_t arg_x)
+{
+	int32_t x = arg_x;
+	return(1000 - (x*x / (2*1000)) + (((x*x/1000) * (x*x/1000))/24/1000 ));  // Taylor: 1 - x^2/2! + x^4/4!
+}
+
+int32_t utils_sin(int32_t arg_x)
+{
+	int32_t x = arg_x;
+	int32_t arg = 0;
+  
+	arg = x - ((((x*x)/1000)*x)/6000) + ((((((x*x*x)/1000)*x)/1000) *x)/12000000);
+  
+	return(arg);   // Taylor: x -x^3/3!+x^5/5! 
+}
+
+int32_t utils_atan(int32_t arg_x)
+{
+	int32_t x = arg_x;
+	int32_t arg=0;
+   
+	if(x <= 1000 && x > -1000)
+	{
+		arg = x * 1000 / (1000 + 280 * x*x / 1000000);  // lw in mRad
+	}    
+	if(x >  1000)
+	{
+		arg = 1570 - (x*1000 / ( x*x/1000 + 280));      // lw in mRad
+	}
+	
+	if(x <= -1000)   
+	{
+	    arg = -1570 - (x*1000 / ( x*x/1000 + 280));     // lw in mRad
+	}   
+	
+	return(arg); 
+}
+
+int32_t utils_tan(int32_t arg_x)
+{
+	int32_t x = arg_x;
+	int32_t arg=0;
+
+	if(x <= 1000 && x > -1000)
+		arg = x * 1000 / (1000 + 280 * x*x / 1000000);  // lw in mRad
+		
+	if(x >  1000)
+		arg = 1570 - (x*1000 / ( x*x/1000 + 280));      // lw in mRad
+
+	if(x <= -1000)   
+		arg = -1570 - (x*1000 / ( x*x/1000 + 280));     // lw in mRad
+
+	return(arg); 
+}

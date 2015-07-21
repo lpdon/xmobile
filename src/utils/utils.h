@@ -20,10 +20,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 
-#ifndef DRIVE_H
-#define DRIVE_H
+#ifndef UTILS_H
+#define UTILS_H
 
-void drive_init(void);
-void drive_cyclic(void);
+#if defined(WIN32)
+	#include <stdint.h>
+#else
+	#include "PE_Types.h"
+#endif
+
+int32_t utils_cos(int32_t arg_x);                    // calculate cos in MilliRad
+int32_t utils_sin(int32_t arg_x);                    // calculate sin in MilliRad
+int32_t utils_atan(int32_t arg_x);                    // calculate angle in MilliRad
+int32_t utils_tan(int32_t arg_x);                    // calculate tan in MilliRad
 
 #endif

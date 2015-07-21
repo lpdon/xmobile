@@ -1,6 +1,6 @@
 /*The MIT License (MIT)
 
-Copyright (c) 2015 Marcelo Chimentao, Leandro Piekarski do Nascimento
+Copyright (c) 2015 Marcelo Chimentao, Leandro Piekarski do Nascimento, Matthias Leiter
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -44,15 +44,19 @@ SOFTWARE.*/
 	#include "../sensor_interface/sensor_interface.h"
 #endif
 
-static const uint8_t STEERING_CENTER = 127U;
-static const uint8_t STEERING_RANGE = 20U;
+static const uint16_t VEHICLE_LENGTH         = 50U;
+static const uint16_t VEHICLE_WIDTH          = 30U;
 
-static const uint8_t WHEEL_RANGE = 255U;
+static const uint8_t STEERING_CENTER         = 127U;
+static const uint8_t STEERING_RANGE          = 20U;
+
+static const uint8_t WHEEL_RANGE             = 255U;
+static const int8_t  WHEEL_DEADZONE          = 5;
+static const int8_t  WHEEL_MAX               = 80;
 
 static void drive_master(void);
 static void drive_slave(const eId arg_id);
-
-tMessageControlData hueData;
+static tMessageSteeringData drive_getSteeringData(const int8_t arg_speed, const int8_t arg_angle);
 
 void drive_init(void)
 {
@@ -94,7 +98,7 @@ void drive_master(void)
 	tMessageWheelData loc_wheelData;
 	int8_t loc_x;
 	int8_t loc_y;
-	uint8_t loc_steering;
+	uint8_t loc_requiredSteering;
 	int8_t loc_wheel;
 
 	/* Read and decode data sent by control */
@@ -102,26 +106,33 @@ void drive_master(void)
 	loc_x = loc_controlData.joystickData.joystickX;
 	loc_y = loc_controlData.joystickData.joystickY;
 
-	loc_steering = (uint8_t)((int8_t)STEERING_CENTER + (int8_t)((loc_x * STEERING_RANGE) / 100));
-	loc_steeringData.steering[E_ID_S1] = loc_steering;
-	loc_steeringData.steering[E_ID_S2] = loc_steering;
-	loc_steeringData.steering[E_ID_S3] = loc_steering;
-	loc_steeringData.steering[E_ID_S4] = loc_steering;
-	comm_setData(E_MSG_ID_STEERING, &loc_steeringData, sizeof(tMessageSteeringData));
+//	loc_steering = (uint8_t)((int8_t)STEERING_CENTER + (int8_t)((loc_x * STEERING_RANGE) / 100));
+//	loc_steeringData.steering[E_ID_S1] = loc_steering;
+//	loc_steeringData.steering[E_ID_S2] = loc_steering;
+//	loc_steeringData.steering[E_ID_S3] = loc_steering;
+//	loc_steeringData.steering[E_ID_S4] = loc_steering;
 
 //	loc_wheel = (uint8_t)((int8_t)((loc_y * WHEEL_RANGE) / 100));
-	loc_wheel = loc_y;
+	loc_wheel = ((loc_y > WHEEL_DEADZONE) || (loc_y < WHEEL_DEADZONE)) ? loc_y : 0;
+
+	if (loc_wheel < -WHEEL_MAX)
+	{
+		loc_wheel = -WHEEL_MAX;
+	}
+	else if (loc_wheel > WHEEL_MAX)
+	{
+		loc_wheel = WHEEL_MAX;
+	}
+
 	loc_wheelData.wheel[E_ID_S1] = loc_wheel;
 	loc_wheelData.wheel[E_ID_S2] = loc_wheel;
 	loc_wheelData.wheel[E_ID_S3] = loc_wheel;
 	loc_wheelData.wheel[E_ID_S4] = loc_wheel;
 	comm_setData(E_MSG_ID_WHEEL, &loc_wheelData, sizeof(tMessageWheelData));
 
-//	if (loc_x != 0 || loc_steering != 127)
-//	{
-//		loc_x = 0;
-//		comm_setData(E_MSG_ID_STEERING, &loc_steeringData, sizeof(tMessageSteeringData));
-//	}
+	loc_requiredSteering = (int8_t)((loc_x * STEERING_RANGE) / 100);
+	loc_steeringData = drive_getSteeringData(loc_wheel, loc_requiredSteering);
+	comm_setData(E_MSG_ID_STEERING, &loc_steeringData, sizeof(tMessageSteeringData));
 }
 
 void drive_slave(const eId arg_id)
@@ -170,4 +181,159 @@ void drive_slave(const eId arg_id)
 	pid[E_PID_MOTOR_STEERING].pFactor = 60;
 	pid[E_PID_MOTOR_STEERING].iFactor = 1;
 	pid[E_PID_MOTOR_STEERING].dFactor = 3;
+}
+
+tMessageSteeringData drive_getSteeringData(const int8_t arg_speed, const int8_t arg_angle)
+{
+	tMessageSteeringData loc_steeringData;
+
+	int32_t y_p;           // Torque pole Y-Direction
+	int32_t x_p;           // Torque pole X-Direciton
+
+	int32_t x_i;           // Position wheel
+	int32_t y_i;           // Position wheel
+
+	int32_t cos_lw;        // Cosinus steering angle
+	int32_t lw;            // vehicle steering angle
+
+	int32_t v;             // Vehicle speed
+
+	int32_t v_max;         // Maximum speed
+	int32_t v_min;         // Minimum speed
+
+	int32_t l;             // vehicle length
+	int32_t b;             // vehicle width
+
+	int16_t angle;         // calculated angle (temp-variable).
+	int16_t vzlw=1;        // sign requested steering angle.
+
+	// Get current values out of vehicle-struct.
+
+	v = arg_speed;             // get vehicle speed in temp variable
+	v_max = (WHEEL_MAX * 3) >> 2; // v_max for the steering mode selection is 75% of the max allowed speed
+	v_min = 0;
+	l = VEHICLE_LENGTH;
+	b = VEHICLE_WIDTH;
+	lw = (int32_t)arg_angle * 10 * 3142 / 1800 ;     // steering angle mrad
+
+	if(v<0)
+	{
+		v = -v;
+	}
+
+	if(lw > 5 || lw < -5)              // lw != 0
+	{
+		// calculate Torque pole
+		// x-Axis
+		if(v > v_min && v < v_max)
+		{
+			x_p = (int32_t) ((l * (1000 - (v-v_min)*1000 / (v_max-v_min))) / 2000); // Offset for x-Axis
+		}
+
+		if(v <= v_min)
+		{
+			x_p = (int32_t) l/2;                     // Torque pole in vehicle center
+		}
+
+		if(v >= v_max)
+		{
+			x_p = (int32_t) 0;                       // Torque pole at rear axis
+		}
+
+		// y-Axis
+		y_p = ((l-x_p)*1000 / utils_tan(lw));
+
+		// Calculate steering angle
+		if (v <= v_min)                  // steer front back reverse
+		{
+			// calculate front angle VL
+			x_i = l;
+			y_i = b/2;
+//			vehiclesetpoint.steer_angle_vl = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S1] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+			// calculate front angle VR
+			x_i = l;
+			y_i =-b/2;
+//			vehiclesetpoint.steer_angle_vr = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S2] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+			// calculate rear angle HL
+			x_i = 0;
+			y_i = b/2;
+//			vehiclesetpoint.steer_angle_hl = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S3] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+			// calculate rear angle HR
+			x_i = 0;
+			y_i =-b/2;
+//			vehiclesetpoint.steer_angle_hr = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S4] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+		}
+		if (v > v_min && v < v_max)      // steer together
+		{
+
+			// calculate front angle VL
+			x_i = l;
+			y_i = b/2;
+//			vehiclesetpoint.steer_angle_vl = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S1] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+			// calculate front angle VL
+			x_i = l;
+			y_i =-b/2;
+//			vehiclesetpoint.steer_angle_vr = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S2] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+			// calculate rear angle HL
+			x_i = 0;
+			y_i = b/2;
+//			vehiclesetpoint.steer_angle_hl = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S3] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+			// calculate rear angle HR
+			x_i = 0;
+			y_i = b/2;
+//			vehiclesetpoint.steer_angle_hr = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S4] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+		}
+
+
+		if(v >= v_max)                  // steer only front axis
+		{
+
+			// calculate front angle VL
+			x_i = l;
+			y_i = b/2;
+//			vehiclesetpoint.steer_angle_vl = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S1] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+			// calculate front angle VR
+			x_i = l;
+			y_i =-b/2;
+//			vehiclesetpoint.steer_angle_vr = calc_lw(l,x_p,x_i,y_p,y_i);
+//			loc_steeringData.steering[E_ID_S2] = calc_lw(l,x_p,x_i,y_p,y_i);
+
+//			vehiclesetpoint.steer_angle_hl = 0;
+//			loc_steeringData.steering[E_ID_S3] = 0;
+
+//			vehiclesetpoint.steer_angle_hr = 0;
+//			loc_steeringData.steering[E_ID_S4] = 0;
+		}
+	}
+	else
+	{
+//		vehiclesetpoint.steer_angle_vl = 0;     // if commanded steer angle is belwo 5dDeg set angle to 0
+//		vehiclesetpoint.steer_angle_vr = 0;
+//		vehiclesetpoint.steer_angle_hl = 0;
+//		vehiclesetpoint.steer_angle_hr = 0;
+		loc_steeringData.steering[E_ID_S1] = 0;
+		loc_steeringData.steering[E_ID_S2] = 0;
+		loc_steeringData.steering[E_ID_S3] = 0;
+		loc_steeringData.steering[E_ID_S4] = 0;
+	}
+
+	return loc_steeringData;
 }
