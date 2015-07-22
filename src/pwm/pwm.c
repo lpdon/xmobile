@@ -77,8 +77,8 @@ void pwm_setSignal(ePWMMotor arg_motor, int32_t arg_pwm)
 		case E_PWM_MOTOR_STEERING:
 		{
 			//PT4 PP5
-			PWM_STEERING_LEFT_SetRatio8(~loc_pwm2);
-			PWM_STEERING_RIGHT_SetRatio8(~loc_pwm1);
+			PWM_STEERING_LEFT_SetRatio16(~loc_pwm2);
+			PWM_STEERING_RIGHT_SetRatio16(~loc_pwm1);
 			break;
 		}
 		case E_PWM_MOTOR_SUSPENSION:
@@ -93,6 +93,16 @@ void pwm_setSignal(ePWMMotor arg_motor, int32_t arg_pwm)
 			//PT0 PT1
 			PWM_WHEEL_FORWARDS_SetRatio8(loc_pwm1);
 			PWM_WHEEL_BACKWARDS_SetRatio8(loc_pwm2);
+			
+			if (loc_pwm1 == 0 && loc_pwm2 == 0) 
+			{
+			  ENABLE_WHEEL_PutVal(0);  
+			} 
+			else 
+			{
+			  ENABLE_WHEEL_PutVal(1);
+			}
+			 
 			break;
 		}
 		default:

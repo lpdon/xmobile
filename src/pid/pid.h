@@ -30,9 +30,9 @@ SOFTWARE.*/
 #endif
 
 #define PID_NUMINST     3
-#define PID_MIN         -250
-#define PID_MAX         250
-#define PID_IMAXERROR (PID_MAX >> 1)
+#define PID_MIN         -65000
+#define PID_MAX          65000
+#define PID_IMAXERROR (PID_MAX >> 3)
 
 typedef enum
 {
@@ -46,16 +46,16 @@ typedef struct
 	uint16_t pFactor;
 	uint16_t iFactor;
 	uint16_t dFactor;
-	int16_t iError;
-	int16_t dError;
+	int32_t iError;
+	int32_t dError;
 
 	struct
 	{
-		int16_t setpoint;
-		int16_t actualValue;
+		int32_t setpoint;
+		int32_t actualValue;
 	} input;
 
-	int16_t output;
+	int32_t output;
 } tPid;
 
 extern tPid pid[PID_NUMINST];

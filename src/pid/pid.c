@@ -28,8 +28,8 @@ SOFTWARE.*/
 
 tPid pid[PID_NUMINST];
 
-static int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error);
-static int16_t pid_calcD(tPid * const arg_pid, int16_t arg_error);
+static int32_t pid_calcI(tPid * const arg_pid, int32_t arg_error);
+static int32_t pid_calcD(tPid * const arg_pid, int32_t arg_error);
 
 static void pid_initInst(tPid * const arg_pid);
 static void pid_updateValues(tPid * const arg_pid);
@@ -59,11 +59,11 @@ void pid_initInst(tPid * const arg_pid)
 	memset(arg_pid, 0, sizeof(tPid));
 }
 
-int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error)
+int32_t pid_calcI(tPid * const arg_pid, int32_t arg_error)
 {
-	const uint16_t loc_iFactor = arg_pid->iFactor;
-	const volatile int16_t loc_error = (arg_error + arg_pid->iError);
-	volatile int16_t loc_value;
+	const uint32_t loc_iFactor = arg_pid->iFactor;
+	const volatile int32_t loc_error = (arg_error + arg_pid->iError);
+	volatile int32_t loc_value;
 
 	loc_value = loc_iFactor * loc_error;
 
@@ -82,11 +82,11 @@ int16_t pid_calcI(tPid * const arg_pid, int16_t arg_error)
 	return loc_value >> 3;
 }
 
-int16_t pid_calcD(tPid * const arg_pid, int16_t arg_error)
+int32_t pid_calcD(tPid * const arg_pid, int32_t arg_error)
 {
-	const uint16_t loc_dFactor = arg_pid->dFactor;
-	const int16_t loc_error = (arg_error - arg_pid->dError);
-	int16_t loc_value;
+	const uint32_t loc_dFactor = arg_pid->dFactor;
+	const int32_t loc_error = (arg_error - arg_pid->dError);
+	int32_t loc_value;
 
 	loc_value = loc_dFactor * loc_error;
 
@@ -98,11 +98,11 @@ int16_t pid_calcD(tPid * const arg_pid, int16_t arg_error)
 
 void pid_updateValues(tPid * const arg_pid)
 {
-	const int16_t loc_error = arg_pid->input.setpoint - arg_pid->input.actualValue;
+	const int32_t loc_error = arg_pid->input.setpoint - arg_pid->input.actualValue;
 
-	const int16_t loc_iTerm = pid_calcI(arg_pid, loc_error);
-	const int16_t loc_dTerm = pid_calcD(arg_pid, loc_error);
-	int16_t loc_value;
+	const int32_t loc_iTerm = pid_calcI(arg_pid, loc_error);
+	const int32_t loc_dTerm = pid_calcD(arg_pid, loc_error);
+	int32_t loc_value;
 
 	loc_value = arg_pid->pFactor * (loc_error + loc_iTerm + loc_dTerm);
 

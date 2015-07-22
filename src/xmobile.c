@@ -55,6 +55,7 @@ int main(void) {
 //
 //	comm_end();
 
+	drive_cyclic();
 
 	return EXIT_SUCCESS;
 }

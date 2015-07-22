@@ -66,15 +66,8 @@ int32_t utils_tan(int32_t arg_x)
 {
 	int32_t x = arg_x;
 	int32_t arg=0;
+   
+  arg = x + ((((x*x)/1000)*x)/3000) + (((((((x*x*x)/1000)*x)/1000) *x)*2)/15000000);
 
-	if(x <= 1000 && x > -1000)
-		arg = x * 1000 / (1000 + 280 * x*x / 1000000);  // lw in mRad
-		
-	if(x >  1000)
-		arg = 1570 - (x*1000 / ( x*x/1000 + 280));      // lw in mRad
-
-	if(x <= -1000)   
-		arg = -1570 - (x*1000 / ( x*x/1000 + 280));     // lw in mRad
-
-	return(arg); 
+  return(arg); // Taylor x + 1/3x^3 + 2/15x^5  
 }
