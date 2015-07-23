@@ -46,7 +46,8 @@ typedef enum
 	E_MSG_ID_CURRENT   =        0x20U,
 	E_MSG_ID_SUSP      =        0x30U,
 	E_MSG_ID_STEERING  =        0x40U,
-	E_MSG_ID_WHEEL     =        0x50U
+	E_MSG_ID_WHEEL     =        0x50U,
+	E_MSG_ID_SAFETY    =        0x60U
 } eMessageId;
 
 typedef enum
@@ -87,6 +88,12 @@ typedef enum
 	E_MSG_CRC_ACTIVE,
 	E_MSG_CRC_INACTIVE
 } eMessageCheckCRC;
+
+typedef enum
+{
+	E_MSG_TIMEOUT_ACTIVE,
+	E_MSG_TIMEOUT_INACTIVE
+} eMessageCheckTimeout;
 
 typedef struct
 {
@@ -137,6 +144,7 @@ typedef struct
 	eMessageBus bus;
 	eMessageCheckACK ackCheck;
 	eMessageCheckCRC crcCheck;
+	eMessageCheckTimeout timeoutCheck;
 } tMessage;
 
 #endif

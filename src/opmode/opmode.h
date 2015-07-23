@@ -20,33 +20,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 
-#ifndef CAN_INTERFACE_H
-#define CAN_INTERFACE_H
-
-#if defined(WIN32)
-	#include <stdint.h>
-#else
-	#include "PE_Types.h"
-#endif
-
-#ifndef FIFO_H
-	#include "../fifo/fifo.h"
-#endif
+#ifndef OPMODE_H
+#define OPMODE_H
 
 typedef enum
 {
-	E_CAN_STATUS_OK,
-	E_CAN_STATUS_FAILED
-} eCanStatus;
+	E_OPMODE_NORMAL,
+	E_OPMODE_SHUTDOWN
+} eOpmode;
 
-extern tFIFO can_fifo;
-
-eCanStatus can_init(void);
-void can_end(void);
-eCanStatus can_writeToBuffer(const uint8_t arg_messageId, const uint8_t * const arg_buffer, const uint8_t arg_length);
-eCanStatus can_readFromBuffer(uint8_t * const arg_buffer, const uint8_t arg_length);
-void can_setDataAvailable(void);
-void can_clearDataAvailable(void);
-eCanStatus can_getDataAvailable(void);
+void opmode_init(void);
+void opmode_setMode(const eOpmode arg_mode);
+const eOpmode opmode_getActiveMode(void);
 
 #endif

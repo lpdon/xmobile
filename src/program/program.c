@@ -60,6 +60,10 @@ SOFTWARE.*/
 	#include "../sensor_interface/sensor_interface.h"
 #endif
 
+#ifndef OPMODE_H
+	#include "../opmode/opmode.h"
+#endif
+
 void program_init(void)
 {
 #if NODE==CONTROL
@@ -67,6 +71,7 @@ void program_init(void)
 	control_init();
 #endif
 	id_init();
+	opmode_init();
 	bus_init(E_BUS_TYPE_CAN);
 	bus_init(E_BUS_TYPE_UART);
 	handshake_init();

@@ -47,6 +47,7 @@ extern tMessage msgCurrent;
 extern tMessage msgSuspension;
 extern tMessage msgSteering;
 extern tMessage msgWheel;
+extern tMessage msgSafety;
 extern tMessage msgW1;
 extern tMessage msgW2;
 extern tMessage msgW3;
@@ -59,7 +60,6 @@ void comm_init(void);
 void comm_end(void);
 void comm_cyclic(void);
 
-//void comm_receiveMessages(void);
 void comm_kickoutMessage(tMessage * const arg_message);
 
 #endif

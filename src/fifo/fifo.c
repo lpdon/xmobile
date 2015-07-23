@@ -24,7 +24,8 @@ SOFTWARE.*/
 	#include "fifo.h"
 #endif
 
-uint8_t fifo_in(tFIFO* arg_fifo, uint8_t arg_byte){
+eFIFOStatus fifo_in(tFIFO* arg_fifo, uint8_t arg_byte)
+{
 	if(arg_fifo->read_index == arg_fifo->write_index + 1 || 
 		(arg_fifo->read_index == 0 && arg_fifo->write_index + 1 == FIFO_BUFFER_SIZE)){
 		return E_FIFO_STATUS_FAILED;
@@ -40,7 +41,8 @@ uint8_t fifo_in(tFIFO* arg_fifo, uint8_t arg_byte){
 	return E_FIFO_STATUS_OK;
 };
 
-uint8_t fifo_out(tFIFO* arg_fifo, uint8_t* arg_byte){
+eFIFOStatus fifo_out(tFIFO* arg_fifo, uint8_t* arg_byte)
+{
 	if(arg_fifo->write_index == arg_fifo->read_index)
 		return E_FIFO_STATUS_FAILED;
 
@@ -49,7 +51,8 @@ uint8_t fifo_out(tFIFO* arg_fifo, uint8_t* arg_byte){
 	if(arg_fifo->read_index >= FIFO_BUFFER_SIZE)
 		arg_fifo->read_index = 0;
 
-	arg_fifo->counter--;
+	if(arg_fifo->counter > 0)
+		arg_fifo->counter--;
 
 	return E_FIFO_STATUS_OK;
 };

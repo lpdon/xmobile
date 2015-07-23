@@ -40,13 +40,6 @@ SOFTWARE.*/
 
 static const eBusStatus bus_checkMessageId(const uint8_t arg_messageId);
 
-//tFIFO bus_fifo =
-//{
-//	{0x00},
-//	0U,
-//	0U
-//};
-
 eBusStatus bus_init(eBusType arg_busType)
 {
 	switch (arg_busType)
@@ -150,6 +143,7 @@ eBusStatus bus_readMessageFromBuffer(const eBusType arg_busType, tMessageBody * 
 					{
 						memcpy(arg_messageBody, &loc_messageBody, sizeof(tMessageBody));
 						loc_result = E_BUS_STATUS_OK;
+						break;
 					}
 				}
 
@@ -159,8 +153,6 @@ eBusStatus bus_readMessageFromBuffer(const eBusType arg_busType, tMessageBody * 
 		}
 		case E_BUS_TYPE_CAN:
 		{
-//			const eCanStatus loc_sts_can = can_readFromBuffer(&arg_messageBody->messageId, arg_messageBody->data.rawData, sizeof(uMessageData));
-//			loc_result = (loc_sts_can == E_CAN_STATUS_OK) ? E_BUS_STATUS_OK : E_BUS_STATUS_FAILED;
 			uint16_t loc_totalBytesRead = 0U;
 			eBusStatus loc_validId = E_BUS_STATUS_FAILED;
 			eCanStatus loc_sts_can = E_CAN_STATUS_FAILED;
@@ -177,8 +169,6 @@ eBusStatus bus_readMessageFromBuffer(const eBusType arg_busType, tMessageBody * 
 					loc_totalBytesRead++;
 					loc_sts_can = can_readFromBuffer(loc_messageBody.data.rawData, sizeof(uMessageData));
 					loc_totalBytesRead += (loc_sts_can == E_CAN_STATUS_OK) ? sizeof(uMessageData) : 0U;
-//					loc_sts_can = can_readFromBuffer(&loc_messageBody.crc, sizeof(uint8_t));
-//					loc_totalBytesRead += (loc_sts_can == E_CAN_STATUS_OK) ? sizeof(uint8_t) : 0U;
 
 					/*CAN messages don't have CRC byte*/
 					if (loc_totalBytesRead == sizeof(tMessageBody) - 1)
@@ -187,8 +177,6 @@ eBusStatus bus_readMessageFromBuffer(const eBusType arg_busType, tMessageBody * 
 						loc_result = E_BUS_STATUS_OK;
 					}
 				}
-
-//				loc_sts_can = can_readFromBuffer(&loc_messageBody.messageId, sizeof(uint8_t));
 			}
 			break;
 		}

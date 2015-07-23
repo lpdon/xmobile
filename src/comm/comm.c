@@ -28,16 +28,16 @@ SOFTWARE.*/
 	#include "../crc/crc.h"
 #endif
 
-//#ifndef UART_INTERFACE_H
-//	#include "../bus_interface/uart_interface.h"
-//#endif
-
 #ifndef BUS_INTERFACE_H
 #include "../bus_interface/bus_interface.h"
 #endif
 
 #ifndef HANDSHAKE_H
 	#include "../handshake/handshake.h"
+#endif
+
+#ifndef OPMODE_H
+	#include "../opmode/opmode.h"
 #endif
 
 #if !defined(WIN32)
@@ -48,8 +48,6 @@ SOFTWARE.*/
 
 #include <string.h>
 
-#include "../bus_interface/can_interface.h"
-
 static void comm_initTransmissionCyclicMessages(void);
 static void comm_cyclicReception(void);
 static void comm_cyclicTransmission(void);
@@ -59,6 +57,7 @@ static const eCommStatus comm_writeMessageToBus(const tMessage * const arg_messa
 static void comm_transmitMessage(tMessage * const arg_message);
 static const eCommStatus comm_checkMessageId(const uint8_t arg_messageId);
 static void comm_clearAcks(void);
+static void comm_resetMessage(const eMessageId arg_messageId);
 
 tMessage msgControl =
 {
@@ -75,7 +74,27 @@ tMessage msgControl =
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_UART,
 	E_MSG_ACK_ACTIVE,
-	E_MSG_CRC_ACTIVE
+	E_MSG_CRC_ACTIVE,
+	E_MSG_TIMEOUT_INACTIVE
+};
+
+tMessage msgSafety =
+{
+	{
+		E_MSG_ID_SAFETY,
+		{{0xF0U, 0xDAU, 0xCEU, 0xF0U, 0xDAU, 0xCEU, 0xFFU, 0xFFU}},
+		0xFFU
+	},
+	E_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_UART,
+	E_MSG_ACK_ACTIVE,
+	E_MSG_CRC_INACTIVE,
+	E_MSG_TIMEOUT_ACTIVE
 };
 
 tMessage msgCurrent =
@@ -93,7 +112,8 @@ tMessage msgCurrent =
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_CAN,
 	E_MSG_ACK_ACTIVE,
-	E_MSG_CRC_INACTIVE
+	E_MSG_CRC_INACTIVE,
+	E_MSG_TIMEOUT_INACTIVE
 };
 
 tMessage msgSuspension =
@@ -111,14 +131,15 @@ tMessage msgSuspension =
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_CAN,
 	E_MSG_ACK_INACTIVE,
-	E_MSG_CRC_INACTIVE
+	E_MSG_CRC_INACTIVE,
+	E_MSG_TIMEOUT_INACTIVE
 };
 
 tMessage msgSteering =
 {
 	{
 		E_MSG_ID_STEERING,
-		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		{{0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U}},
 		0xFFU
 	},
 	E_MSG_STATE_INIT,
@@ -129,14 +150,15 @@ tMessage msgSteering =
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_CAN,
 	E_MSG_ACK_INACTIVE,
-	E_MSG_CRC_INACTIVE
+	E_MSG_CRC_INACTIVE,
+	E_MSG_TIMEOUT_INACTIVE
 };
 
 tMessage msgWheel =
 {
 	{
 		E_MSG_ID_WHEEL,
-		{{0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU}},
+		{{0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U}},
 		0xFFU
 	},
 	E_MSG_STATE_INIT,
@@ -147,7 +169,8 @@ tMessage msgWheel =
 	E_MSG_TYPE_CYCLIC,
 	E_MSG_BUS_CAN,
 	E_MSG_ACK_INACTIVE,
-	E_MSG_CRC_INACTIVE
+	E_MSG_CRC_INACTIVE,
+	E_MSG_TIMEOUT_INACTIVE
 };
 
 static tMessage * transmitMessages[] =
@@ -156,9 +179,8 @@ static tMessage * transmitMessages[] =
 	&msgControl,
 #elif NODE==MASTER
 	&msgWheel,
-//	&msgCurrent,
 	&msgSteering,
-//	&msgSuspension,
+	&msgSafety,
 #elif NODE==SLAVE1
 #endif
 	NULL
@@ -166,15 +188,15 @@ static tMessage * transmitMessages[] =
 
 static tMessage * receiveMessages[] =
 {
-#if NODE!=CONTROL
-#if NODE==MASTER
+#if NODE==CONTROL
+	&msgSafety,
+#elif NODE==MASTER
 	&msgControl,
 #else //NODE==SLAVE1...4
 	&msgSteering,
 	&msgWheel,
 	&msgCurrent,
 	&msgSuspension,
-#endif
 #endif
 	NULL
 };
@@ -367,10 +389,18 @@ void comm_transmitMessage(tMessage * const arg_message)
 		default:
 		case E_MSG_STATE_END:
 		{
-			//TODO TRM Shutdown :)
-//#if defined(WIN32)
-			loc_state = E_MSG_STATE_INIT;
-//#endif
+			if (arg_message->timeoutCheck == E_MSG_TIMEOUT_ACTIVE)
+			{
+				loc_state = E_MSG_STATE_INIT;
+			}
+			else
+			{
+				/*Reset all messages related to drive functions. Vehicle must remain in safe state.*/
+				comm_resetMessage(E_MSG_ID_CONTROL);
+				comm_resetMessage(E_MSG_ID_STEERING);
+				comm_resetMessage(E_MSG_ID_WHEEL);
+				opmode_setMode(E_OPMODE_SHUTDOWN);
+			}
 			break;
 		}
 	}
@@ -464,6 +494,7 @@ void comm_receiveMessagesFromBus(const eMessageBus arg_busType)
 									tMessage loc_message;
 									loc_message.body.messageId = (loc_receivedMessageId | MSG_ACK);
 									loc_message.bus = (*pMessage)->bus;
+									comm_writeMessageToBus(&loc_message);
 
 									/* Write valid values */
 									(*pMessage)->body = loc_receivedMessageBody;
@@ -568,6 +599,33 @@ void comm_clearAcks(void)
 	while (*pMessage != NULL)
 	{
 		(*pMessage)->ack = E_MSG_ACK_FAILED;
+		pMessage++;
+	}
+}
+
+void comm_resetMessage(const eMessageId arg_messageId)
+{
+	tMessage ** pMessage = transmitMessages;
+
+	while (*pMessage != NULL)
+	{
+		if ((*pMessage)->body.messageId == arg_messageId)
+		{
+			memset((*pMessage)->body.data.rawData, 0U, sizeof(uMessageData));
+			break;
+		}
+		pMessage++;
+	}
+
+	pMessage = receiveMessages;
+
+	while (*pMessage != NULL)
+	{
+		if ((*pMessage)->body.messageId == arg_messageId)
+		{
+			memset((*pMessage)->body.data.rawData, 0U, sizeof(uMessageData));
+			break;
+		}
 		pMessage++;
 	}
 }

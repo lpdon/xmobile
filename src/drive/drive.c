@@ -21,27 +21,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 
 #ifndef DRIVE_H
-#include "drive.h"
+	#include "drive.h"
 #endif
 
 #ifndef PID_H
-#include "../pid/pid.h"
+	#include "../pid/pid.h"
 #endif
 
 #ifndef PWM_H
-#include "../pwm/pwm.h"
+	#include "../pwm/pwm.h"
 #endif
 
 #ifndef COMM_H
-#include "../comm/comm.h"
+	#include "../comm/comm.h"
 #endif
 
 #ifndef ID_H
-#include "../id/id.h"
+	#include "../id/id.h"
 #endif
 
 #ifndef SENSOR_INTERFACE_H
-#include "../sensor_interface/sensor_interface.h"
+	#include "../sensor_interface/sensor_interface.h"
+#endif
+
+#ifndef UTILS_H
+	#include "../utils/utils.h"
+#endif
+
+#ifndef OPMODE_H
+	#include "../opmode/opmode.h"
 #endif
 
 static const uint16_t VEHICLE_LENGTH         = 50U;
@@ -123,15 +131,31 @@ void drive_master(void)
 		loc_wheel = WHEEL_MAX;
 	}
 
-	loc_wheelData.wheel[E_ID_S1] = loc_wheel;
-	loc_wheelData.wheel[E_ID_S2] = loc_wheel;
-	loc_wheelData.wheel[E_ID_S3] = loc_wheel;
-	loc_wheelData.wheel[E_ID_S4] = loc_wheel;
-	comm_setData(E_MSG_ID_WHEEL, &loc_wheelData, sizeof(tMessageWheelData));
-
-	loc_x = -100;
 	loc_requiredSteering = ((loc_x * STEERING_RANGE) / 10) ; //dDeg
 	loc_steeringData = drive_getSteeringData(loc_wheel, loc_requiredSteering);
+
+	switch (opmode_getActiveMode())
+	{
+		case E_OPMODE_NORMAL:
+		{
+			loc_wheelData.wheel[E_ID_S1] = loc_wheel;
+			loc_wheelData.wheel[E_ID_S2] = loc_wheel;
+			loc_wheelData.wheel[E_ID_S3] = loc_wheel;
+			loc_wheelData.wheel[E_ID_S4] = loc_wheel;
+			break;
+		}
+		case E_OPMODE_SHUTDOWN:
+		default:
+		{
+			loc_wheelData.wheel[E_ID_S1] = 0;
+			loc_wheelData.wheel[E_ID_S2] = 0;
+			loc_wheelData.wheel[E_ID_S3] = 0;
+			loc_wheelData.wheel[E_ID_S4] = 0;
+			break;
+		}
+	}
+
+	comm_setData(E_MSG_ID_WHEEL, &loc_wheelData, sizeof(tMessageWheelData));
 	comm_setData(E_MSG_ID_STEERING, &loc_steeringData, sizeof(tMessageSteeringData));
 }
 

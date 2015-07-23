@@ -45,7 +45,7 @@ typedef struct
 	uint32_t counter;
 } tFIFO;
 
-uint8_t fifo_in(tFIFO* arg_fifo, uint8_t arg_byte);
-uint8_t fifo_out(tFIFO* arg_fifo, uint8_t* arg_byte);
+eFIFOStatus fifo_in(tFIFO* arg_fifo, uint8_t arg_byte);
+eFIFOStatus fifo_out(tFIFO* arg_fifo, uint8_t* arg_byte);
 
 #endif

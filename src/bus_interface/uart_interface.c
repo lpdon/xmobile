@@ -39,14 +39,11 @@ SOFTWARE.*/
 	#endif
 #endif
 
-//#if !defined(_WIN32)
-//static eUartStatus uart_dataAvailable = E_UART_STATUS_FAILED;
-//#else
-//static eUartStatus uart_dataAvailable = E_UART_STATUS_OK;
-//#endif
+#ifndef MESSAGE_H
+	#include "../comm/message.h"
+#endif
 
 static eUartStatus uart_dataAvailable = E_UART_STATUS_OK;
-//static eUartStatus uart_dataAvailable = E_UART_STATUS_FAILED;
 
 tFIFO uart_fifo =
 {
@@ -125,6 +122,6 @@ void uart_clearDataAvailable(void)
 
 eUartStatus uart_getDataAvailable(void)
 {
-	const eUartStatus loc_result = uart_dataAvailable;
+	const eUartStatus loc_result = (uart_fifo.counter >= sizeof(tMessageBody)) ? E_UART_STATUS_OK : E_UART_STATUS_FAILED;
 	return loc_result;
 }

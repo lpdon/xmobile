@@ -36,8 +36,6 @@ SOFTWARE.*/
 
 #include "string.h"
 
-#include "../comm/message.h"
-
 #if !defined(_WIN32)
 static eCanStatus can_dataAvailable = E_CAN_STATUS_FAILED;
 #else
@@ -69,20 +67,6 @@ void can_end(void)
 eCanStatus can_writeToBuffer(const uint8_t arg_messageId, const uint8_t * const arg_buffer, const uint8_t arg_length)
 {
 	eCanStatus loc_result = E_CAN_STATUS_FAILED;
-//	uint16_t loc_totalBytesSent = 0U;
-
-	if (arg_messageId == E_MSG_ID_STEERING)
-	{
-		tMessageSteeringData loc_steeringData;
-		memcpy(&loc_steeringData, arg_buffer, sizeof(tMessageSteeringData));
-
-		if (loc_steeringData.steering[0] != 127 || loc_steeringData.steering[1] != 127 || loc_steeringData.steering[2] != 127)
-		{
-			loc_steeringData.steering[0] = 127;
-			loc_steeringData.steering[1] = 127;
-			loc_steeringData.steering[2] = 127;
-		}
-	}
 
 #if !defined(WIN32)
 	//byte CAN1_SendFrameExt(dword MessageID,byte FrameType,byte Length,const byte *Data);
@@ -92,38 +76,6 @@ eCanStatus can_writeToBuffer(const uint8_t arg_messageId, const uint8_t * const 
 	loc_result = (arg_length == arg_length) ? E_CAN_STATUS_OK : E_CAN_STATUS_FAILED;
 	return loc_result;
 }
-
-//eCanStatus can_readFromBuffer(uint8_t * const arg_messageId, uint8_t * const arg_buffer, const uint8_t arg_length)
-//{
-//	eCanStatus loc_result = E_CAN_STATUS_FAILED;
-//	uint8_t loc_totalBytesRead = 0U;
-//	uint32_t loc_messageId = 0U;
-//	uint8_t loc_length = arg_length;
-//	uint8_t loc_buffer[20];
-//
-//#if !defined(WIN32)
-//	//byte CAN1_ReadFrame(dword *MessageID, byte *FrameType, byte *FrameFormat, byte *Length, byte *Data);
-////	CAN1_ReadFrame(&loc_messageId, &loc_frameType, &loc_frameFormat, &loc_totalBytesRead, arg_buffer);
-////	*arg_messageId = (uint8_t)loc_messageId;
-//#endif
-//
-//	while (loc_length > 0)
-//	{
-//		eFIFOStatus loc_sts_fifo = fifo_out(&can_fifo, &loc_buffer[loc_totalBytesRead]);
-//		loc_totalBytesRead += (loc_sts_fifo == E_FIFO_STATUS_OK) ? 1U : 0U;
-//		loc_length--;
-//	}
-//
-//	if (loc_totalBytesRead == arg_length)
-//	{
-//		loc_messageId = loc_buffer[0U];
-//		*arg_messageId = loc_messageId;
-//		memcpy(arg_buffer, &loc_buffer[1U], arg_length);
-//		loc_result = E_CAN_STATUS_OK;
-//	}
-//
-//	return loc_result;
-//}
 
 eCanStatus can_readFromBuffer(uint8_t * const arg_buffer, const uint8_t arg_length)
 {
