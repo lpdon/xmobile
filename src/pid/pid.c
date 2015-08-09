@@ -79,7 +79,7 @@ int32_t pid_calcI(tPid * const arg_pid, int32_t arg_error)
 		arg_pid->iError = -PID_IMAXERROR;
 	}
 
-	return loc_value >> 3;
+	return loc_value >> 0;
 }
 
 int32_t pid_calcD(tPid * const arg_pid, int32_t arg_error)
@@ -104,7 +104,7 @@ void pid_updateValues(tPid * const arg_pid)
 	const int32_t loc_dTerm = pid_calcD(arg_pid, loc_error);
 	int32_t loc_value;
 
-	loc_value = arg_pid->pFactor * (loc_error + loc_iTerm + loc_dTerm);
+	loc_value = (arg_pid->pFactor * loc_error) + loc_iTerm + loc_dTerm;
 
 	/*Limit output*/
 	if (loc_value > PID_MAX)

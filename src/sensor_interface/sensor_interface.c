@@ -30,7 +30,7 @@ SOFTWARE.*/
 	#endif
 #endif
 
-uint8_t sensor[SENSOR_NUMINST];
+uint16_t sensor[SENSOR_NUMINST];
 
 void sensor_init(void)
 {
@@ -45,11 +45,11 @@ void sensor_cyclic(void)
 {
 #if NODE!=CONTROL && NODE!=MASTER
 	AD1_Measure(1);
-	AD1_GetChanValue8(E_SENSOR_CURRENT, &sensor[E_SENSOR_CURRENT]);
-	AD1_GetChanValue8(E_SENSOR_STEERING, &sensor[E_SENSOR_STEERING]);
-	AD1_GetChanValue8(E_SENSOR_SUSPENSION_SPRING, &sensor[E_SENSOR_SUSPENSION_SPRING]);
-	AD1_GetChanValue8(E_SENSOR_SUSPENSION_JOINT, &sensor[E_SENSOR_SUSPENSION_JOINT]);
+	AD1_GetChanValue(E_SENSOR_CURRENT, &sensor[E_SENSOR_CURRENT]);
+	AD1_GetChanValue(E_SENSOR_STEERING, &sensor[E_SENSOR_STEERING]);
+	AD1_GetChanValue(E_SENSOR_SUSPENSION_SPRING, &sensor[E_SENSOR_SUSPENSION_SPRING]);
+	AD1_GetChanValue(E_SENSOR_SUSPENSION_JOINT, &sensor[E_SENSOR_SUSPENSION_JOINT]);
 
-	sensor[E_SENSOR_STEERING] = ~sensor[E_SENSOR_STEERING];
+	sensor[E_SENSOR_STEERING] = (uint16_t)(1024U - sensor[E_SENSOR_STEERING]);
 #endif
 }

@@ -47,7 +47,8 @@ typedef enum
 	E_MSG_ID_SUSP      =        0x30U,
 	E_MSG_ID_STEERING  =        0x40U,
 	E_MSG_ID_WHEEL     =        0x50U,
-	E_MSG_ID_SAFETY    =        0x60U
+	E_MSG_ID_SAFETY    =        0x60U,
+	E_MSG_ID_PARAMETER =        0x70U
 } eMessageId;
 
 typedef enum
@@ -119,6 +120,12 @@ typedef struct
 {
 	int16_t wheel[4];
 } tMessageWheelData;
+
+typedef struct
+{
+	uint8_t pFactor[4];
+	uint8_t iFactor[4];
+} tMessageParameterData;
 
 typedef union
 {

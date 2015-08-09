@@ -59,16 +59,18 @@ SOFTWARE.*/
 void pwm_setSignal(ePWMMotor arg_motor, int32_t arg_pwm)
 {
 #if !defined(_WIN32)
-	uint16_t loc_absPwm = (uint16_t)abs(arg_pwm);
+	uint16_t loc_absPwm = 0U;
 	uint16_t loc_pwm1 = 0U;
-	uint16_t loc_pwm2 = 0U;
+	uint16_t loc_pwm2 = 0U; 
 
 	if (arg_pwm > 0U)
 	{
+	  loc_absPwm = (uint16_t)arg_pwm;
 		loc_pwm1 = loc_absPwm;
 	}
 	else
 	{
+	  loc_absPwm = (uint16_t)(-arg_pwm);
 		loc_pwm2 = loc_absPwm;
 	}
 

@@ -29,7 +29,7 @@ SOFTWARE.*/
 	#include "PE_Types.h"
 #endif
 
-#define FIFO_BUFFER_SIZE 40
+#define FIFO_BUFFER_SIZE 60
 
 typedef enum
 {

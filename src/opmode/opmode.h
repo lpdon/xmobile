@@ -25,11 +25,13 @@ SOFTWARE.*/
 
 typedef enum
 {
-	E_OPMODE_NORMAL,
-	E_OPMODE_SHUTDOWN
+	E_OPMODE_NORMAL = 0U,
+	E_OPMODE_SHUTDOWN = 1U
 } eOpmode;
 
 void opmode_init(void);
+void opmode_cyclic(void);
+void opmode_resetWatchdog(void);
 void opmode_setMode(const eOpmode arg_mode);
 const eOpmode opmode_getActiveMode(void);
 

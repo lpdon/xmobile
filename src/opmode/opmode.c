@@ -24,11 +24,32 @@ SOFTWARE.*/
 	#include "opmode.h"
 #endif
 
+#ifndef WIN32
+  #include "PE_Types.h"
+#endif
+
+static const uint32_t WATCHDOG_LIMIT = 100U;
+static uint32_t opmode_watchdog = 0U;                
 static eOpmode opmode_activeMode = E_OPMODE_SHUTDOWN;
 
 void opmode_init(void)
 {
 	opmode_activeMode = E_OPMODE_NORMAL;
+}
+
+void opmode_cyclic(void) 
+{
+  opmode_watchdog++;  
+  
+  if (opmode_watchdog >= WATCHDOG_LIMIT)
+    opmode_activeMode = E_OPMODE_SHUTDOWN;
+  else
+    opmode_activeMode = E_OPMODE_NORMAL;
+}
+
+void opmode_resetWatchdog(void) 
+{
+  opmode_watchdog = 0U;  
 }
 
 void opmode_setMode(const eOpmode arg_mode)

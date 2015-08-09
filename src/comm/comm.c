@@ -173,6 +173,25 @@ tMessage msgWheel =
 	E_MSG_TIMEOUT_INACTIVE
 };
 
+tMessage msgParameter =
+{
+	{
+		E_MSG_ID_PARAMETER,
+		{{0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U}},
+		0xFFU
+	},
+	E_MSG_STATE_INIT,
+	COMM_TIMEOUT,
+	COMM_MAXRETRANSMISSIONS,
+	E_MSG_STATUS_INACTIVE,
+	E_COMM_STATUS_FAILED,
+	E_MSG_TYPE_CYCLIC,
+	E_MSG_BUS_CAN,
+	E_MSG_ACK_INACTIVE,
+	E_MSG_CRC_INACTIVE,
+	E_MSG_TIMEOUT_INACTIVE
+};
+
 static tMessage * transmitMessages[] =
 {
 #if NODE==CONTROL
@@ -180,7 +199,8 @@ static tMessage * transmitMessages[] =
 #elif NODE==MASTER
 	&msgWheel,
 	&msgSteering,
-	&msgSafety,
+	//&msgParameter,
+	//&msgSafety,
 #elif NODE==SLAVE1
 #endif
 	NULL
@@ -193,10 +213,11 @@ static tMessage * receiveMessages[] =
 #elif NODE==MASTER
 	&msgControl,
 #else //NODE==SLAVE1...4
+	//&msgParameter,
 	&msgSteering,
 	&msgWheel,
-	&msgCurrent,
-	&msgSuspension,
+	//&msgCurrent,
+	//&msgSuspension,
 #endif
 	NULL
 };
@@ -360,7 +381,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 						/*If the message is cyclic it can be prepared to be transmitted once again*/
 						if (loc_type == E_MSG_TYPE_CYCLIC)
 						{
-							loc_state = E_MSG_STATE_TRANSMIT;
+							loc_state = E_MSG_STATE_TX_READY;
 						}
 						/*Otherwise, the next transmission must be triggered*/
 						else
@@ -375,7 +396,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 				/*Timeout expired*/
 				else
 				{
-					loc_state = (loc_retransmissions > 0U) ? E_MSG_STATE_TX_READY : E_MSG_STATE_END;
+					loc_state = (loc_retransmissions > 0U) ? E_MSG_STATE_TRANSMIT : E_MSG_STATE_END;
 					loc_retransmissions--;
 				}
 			}
@@ -389,7 +410,7 @@ void comm_transmitMessage(tMessage * const arg_message)
 		default:
 		case E_MSG_STATE_END:
 		{
-			if (arg_message->timeoutCheck == E_MSG_TIMEOUT_ACTIVE)
+			if (arg_message->timeoutCheck == E_MSG_TIMEOUT_INACTIVE)
 			{
 				loc_state = E_MSG_STATE_INIT;
 			}

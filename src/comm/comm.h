@@ -48,6 +48,7 @@ extern tMessage msgSuspension;
 extern tMessage msgSteering;
 extern tMessage msgWheel;
 extern tMessage msgSafety;
+extern tMessage msgParameter;
 extern tMessage msgW1;
 extern tMessage msgW2;
 extern tMessage msgW3;

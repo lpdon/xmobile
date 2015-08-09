@@ -39,7 +39,7 @@ typedef enum
 	E_SENSOR_SUSPENSION_JOINT  = 3,
 } eSensor;
 
-extern uint8_t sensor[SENSOR_NUMINST];
+extern uint16_t sensor[SENSOR_NUMINST];
 
 void sensor_init(void);
 void sensor_cyclic(void);

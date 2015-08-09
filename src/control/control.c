@@ -45,9 +45,11 @@ void control_cyclic(void)
 {
 	const int8_t loc_x = nunchuk.joystickX;
 	const int8_t loc_y = nunchuk.joystickY;
+	const uint8_t loc_buttons = nunchuk.buttons;
 	tMessageControlData loc_ctrlData;
 
 	loc_ctrlData.joystickData.joystickX = loc_x;
 	loc_ctrlData.joystickData.joystickY = loc_y;
+	loc_ctrlData.joystickData.buttons = loc_buttons;
 	comm_setData(E_MSG_ID_CONTROL, &loc_ctrlData, sizeof(tMessageControlData));
 }

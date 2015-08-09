@@ -87,6 +87,9 @@ void program_cyclic(void)
 	nunchuk_cyclic();
 	control_cyclic();
 #endif
+#if NODE==MASTER
+  opmode_cyclic();
+#endif
 	handshake_cyclic();
 	comm_cyclic();
 	sensor_cyclic();
