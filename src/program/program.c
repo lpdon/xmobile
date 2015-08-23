@@ -88,7 +88,7 @@ void program_cyclic(void)
 	control_cyclic();
 #endif
 #if NODE==MASTER
-  opmode_cyclic();
+	opmode_cyclic();
 #endif
 	handshake_cyclic();
 	comm_cyclic();

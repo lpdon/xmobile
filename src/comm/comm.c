@@ -78,25 +78,6 @@ tMessage msgControl =
 	E_MSG_TIMEOUT_INACTIVE
 };
 
-tMessage msgSafety =
-{
-	{
-		E_MSG_ID_SAFETY,
-		{{0xF0U, 0xDAU, 0xCEU, 0xF0U, 0xDAU, 0xCEU, 0xFFU, 0xFFU}},
-		0xFFU
-	},
-	E_MSG_STATE_INIT,
-	COMM_TIMEOUT,
-	COMM_MAXRETRANSMISSIONS,
-	E_MSG_STATUS_INACTIVE,
-	E_COMM_STATUS_FAILED,
-	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_UART,
-	E_MSG_ACK_ACTIVE,
-	E_MSG_CRC_INACTIVE,
-	E_MSG_TIMEOUT_ACTIVE
-};
-
 tMessage msgCurrent =
 {
 	{
@@ -173,25 +154,6 @@ tMessage msgWheel =
 	E_MSG_TIMEOUT_INACTIVE
 };
 
-tMessage msgParameter =
-{
-	{
-		E_MSG_ID_PARAMETER,
-		{{0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U}},
-		0xFFU
-	},
-	E_MSG_STATE_INIT,
-	COMM_TIMEOUT,
-	COMM_MAXRETRANSMISSIONS,
-	E_MSG_STATUS_INACTIVE,
-	E_COMM_STATUS_FAILED,
-	E_MSG_TYPE_CYCLIC,
-	E_MSG_BUS_CAN,
-	E_MSG_ACK_INACTIVE,
-	E_MSG_CRC_INACTIVE,
-	E_MSG_TIMEOUT_INACTIVE
-};
-
 static tMessage * transmitMessages[] =
 {
 #if NODE==CONTROL
@@ -199,8 +161,6 @@ static tMessage * transmitMessages[] =
 #elif NODE==MASTER
 	&msgWheel,
 	&msgSteering,
-	//&msgParameter,
-	//&msgSafety,
 #elif NODE==SLAVE1
 #endif
 	NULL
@@ -209,15 +169,11 @@ static tMessage * transmitMessages[] =
 static tMessage * receiveMessages[] =
 {
 #if NODE==CONTROL
-	&msgSafety,
 #elif NODE==MASTER
 	&msgControl,
 #else //NODE==SLAVE1...4
-	//&msgParameter,
 	&msgSteering,
 	&msgWheel,
-	//&msgCurrent,
-	//&msgSuspension,
 #endif
 	NULL
 };
@@ -301,9 +257,6 @@ void comm_cyclicTransmission(void)
 	while (*pMessage != NULL)
 	{
 		comm_transmitMessage(*pMessage);
-#if !defined(WIN32)
-//		Cpu_Delay100US(20);
-#endif
 		pMessage++;
 	}
 }

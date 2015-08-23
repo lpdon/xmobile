@@ -1,4 +1,26 @@
-#ifndef NUNCHUK
+/*The MIT License (MIT)
+
+Copyright (c) 2015 Marcelo Chimentao, Leandro Piekarski do Nascimento
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.*/
+
+#ifndef NUNCHUK_H
 	#include "nunchuk.h"
 #endif
 
@@ -22,12 +44,10 @@ uint8_t nunchuk_init()
 	nunchuk.joystickY = 0;
 
 #if !defined(WIN32)
-//	__DI();
 	error_code = EI2C1_SendBlock(init_block, 2, &length);
 	EI2C1_SendStop();
 	error_code = EI2C1_SendBlock(init_block+2, 2, &length);
 	EI2C1_SendStop();
-//	__EI();
 #endif
 	return error_code;
 }
@@ -37,25 +57,14 @@ uint8_t nunchuk_cyclic()
 	uint8_t received[6];
 	uint16_t length = 0U;
 	uint8_t error_code = 0U;
-	int16_t loc_x = 0;
-	int16_t loc_y = 0;
-	uint8_t loc_buffer[2];
 
 	if (nunchukCycletime == 0U)
 	{
-		volatile int8_t loc_scalX = 0;
-		volatile int8_t loc_scalY = 0;
 #if !defined(WIN32)
-//		__DI();
 		error_code = EI2C1_SendChar(0x00);
 		EI2C1_SendStop();
 		error_code = EI2C1_RecvBlock(received,6,&length);
 		EI2C1_SendStop();
-//		__EI();
-//		AD1_Measure(1);
-//		AD1_GetValue8(loc_buffer);
-//		loc_x = ((int16_t)loc_buffer[1U]) - 127;
-//		loc_y = ((int16_t)loc_buffer[0U]) - 127;
 #endif
 		if(length>5){
 			nunchuk.joystickX = (received[0] - 0x1a)-100;
@@ -63,13 +72,6 @@ uint8_t nunchuk_cyclic()
 			nunchuk.buttons = ((received[5] & 0x02) ? 0 : 1)<<1;
 			nunchuk.buttons += (received[5] & 0x01) ? 0 : 1;
 		}
-
-//		loc_scalX = (int8_t)((loc_x * 100) / 127);
-//		loc_scalY = (int8_t)((loc_y * 100) / 127);
-//
-//		nunchuk.joystickX = loc_scalX;
-//		nunchuk.joystickY = loc_scalY;
-
 		nunchukCycletime = NUNCHUK_CYCLETIME;
 	}
 	else

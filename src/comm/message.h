@@ -46,9 +46,7 @@ typedef enum
 	E_MSG_ID_CURRENT   =        0x20U,
 	E_MSG_ID_SUSP      =        0x30U,
 	E_MSG_ID_STEERING  =        0x40U,
-	E_MSG_ID_WHEEL     =        0x50U,
-	E_MSG_ID_SAFETY    =        0x60U,
-	E_MSG_ID_PARAMETER =        0x70U
+	E_MSG_ID_WHEEL     =        0x50U
 } eMessageId;
 
 typedef enum

@@ -25,7 +25,9 @@ SOFTWARE.*/
 #endif
 
 #ifndef WIN32
-  #include "PE_Types.h"
+	#include "PE_Types.h"
+#else
+	#include <stdint.h>
 #endif
 
 static const uint32_t WATCHDOG_LIMIT = 100U;

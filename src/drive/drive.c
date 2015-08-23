@@ -48,6 +48,10 @@ SOFTWARE.*/
 #include "../opmode/opmode.h"
 #endif
 
+#ifndef UTILS_H
+#include "../utils/utils.h"
+#endif
+
 static const uint16_t VEHICLE_LENGTH         = 50U;
 static const uint16_t VEHICLE_WIDTH          = 30U;
 
@@ -75,23 +79,7 @@ static const uint16_t STEERING_S4_P             = 150;
 static const uint16_t STERRING_S4_I             = 5;
 static const uint16_t STEERING_S4_D             = 0; 
 
-#if NODE==SLAVE1
-static const uint16_t STEERING_P             = STEERING_S1_P;
-static const uint16_t STERRING_I             = STERRING_S1_I;
-static const uint16_t STEERING_D             = STEERING_S1_D;
-#elif NODE==SLAVE2
-static const uint16_t STEERING_P             = STEERING_S2_P;
-static const uint16_t STERRING_I             = STERRING_S2_I;
-static const uint16_t STEERING_D             = STEERING_S2_D;
-#elif NODE==SLAVE3
-static const uint16_t STEERING_P             = STEERING_S3_P;
-static const uint16_t STERRING_I             = STERRING_S3_I;
-static const uint16_t STEERING_D             = STEERING_S3_D;
-#elif NODE==SLAVE4
-static const uint16_t STEERING_P             = STEERING_S4_P;
-static const uint16_t STERRING_I             = STERRING_S4_I;
-static const uint16_t STEERING_D             = STEERING_S4_D;
-#endif
+
 
 static void drive_master(void);
 static void drive_slave(const eId arg_id);
@@ -137,7 +125,6 @@ void drive_master(void)
 	tMessageControlData loc_controlData;
 	tMessageSteeringData loc_steeringData;
 	tMessageWheelData loc_wheelData;
-	tMessageParameterData loc_parameterData;
 	
 	int8_t loc_x;
 	int8_t loc_y;
@@ -165,6 +152,7 @@ void drive_master(void)
 
 	loc_requiredSteering = ((loc_x * STEERING_RANGE) / 10) ; //dDeg
 	
+	/* TODO
 	loc_parameterData.pFactor[E_ID_S1] = STEERING_S1_P / 10;
 	loc_parameterData.pFactor[E_ID_S2] = STEERING_S2_P / 10;
 	loc_parameterData.pFactor[E_ID_S3] = STEERING_S3_P / 10;
@@ -174,6 +162,7 @@ void drive_master(void)
 	loc_parameterData.iFactor[E_ID_S2] = STERRING_S2_I;
 	loc_parameterData.iFactor[E_ID_S3] = STERRING_S3_I;
 	loc_parameterData.iFactor[E_ID_S4] = STERRING_S4_I;
+	*/
 	
 	switch (opmode_getActiveMode())
 	{
@@ -203,7 +192,6 @@ void drive_master(void)
 
 	comm_setData(E_MSG_ID_WHEEL, &loc_wheelData, sizeof(tMessageWheelData));
 	comm_setData(E_MSG_ID_STEERING, &loc_steeringData, sizeof(tMessageSteeringData));
-	comm_setData(E_MSG_ID_PARAMETER, &loc_parameterData, sizeof(tMessageParameterData));
 }
 
 void drive_slave(const eId arg_id)
@@ -213,6 +201,24 @@ void drive_slave(const eId arg_id)
 	const uint16_t loc_sensorSteering = sensor[E_SENSOR_STEERING];
 	const uint16_t loc_sensorJoint = sensor[E_SENSOR_SUSPENSION_JOINT];
 	const uint16_t loc_sensorSpring = sensor[E_SENSOR_SUSPENSION_SPRING];
+
+#if NODE==SLAVE1
+	const uint16_t STEERING_P             = STEERING_S1_P;
+	const uint16_t STERRING_I             = STERRING_S1_I;
+	const uint16_t STEERING_D             = STEERING_S1_D;
+#elif NODE==SLAVE2
+	const uint16_t STEERING_P             = STEERING_S2_P;
+	const uint16_t STERRING_I             = STERRING_S2_I;
+	const uint16_t STEERING_D             = STEERING_S2_D;
+#elif NODE==SLAVE3
+	const uint16_t STEERING_P             = STEERING_S3_P;
+	const uint16_t STERRING_I             = STERRING_S3_I;
+	const uint16_t STEERING_D             = STEERING_S3_D;
+#elif NODE==SLAVE4
+	const uint16_t STEERING_P             = STEERING_S4_P;
+	const uint16_t STERRING_I             = STERRING_S4_I;
+	const uint16_t STEERING_D             = STEERING_S4_D;
+#endif
 
 	tMessageSteeringData loc_steeringData;
 	tMessageSuspensionData loc_suspensionData;
@@ -232,13 +238,11 @@ void drive_slave(const eId arg_id)
 	comm_getData(E_MSG_ID_STEERING, &loc_steeringData, sizeof(tMessageSteeringData));
 	comm_getData(E_MSG_ID_SUSP, &loc_suspensionData, sizeof(tMessageSuspensionData));
 	comm_getData(E_MSG_ID_WHEEL, &loc_wheelData, sizeof(tMessageWheelData));
-	comm_getData(E_MSG_ID_PARAMETER, &loc_parameterData, sizeof(tMessageParameterData));
 
 	loc_steering = loc_steeringData.steering[(uint8_t)loc_id];
 	loc_suspension = loc_suspensionData.suspension[(uint8_t)loc_id];
 	loc_wheel = loc_wheelData.wheel[(uint8_t)loc_id];	  
-	//loc_pFactor = loc_parameterData.pFactor[(uint8_t)loc_id];                                             	
-	//loc_iFactor = loc_parameterData.iFactor[(uint8_t)loc_id];                                             	
+
 	loc_pFactor = STEERING_P;
 	loc_iFactor = STERRING_I;
 	loc_dFactor = STEERING_D;
@@ -275,7 +279,6 @@ tMessageSteeringData drive_getSteeringData(const int8_t arg_speed, const int16_t
 	volatile int32_t x_i;           // Position wheel
 	volatile int32_t y_i;           // Position wheel
 
-	int32_t cos_lw;        // Cosinus steering angle
 	int32_t lw;            // vehicle steering angle
 
 	int32_t v;             // Vehicle speed
@@ -285,11 +288,6 @@ tMessageSteeringData drive_getSteeringData(const int8_t arg_speed, const int16_t
 
 	int32_t l;             // vehicle length
 	int32_t b;             // vehicle width
-
-	int16_t angle;         // calculated angle (temp-variable).
-	int16_t vzlw=1;        // sign requested steering angle.
-
-	// Get current values out of vehicle-struct.
 
 	v = arg_speed;             // get vehicle speed in temp variable
 	v_max = (WHEEL_MAX * 3) / 4; // v_max for the steering mode selection is 75% of the max allowed speed
@@ -436,12 +434,16 @@ int8_t drive_changeMode(uint8_t buttons)
   
   if( sequence == 0b11110000 ){
     mode = 0;
+#if !defined(WIN32)
     PWM_WHEEL_FORWARDS_SetRatio8(0x00);
+#endif
     sequence = 0;
   }
   if( sequence == 0b10101010 ){
     mode = 1;   
+#if !defined(WIN32)
     PWM_WHEEL_FORWARDS_SetRatio8(0xbf);
+#endif
     sequence = 0;
   }
   
